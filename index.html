@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MINT | PIMCO Enhanced Short Maturity Active ETF</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-0:#0a0c10;--bg-1:#0f1218;--bg-2:#151a23;--bg-3:#1c2230;
+  --border:#252d3d;--border-bright:#344054;
+  --text-0:#e8ecf4;--text-1:#a0aec0;--text-2:#6b7a90;
+  --accent:#00d4aa;--accent-dim:#00d4aa33;
+  --red:#ff4757;--red-dim:#ff475722;
+  --amber:#ffa502;--amber-dim:#ffa50222;
+  --blue:#3b82f6;--blue-dim:#3b82f622;
+  --purple:#a855f7;--cyan:#06b6d4;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'DM Sans',-apple-system,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-size:13px;line-height:1.5;overflow-x:hidden}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg-1)}
+::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:3px}
+.header{background:var(--bg-1);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:16px}
+.ticker{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.header-meta{display:flex;flex-direction:column;gap:1px}
+.header-meta .name{font-size:13px;color:var(--text-1);font-weight:500}
+.header-meta .filing{font-family:var(--mono);font-size:10px;color:var(--text-2);letter-spacing:1px}
+.header-right{display:flex;gap:10px;align-items:center}
+.nav-tab{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:all .2s;border-radius:2px}
+.nav-tab:hover,.nav-tab.active{color:var(--accent);border-color:var(--accent);background:var(--accent-dim)}
+.main{padding:16px 24px 40px;max-width:1800px;margin:0 auto}
+.section{display:none}.section.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.summary-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--bg-1);border:1px solid var(--border);padding:14px 16px;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card:hover{border-color:var(--border-bright)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.green::before{background:var(--accent)}
+.stat-card.red::before{background:var(--red)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.amber::before{background:var(--amber)}
+.stat-card.purple::before{background:var(--purple)}
+.stat-card.cyan::before{background:var(--cyan)}
+.stat-label{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-2);margin-bottom:6px}
+.stat-value{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--text-0)}
+.stat-sub{font-family:var(--mono);font-size:10px;color:var(--text-2);margin-top:4px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.panel{background:var(--bg-1);border:1px solid var(--border);overflow:hidden}
+.panel-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg-2);flex-wrap:wrap;gap:6px}
+.panel-title{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-1);font-weight:600}
+.panel-body{padding:14px}
+.panel-body.flush{padding:0}
+.chart-wrap{position:relative;width:100%}
+.chart-wrap canvas{width:100%!important}
+.source-tag{font-family:var(--mono);font-size:9px;color:var(--text-2);padding:2px 6px;border:1px solid var(--border);letter-spacing:.5px}
+.data-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+.data-table thead th{background:var(--bg-2);border-bottom:1px solid var(--border-bright);padding:8px 10px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-2);font-weight:600;cursor:pointer;white-space:nowrap;user-select:none;position:sticky;top:0;z-index:5}
+.data-table thead th:hover{color:var(--accent)}
+.data-table thead th.sorted-asc::after{content:' \25B2';color:var(--accent)}
+.data-table thead th.sorted-desc::after{content:' \25BC';color:var(--accent)}
+.data-table tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+.data-table tbody tr:hover{background:var(--bg-3)}
+.data-table td{padding:6px 10px;white-space:nowrap;color:var(--text-1)}
+.data-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.data-table td.ctr{text-align:center}
+.data-table td.company-cell{max-width:240px;overflow:hidden;text-overflow:ellipsis;color:var(--text-0);font-weight:500}
+.data-table td.desc-cell{max-width:300px;overflow:hidden;text-overflow:ellipsis;color:var(--text-2);font-size:10px}
+.search-bar{display:flex;gap:8px;margin-bottom:14px}
+.search-bar input{flex:1;background:var(--bg-2);border:1px solid var(--border);color:var(--text-0);font-family:var(--mono);font-size:12px;padding:8px 14px;outline:none;transition:border-color .2s}
+.search-bar input:focus{border-color:var(--accent)}
+.search-bar input::placeholder{color:var(--text-2)}
+.table-scroll{max-height:700px;overflow-y:auto}
+.comp-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+.comp-table thead th{background:var(--bg-2);border-bottom:1px solid var(--border-bright);padding:8px 12px;text-align:right;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-2);font-weight:600}
+.comp-table thead th:first-child{text-align:left}
+.comp-table tbody td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text-1);text-align:right;font-variant-numeric:tabular-nums}
+.comp-table tbody td:first-child{text-align:left;color:var(--text-0);font-weight:500}
+.comp-table tbody tr:hover{background:var(--bg-3)}
+.loading-overlay{position:fixed;inset:0;background:var(--bg-0);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s}
+.loading-overlay.hide{opacity:0;pointer-events:none}
+.loading-text{font-family:var(--mono);font-size:14px;color:var(--accent);letter-spacing:3px}
+.loading-text::after{content:'';animation:dots 1.5s infinite}
+@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+@media(max-width:1200px){.summary-row{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:800px){.summary-row{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="loading-overlay" id="loading"><div class="loading-text">LOADING MINT</div></div>
+<div class="header">
+  <div class="header-left">
+    <span class="ticker">MINT</span>
+    <div class="header-meta">
+      <div class="name">PIMCO Enhanced Short Maturity Active ETF</div>
+      <div class="filing">SEC N-PORT &middot; AS OF 2025-12-31 &middot; 922 HOLDINGS</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="nav-tab active" data-section="overview">Overview</button>
+    <button class="nav-tab" data-section="performance">Performance</button>
+    <button class="nav-tab" data-section="income">Income</button>
+    <button class="nav-tab" data-section="holdings">Holdings</button>
+  </div>
+</div>
+<div class="main">
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="sec-overview">
+    <div class="summary-row">
+      <div class="stat-card green"><div class="stat-label">Net Assets</div><div class="stat-value">$14.57B</div><div class="stat-sub">149.97M shares</div></div>
+      <div class="stat-card blue"><div class="stat-label">NAV</div><div class="stat-value">$100.46</div><div class="stat-sub">Price: $100.48 | Prem: 0.02%</div></div>
+      <div class="stat-card amber"><div class="stat-label">SEC 30-Day Yield</div><div class="stat-value">3.67%</div><div class="stat-sub">Dist yield: 4.54%</div></div>
+      <div class="stat-card purple"><div class="stat-label">Eff. Duration</div><div class="stat-value">~0.24yr</div><div class="stat-sub">Avg mat: &lt;1yr</div></div>
+      <div class="stat-card cyan"><div class="stat-label">Total Holdings</div><div class="stat-value">922</div><div class="stat-sub">Corp 62.94% / ABS 16.81% / Agency 15.16%</div></div>
+      <div class="stat-card green"><div class="stat-label">Expense Ratio</div><div class="stat-value">0.36%</div><div class="stat-sub">Turnover: 79% | 3&#9733; Morningstar</div></div></div>
+    <div class="grid-2">
+      <div class="panel"><div class="panel-header"><span class="panel-title">Issuer Category</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-issuer"></canvas></div></div></div>
+      <div class="panel"><div class="panel-header"><span class="panel-title">Asset Category</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-asset"></canvas></div></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="panel"><div class="panel-header"><span class="panel-title">Country Allocation</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-country"></canvas></div></div></div>
+      <div class="panel"><div class="panel-header"><span class="panel-title">Coupon Type</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-coupon"></canvas></div></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="panel"><div class="panel-header"><span class="panel-title">Maturity Profile</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="chart-maturity"></canvas></div></div></div>
+      <div class="panel"><div class="panel-header"><span class="panel-title">Yield Comparison</span><span class="source-tag">SCHWAB / FRED</span></div><div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="chart-yield-comp"></canvas></div></div></div>
+    </div>
+  </div>
+
+  <!-- PERFORMANCE -->
+  <div class="section" id="sec-performance">
+    <div class="summary-row">
+      <div class="stat-card green"><div class="stat-label">1-Month</div><div class="stat-value">+0.3988%</div><div class="stat-sub">Dec 2025</div></div>
+      <div class="stat-card green"><div class="stat-label">Q4 2025</div><div class="stat-value">+1.127%</div><div class="stat-sub">Oct+Nov+Dec 2025</div></div>
+      <div class="stat-card green"><div class="stat-label">YTD (2025)</div><div class="stat-value">+4.7%</div><div class="stat-sub">Total return</div></div>
+      <div class="stat-card green"><div class="stat-label">1-Year</div><div class="stat-value">+4.7%</div><div class="stat-sub">Total return</div></div>
+      <div class="stat-card blue"><div class="stat-label">5-Year Ann.</div><div class="stat-value">+3.1%</div><div class="stat-sub">Annualized</div></div>
+      <div class="stat-card purple"><div class="stat-label">Since Inception</div><div class="stat-value">+2.0%</div><div class="stat-sub">2009-11-16 (ann.)</div></div></div>
+    <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Monthly Returns (Q4 2025)</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:280px"><canvas id="chart-monthly-returns"></canvas></div></div></div>
+    <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Annual Returns</span><span class="source-tag">SCHWAB</span></div><div class="panel-body"><div class="chart-wrap" style="height:280px"><canvas id="chart-annual-returns"></canvas></div></div></div>
+    <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Returns Comparison</span><span class="source-tag">SCHWAB</span></div><div class="panel-body"><table class="comp-table"><thead><tr><th>Fund / Benchmark</th><th>1-Year</th><th>5-Year Ann.</th><th>10-Year Ann.</th><th>Since Inception</th></tr></thead>
+      <tbody>
+        <tr><td>MINT (NAV)</td><td style="color:var(--accent)">+4.7%</td><td style="color:var(--accent)">+3.1%</td><td>+2.6%</td><td>+2.0%</td></tr>
+        <tr><td>Ultrashort Bond Category</td><td>+4.8%</td><td>+3.3%</td><td>+2.6%</td><td>&mdash;</td></tr>
+        <tr><td>Bloomberg US Agg Bond</td><td style="color:var(--accent)">+7.3%</td><td style="color:var(--red)">-0.4%</td><td>+2.0%</td><td>+2.6%</td></tr>
+      </tbody></table></div></div>
+  </div>
+
+  <!-- INCOME -->
+  <div class="section" id="sec-income">
+    <div class="summary-row">
+      <div class="stat-card green"><div class="stat-label">Latest Distribution</div><div class="stat-value">$0.340</div><div class="stat-sub">Ex-date: Mar 2026</div></div>
+      <div class="stat-card amber"><div class="stat-label">Trailing 12M Income</div><div class="stat-value">$5.33</div><div class="stat-sub">Per share</div></div>
+      <div class="stat-card blue"><div class="stat-label">Dividend Yield</div><div class="stat-value">4.54%</div><div class="stat-sub">Based on NAV</div></div>
+      <div class="stat-card purple"><div class="stat-label">SEC 30-Day Yield</div><div class="stat-value">3.67%</div><div class="stat-sub">Net of expenses</div></div>
+      <div class="stat-card cyan"><div class="stat-label">Distribution Freq</div><div class="stat-value">Monthly</div><div class="stat-sub">Ex-date ~1st of month</div></div>
+      <div class="stat-card red"><div class="stat-label">Dividend Growth (1Y)</div><div class="stat-value">-11.2%</div><div class="stat-sub">YoY change</div></div></div>
+    <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Monthly Distribution History</span><span class="source-tag">STOCKANALYSIS</span></div><div class="panel-body"><div class="chart-wrap" style="height:340px"><canvas id="chart-dist-history"></canvas></div></div></div>
+    <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Annual Income Summary</span><span class="source-tag">COMPUTED</span></div><div class="panel-body"><div class="chart-wrap" style="height:280px"><canvas id="chart-annual-income"></canvas></div></div></div>
+  </div>
+
+  <!-- HOLDINGS -->
+  <div class="section" id="sec-holdings">
+    <div class="search-bar"><input type="text" id="holdings-search" placeholder="Search holdings by name, title, sector, country, coupon type..."></div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">All 922 Holdings (SEC N-PORT 2025-12-31)</span><span class="panel-title" id="holdings-count" style="color:var(--text-2)">922 positions</span></div>
+      <div class="panel-body flush"><div class="table-scroll">
+        <table class="data-table" id="holdings-table">
+          <thead><tr>
+            <th data-key="n">Name</th><th data-key="t">Title</th>
+            <th data-key="s" style="text-align:center">Sector</th>
+            <th data-key="c" style="text-align:center">Country</th>
+            <th data-key="cr" style="text-align:right">Coupon %</th>
+            <th data-key="ct" style="text-align:center">Type</th>
+            <th data-key="m" style="text-align:right">Maturity</th>
+            <th data-key="w" style="text-align:right">Weight %</th>
+            <th data-key="v" style="text-align:right">Value $M</th>
+          </tr></thead>
+          <tbody id="holdings-body"></tbody>
+        </table>
+      </div></div>
+    </div>
+  </div>
+
+</div>
+<script>
+const HOLDINGS=[
+{n:"UNITED STATES GOVT",t:"US TREASURY N/B 10/30 3.625",s:"UST",c:"US",cr:3.625,ct:"Fix",m:"2030-10-31",w:2.7061,v:394.2},
+{n:"N/A",t:"CITIGROUP REPO REPO                     5807",s:"Other",c:"US",w:2.032,v:296.0},
+{n:"FANNIE MAE REMICS 2025-18",t:"FANNIE MAE FNR 2025 18 FM",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2054-09-25",w:1.6081,v:234.3},
+{n:"FREDDIE MAC REMICS 5513",t:"FREDDIE MAC FHR 5513 MF",s:"Agency",c:"US",cr:4.8142,ct:"Flt",m:"2054-11-25",w:1.4018,v:204.2},
+{n:"BOEING CO/THE",t:"BOEING CO SR UNSECURED 02/26 2.196",s:"Corp",c:"US",cr:2.196,ct:"Fix",m:"2026-02-04",w:1.0241,v:149.2},
+{n:"CROWN CASTLE INTERNATIONAL CORP (CCI)",t:"CROWN CASTLE 01/26 ZCP",s:"Corp",c:"US",m:"2026-01-20",w:0.8561,v:124.7},
+{n:"BERRY GLOBAL INC",t:"BERRY GLOBAL INC SR SECURED 01/26 1.57",s:"Corp",c:"US",cr:1.57,ct:"Fix",m:"2026-01-15",w:0.8483,v:123.6},
+{n:"AERCAP IRELAND CAPITAL DAC / AERCAP GLOBAL AVIATION TRUST",t:"AERCAP IRELAND CAP/GLOBA COMPANY GUAR 10/26 2.45",s:"Corp",c:"IE",cr:2.45,ct:"Fix",m:"2026-10-29",w:0.7965,v:116.0},
+{n:"WORLD BANK (INTERNATIONAL BANK FOR RECONSTRUCTION AND DEVELOPMENT: IBRD)",t:"INTL BK RECON + DEVELOP SR UNSECURED 09/26 VAR",s:"Corp",c:"N/A",cr:4.0013,ct:"Flt",m:"2026-09-23",w:0.79,v:115.1},
+{n:"HCA INC",t:"HCA INC DISC COML PAPER 01/26 ZCP",s:"Corp",c:"US",m:"2026-01-07",w:0.7864,v:114.6},
+{n:"AIR LEASE CORPORATION",t:"AIR LEASE CORP SR UNSECURED 08/26 1.875",s:"Corp",c:"US",cr:1.875,ct:"Fix",m:"2026-08-15",w:0.73,v:106.3},
+{n:"VMWARE LLC",t:"VMWARE LLC SR UNSECURED 08/26 1.4",s:"Corp",c:"US",cr:1.4,ct:"Fix",m:"2026-08-15",w:0.6577,v:95.8},
+{n:"BPCE SA",t:"BPCE SA 144A 01/27 VAR",s:"Corp",c:"FR",cr:5.975,ct:"Flt",m:"2027-01-18",w:0.6122,v:89.2},
+{n:"GM FINANCIAL AUTOMOBILE LEASING TRUST 2025-1",t:"GM FINANCIAL AUTOMOBILE LEASIN GMALT 2025 1 A2B",s:"ABS",c:"US",cr:4.3277,ct:"Flt",m:"2027-05-20",w:0.6063,v:88.3},
+{n:"EVERGREEN CREDIT CARD TRUST SERIES 2025-1A",t:"EVERGREEN CREDIT CARD TRUST EVGRN 2025 1A A 144A",s:"ABS",c:"CA",cr:4.54,ct:"Flt",m:"2029-10-15",w:0.6064,v:88.3},
+{n:"KOMMUNALBANKEN AS",t:"KOMMUNALBANKEN AS SR UNSECURED 144A 06/27 VAR",s:"Corp",c:"NO",cr:4.0177,ct:"Flt",m:"2027-06-25",w:0.6047,v:88.1},
+{n:"AMERICAN HONDA FINANCE CORPORATION",t:"AMERICAN HONDA FINANCE SR UNSECURED 08/27 VAR",s:"Corp",c:"US",cr:4.6063,ct:"Flt",m:"2027-08-13",w:0.5759,v:83.9},
+{n:"FREDDIE MAC REMICS 5528",t:"FREDDIE MAC FHR 5528 FA",s:"Agency",c:"US",cr:4.7442,ct:"Flt",m:"2055-04-25",w:0.5747,v:83.7},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2025-98",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2025 98 GF",s:"Agency",c:"US",cr:4.8177,ct:"Flt",m:"2055-06-20",w:0.5565,v:81.1},
+{n:"SANTANDER UK GROUP HOLDINGS PLC",t:"SANTANDER UK GROUP HLDGS SR UNSECURED 06/27 VAR",s:"Corp",c:"GB",cr:1.673,ct:"Flt",m:"2027-06-14",w:0.5538,v:80.7},
+{n:"SOUTHERN CALIFORNIA EDISON COMPANY",t:"SOUTHERN CAL EDISON 1ST MORTGAGE 03/26 5.35",s:"Corp",c:"US",cr:5.35,ct:"Fix",m:"2026-03-01",w:0.5444,v:79.3},
+{n:"FREDDIE MAC REMICS 5534",t:"FREDDIE MAC FHR 5534 FM",s:"Agency",c:"US",cr:4.8042,ct:"Flt",m:"2055-05-25",w:0.5233,v:76.2},
+{n:"MERCEDES-BENZ FINANCE NORTH AMERICA LLC",t:"MERCEDES BENZ FIN NA COMPANY GUAR 144A 01/26 VAR",s:"Corp",c:"US",cr:4.686,ct:"Flt",m:"2026-01-09",w:0.5156,v:75.1},
+{n:"BANK OF AMERICA CORPORATION",t:"BANK OF AMERICA CORP SR UNSECURED 01/27 VAR",s:"Corp",c:"US",cr:5.08,ct:"Flt",m:"2027-01-20",w:0.5144,v:74.9},
+{n:"NEW YORK LIFE GLOBAL FUNDING",t:"NEW YORK LIFE GLOBAL FDG SR SECURED 144A 02/27 VAR",s:"Corp",c:"US",cr:4.2993,ct:"Flt",m:"2027-02-05",w:0.5131,v:74.7},
+{n:"COOPERATIEVE RABOBANK UA/NEW YORK BRANCH",t:"COOPERAT RABOBANK UA/NY SR UNSECURED 03/27 VAR",s:"Corp",c:"NL",cr:4.4835,ct:"Flt",m:"2027-03-05",w:0.4838,v:70.5},
+{n:"GMF FLOORPLAN OWNER REVOLVING TRUST 1",t:"GENERAL MOTORS GFORT 2023 1 A1 144A",s:"ABS",c:"US",cr:5.34,ct:"Fix",m:"2028-06-15",w:0.4769,v:69.5},
+{n:"UBS GROUP AG",t:"UBS GROUP AG SR UNSECURED 144A 02/27 VAR",s:"Corp",c:"CH",cr:1.305,ct:"Flt",m:"2027-02-02",w:0.4696,v:68.4},
+{n:"MORGAN STANLEY PRIVATE BANK NATIONAL ASSOCIATION",t:"MORGAN STANLEY PVT BANK SR UNSECURED 07/28 VAR",s:"Corp",c:"US",cr:4.5372,ct:"Flt",m:"2028-07-06",w:0.4699,v:68.4},
+{n:"PACIFIC LIFE GLOBAL FUNDING II",t:"PACIFIC LIFE GF II SECURED 144A 02/27 VAR",s:"Corp",c:"US",cr:4.3864,ct:"Flt",m:"2027-02-04",w:0.4689,v:68.3},
+{n:"TEMASEK FINANCIAL (I) LIMITED",t:"TEMASEK FINANCIAL I LTD COMPANY GUAR 144A 08/27 VAR",s:"Corp",c:"SG",cr:4.2539,ct:"Flt",m:"2027-08-20",w:0.4683,v:68.2},
+{n:"MASTER CREDIT CARD TRUST II 2024-1A",t:"MASTER CREDIT CARD TRUST MCCT 2024 1A A 144A",s:"ABS",c:"CA",cr:4.6934,ct:"Flt",m:"2028-01-21",w:0.4611,v:67.2},
+{n:"HCA INC",t:"HCA INC DISC COML PAPER 01/26 ZCP",s:"Corp",c:"US",m:"2026-01-13",w:0.4555,v:66.4},
+{n:"MOLSON COORS BEVERAGE COMPANY",t:"MOLSON COORS BEVERAGE COMPANY GUAR 07/26 3",s:"Corp",c:"US",cr:3.0,ct:"Fix",m:"2026-07-15",w:0.4527,v:65.9},
+{n:"UNITED OVERSEAS BANK LIMITED",t:"UNITED OVERSEAS BANK LTD SR UNSECURED 144A 04/28 VAR",s:"Corp",c:"SG",cr:4.3004,ct:"Flt",m:"2028-04-02",w:0.4438,v:64.6},
+{n:"CREDIT AGRICOLE SA",t:"CREDIT AGRICOLE SA 144A 01/27 VAR",s:"Corp",c:"FR",cr:1.247,ct:"Flt",m:"2027-01-26",w:0.4435,v:64.6},
+{n:"DEUTSCHE BANK AG/NEW YORK BRANCH",t:"DEUTSCHE BANK NY 07/27 VAR",s:"Corp",c:"DE",cr:7.146,ct:"Flt",m:"2027-07-13",w:0.4416,v:64.3},
+{n:"BAT INTERNATIONAL FINANCE PLC",t:"BAT INTL FINANCE PLC COMPANY GUAR 03/26 1.668",s:"Corp",c:"GB",cr:1.668,ct:"Fix",m:"2026-03-25",w:0.4406,v:64.2},
+{n:"ROYAL BANK OF CANADA",t:"ROYAL BANK OF CANADA SR UNSECURED 07/27 VAR",s:"Corp",c:"CA",cr:4.7448,ct:"Flt",m:"2027-07-23",w:0.4385,v:63.9},
+{n:"TRILLIUM CREDIT CARD TRUST II 2025-1A",t:"TRILLIUM CREDIT CARD TRUST II TCCT 2025 1A A 144A",s:"ABS",c:"US",cr:4.2769,ct:"Flt",m:"2030-09-26",w:0.4376,v:63.7},
+{n:"PACIFIC GAS AND ELECTRIC COMPANY",t:"PACIFIC GAS + ELECTRIC 1ST MORTGAGE 01/26 3.15",s:"Corp",c:"US",cr:3.15,ct:"Fix",m:"2026-01-01",w:0.4301,v:62.7},
+{n:"NEXTERA ENERGY CAPITAL HOLDINGS INC",t:"NEXTERA ENERGY CAPITAL COMPANY GUAR 01/26 VAR",s:"Corp",c:"US",cr:4.687,ct:"Flt",m:"2026-01-29",w:0.4287,v:62.4},
+{n:"FREDDIE MAC REMICS 5549",t:"FREDDIE MAC FHR 5549 CF",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2052-10-25",w:0.423,v:61.6},
+{n:"FREDDIE MAC REMICS 5517",t:"FREDDIE MAC FHR 5517 VF",s:"Agency",c:"US",cr:4.8242,ct:"Flt",m:"2055-03-25",w:0.4191,v:61.1},
+{n:"CONAGRA BRANDS INC",t:"CONAGRA BRANDS INC SR UNSECURED 10/26 5.3",s:"Corp",c:"US",cr:5.3,ct:"Fix",m:"2026-10-01",w:0.4171,v:60.8},
+{n:"CENTERPOINT ENERGY INC",t:"CENTERPOINT ENERGY INC SR UNSECURED 06/26 1.45",s:"Corp",c:"US",cr:1.45,ct:"Fix",m:"2026-06-01",w:0.4121,v:60.0},
+{n:"VOLKSWAGEN GROUP OF AMERICA FINANCE LLC",t:"VOLKSWAGEN GROUP AMERICA COMPANY GUAR 144A 03/27 VAR",s:"Corp",c:"US",cr:4.8096,ct:"Flt",m:"2027-03-25",w:0.4072,v:59.3},
+{n:"BARCLAYS PLC",t:"BARCLAYS PLC SR UNSECURED 01/26 4.375",s:"Corp",c:"GB",cr:4.375,ct:"Fix",m:"2026-01-12",w:0.3977,v:57.9},
+{n:"MIZUHO FINANCIAL GROUP INC",t:"MIZUHO FINANCIAL GROUP SR UNSECURED 05/27 VAR",s:"Corp",c:"JP",cr:1.234,ct:"Flt",m:"2027-05-22",w:0.3958,v:57.7},
+{n:"ING GROEP NV",t:"ING GROEP NV SR UNSECURED 04/27 VAR",s:"Corp",c:"NL",cr:1.726,ct:"Flt",m:"2027-04-01",w:0.3946,v:57.5},
+{n:"BANK OF MONTREAL",t:"BANK OF MONTREAL SR UNSECURED 09/27 VAR",s:"Corp",c:"CA",cr:4.6197,ct:"Flt",m:"2027-09-10",w:0.3936,v:57.3},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2025-P4",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2025 P4 A2",s:"ABS",c:"US",cr:4.19,ct:"Fix",m:"2029-03-12",w:0.3894,v:56.7},
+{n:"NOMURA HOLDINGS INC",t:"NOMURA HOLDINGS INC SR UNSECURED 07/26 1.653",s:"Corp",c:"JP",cr:1.653,ct:"Fix",m:"2026-07-14",w:0.3828,v:55.8},
+{n:"NATIONAL BANK OF CANADA",t:"NATIONAL BANK OF CANADA COMPANY GUAR 03/27 VAR",s:"Corp",c:"CA",cr:4.6496,ct:"Flt",m:"2027-03-25",w:0.3771,v:54.9},
+{n:"FEDERATION DES CAISSES DESJARDINS DU QUEBEC",t:"FED CAISSES DESJARDINS SR UNSECURED 144A 01/27 VAR",s:"Corp",c:"CA",cr:4.5764,ct:"Flt",m:"2027-01-27",w:0.37,v:53.9},
+{n:"CRSNT TRUST 2021-MOON",t:"CRSNT TRUST CRSNT 2021 MOON A 144A",s:"ABS",c:"US",cr:4.6945,ct:"Flt",m:"2036-04-15",w:0.3574,v:52.1},
+{n:"ROYAL BANK OF CANADA",t:"ROYAL BANK OF CANADA SR UNSECURED 10/27 VAR",s:"Corp",c:"CA",cr:4.6927,ct:"Flt",m:"2027-10-18",w:0.3578,v:52.1},
+{n:"MARATHON PETROLEUM CORPORATION",t:"MARATHON PETROLEUM CORP SR UNSECURED 12/26 5.125",s:"Corp",c:"US",cr:5.125,ct:"Fix",m:"2026-12-15",w:0.3572,v:52.0},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2025-205",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2025 205 FG",s:"Agency",c:"US",cr:4.8355,ct:"Flt",m:"2053-12-20",w:0.3544,v:51.6},
+{n:"VOLKSWAGEN GROUP OF AMERICA FINANCE LLC",t:"VOLKSWAGEN GROUP AMERICA COMPANY GUAR 144A 03/26 VAR",s:"Corp",c:"US",cr:4.5525,ct:"Flt",m:"2026-03-20",w:0.3544,v:51.6},
+{n:"GCCT-2021-1A",t:"GOLDEN CREDIT CARD TRUST GCCT 2021 1A A 144A",s:"ABS",c:"US",cr:1.14,ct:"Fix",m:"2028-08-15",w:0.3528,v:51.4},
+{n:"ENTERGY CORPORATION",t:"ENTERGY CORP SR UNSECURED 09/26 2.95",s:"Corp",c:"US",cr:2.95,ct:"Fix",m:"2026-09-01",w:0.3486,v:50.8},
+{n:"BMW US CAPITAL LLC",t:"BMW US CAPITAL LLC COMPANY GUAR 144A 08/27 VAR",s:"Corp",c:"US",cr:4.5903,ct:"Flt",m:"2027-08-11",w:0.3472,v:50.6},
+{n:"CANADIAN IMPERIAL BANK OF COMMERCE (CIBC)",t:"CANADIAN IMPERIAL BANK SR UNSECURED 09/28 VAR",s:"Corp",c:"CA",cr:4.567,ct:"Flt",m:"2028-09-08",w:0.3465,v:50.5},
+{n:"AES CORPORATION",t:"AES CORP/THE SR UNSECURED 01/26 1.375",s:"Corp",c:"US",cr:1.375,ct:"Fix",m:"2026-01-15",w:0.3438,v:50.1},
+{n:"BNP PARIBAS",t:"BNP PARIBAS 144A 01/27 VAR",s:"Corp",c:"FR",cr:1.323,ct:"Flt",m:"2027-01-13",w:0.3436,v:50.0},
+{n:"ABN AMRO BANK NV",t:"ABN AMRO BANK NV REGS 09/27 VAR",s:"Corp",c:"NL",cr:5.4994,ct:"Flt",m:"2027-09-18",w:0.3421,v:49.8},
+{n:"ATHENE GLOBAL FUNDING",t:"ATHENE GLOBAL FUNDING SR SECURED 144A 05/26 VAR",s:"Corp",c:"US",cr:4.7315,ct:"Flt",m:"2026-05-08",w:0.3419,v:49.8},
+{n:"BARCLAYS PLC",t:"BARCLAYS PLC SR UNSECURED 05/27 VAR",s:"Corp",c:"GB",cr:5.829,ct:"Flt",m:"2027-05-09",w:0.3363,v:49.0},
+{n:"ING GROEP NV",t:"ING GROEP NV SR UNSECURED 04/27 VAR",s:"Corp",c:"NL",cr:4.7304,ct:"Flt",m:"2027-04-01",w:0.3358,v:48.9},
+{n:"FREDDIE MAC REMICS 5548",t:"FREDDIE MAC FHR 5548 AF",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2055-06-25",w:0.3291,v:47.9},
+{n:"JACKSON NATIONAL LIFE GLOBAL FUNDING",t:"JACKSON NATL LIFE GLOBAL SR SECURED 144A 04/26 5.6",s:"Corp",c:"US",cr:5.6,ct:"Fix",m:"2026-04-10",w:0.3288,v:47.9},
+{n:"TOYOTA LEASE OWNER TRUST 2025-A",t:"TOYOTA LEASE OWNER TRUST TLOT 2025 A A2B 144A",s:"ABS",c:"US",cr:4.3277,ct:"Flt",m:"2027-07-20",w:0.3288,v:47.9},
+{n:"FREDDIE MAC REMICS 5544",t:"FREDDIE MAC FHR 5544 F",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2055-06-25",w:0.3224,v:47.0},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 03/27 VAR",s:"Corp",c:"US",cr:4.7396,ct:"Flt",m:"2027-03-25",w:0.3206,v:46.7},
+{n:"FORTIS INC/CANADA",t:"FORTIS INC SR UNSECURED 10/26 3.055",s:"Corp",c:"CA",cr:3.055,ct:"Fix",m:"2026-10-04",w:0.3193,v:46.5},
+{n:"COREBRIDGE GLOBAL FUNDING",t:"COREBRIDGE GLOB FUNDING SECURED 144A 12/28 VAR",s:"Corp",c:"US",cr:4.5814,ct:"Flt",m:"2028-12-15",w:0.3192,v:46.5},
+{n:"AMETEK INC",t:"AMETEK INC DISC COML 01/26 ZCP",s:"Corp",c:"US",m:"2026-01-12",w:0.3154,v:45.9},
+{n:"NISSAN AUTO LEASE TRUST 2025-A",t:"NISSAN AUTO LEASE TRUST NALT 2025 A A2B",s:"ABS",c:"US",cr:4.4338,ct:"Flt",m:"2027-11-15",w:0.3134,v:45.7},
+{n:"SUMITOMO MITSUI FINANCIAL GROUP INC",t:"SUMITOMO MITSUI FINL GRP SR UNSECURED 07/26 VAR",s:"Corp",c:"JP",cr:5.306,ct:"Flt",m:"2026-07-13",w:0.31,v:45.2},
+{n:"MORGAN STANLEY BANK NA",t:"MORGAN STANLEY BANK NA SR UNSECURED 10/27 VAR",s:"Corp",c:"US",cr:4.6752,ct:"Flt",m:"2027-10-15",w:0.3088,v:45.0},
+{n:"ORACLE CORPORATION",t:"ORACLE CORPORATION 01/26 ZCP",s:"Corp",c:"US",m:"2026-01-16",w:0.3091,v:45.0},
+{n:"ROYAL CARIBBEAN CRUISES LTD",t:"ROYAL CARIBBEAN CRUISES SR UNSECURED 144A 08/26 5.5",s:"Corp",c:"LR",cr:5.5,ct:"Fix",m:"2026-08-31",w:0.3056,v:44.5},
+{n:"AMERICAN HONDA FINANCE CORPORATION",t:"AMERICAN HONDA FINANCE SR UNSECURED 03/27 VAR",s:"Corp",c:"US",cr:4.497,ct:"Flt",m:"2027-03-08",w:0.3028,v:44.1},
+{n:"LLOYDS BANKING GROUP PLC",t:"LLOYDS BANKING GROUP PLC SR UNSECURED 08/27 VAR",s:"Corp",c:"GB",cr:5.985,ct:"Flt",m:"2027-08-07",w:0.3028,v:44.1},
+{n:"DBS GROUP HOLDINGS LTD",t:"DBS GROUP HOLDINGS LTD SR UNSECURED 144A 03/28 VAR",s:"Corp",c:"SG",cr:4.2958,ct:"Flt",m:"2028-03-21",w:0.3031,v:44.1},
+{n:"SAMMONS FINANCIAL GROUP GLOBAL FUNDING",t:"SAMMONS FINANCIAL GLOBAL SR SECURED 144A 09/27 VAR",s:"Corp",c:"US",cr:4.6718,ct:"Flt",m:"2027-09-02",w:0.302,v:44.0},
+{n:"STANDARD CHARTERED PLC",t:"STANDARD CHARTERED PLC SR UNSECURED 144A 01/27 VAR",s:"Corp",c:"GB",cr:1.456,ct:"Flt",m:"2027-01-14",w:0.2977,v:43.4},
+{n:"PNC BANK NA",t:"PNC BANK NA SR UNSECURED 01/27 VAR",s:"Corp",c:"US",cr:4.4902,ct:"Flt",m:"2027-01-15",w:0.2925,v:42.6},
+{n:"CVS HEALTH CORPORATION",t:"CVS HEALTH CORP SR UNSECURED 06/26 2.875",s:"Corp",c:"US",cr:2.875,ct:"Fix",m:"2026-06-01",w:0.292,v:42.5},
+{n:"ONEOK INC",t:"ONEOK INC COMPANY GUAR 07/26 4.85",s:"Corp",c:"US",cr:4.85,ct:"Fix",m:"2026-07-15",w:0.2859,v:41.6},
+{n:"NATIONAL RURAL UTILITIES COOPERATIVE FINANCE CORPORATION",t:"NATIONAL RURAL UTIL COOP SR UNSECURED 11/26 VAR",s:"Corp",c:"US",cr:4.4163,ct:"Flt",m:"2026-11-22",w:0.2835,v:41.3},
+{n:"CITIGROUP INC",t:"CITIGROUP INC SR UNSECURED 01/27 VAR",s:"Corp",c:"US",cr:1.122,ct:"Flt",m:"2027-01-28",w:0.2829,v:41.2},
+{n:"SOUTHERN CALIFORNIA EDISON COMPANY",t:"SOUTHERN CAL EDISON 1ST MORTGAGE 09/26 4.4",s:"Corp",c:"US",cr:4.4,ct:"Fix",m:"2026-09-06",w:0.2826,v:41.2},
+{n:"PACIFIC LIFE GLOBAL FUNDING II",t:"PACIFIC LIFE GF II SECURED 144A 01/28 VAR",s:"Corp",c:"US",cr:4.5464,ct:"Flt",m:"2028-01-27",w:0.282,v:41.1},
+{n:"COOPERATIEVE RABOBANK UA/NEW YORK BRANCH",t:"COOPERAT RABOBANK UA/NY 01/26 VAR",s:"Corp",c:"NL",cr:4.7063,ct:"Flt",m:"2026-01-09",w:0.2815,v:41.0},
+{n:"AMERICAN TOWER CORP (AKA: AMERICAN TOWER REIT INC)",t:"AMERICAN TOWER CORP SR UNSECURED 09/26 1.45",s:"Corp",c:"US",cr:1.45,ct:"Fix",m:"2026-09-15",w:0.2801,v:40.8},
+{n:"ENEL FINANCE INTERNATIONAL NV",t:"ENEL FINANCE INTL NV COMPANY GUAR 144A 07/26 1.625",s:"Corp",c:"NL",cr:1.625,ct:"Var",m:"2026-07-12",w:0.2793,v:40.7},
+{n:"JP MORGAN CHASE & CO",t:"JPMORGAN CHASE + CO SR UNSECURED 04/27 VAR",s:"Corp",c:"US",cr:1.578,ct:"Flt",m:"2027-04-22",w:0.2753,v:40.1},
+{n:"FREDDIE MAC REMICS 5508",t:"FREDDIE MAC FHR 5508 AF",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2055-02-25",w:0.2753,v:40.1},
+{n:"FORD CREDIT AUTO OWNER TRUST 2025-B",t:"FORD CREDIT AUTO OWNER TRUST FORDO 2025 B A2B",s:"ABS",c:"US",cr:4.2839,ct:"Flt",m:"2028-06-15",w:0.2733,v:39.8},
+{n:"FANNIE MAE 2025-40",t:"FANNIE MAE FNR 2025 40 FP",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2054-10-25",w:0.2692,v:39.2},
+{n:"DEUTSCHE BANK AG/NEW YORK BRANCH",t:"DEUTSCHE BANK NY 11/27 VAR",s:"Corp",c:"DE",cr:2.311,ct:"Flt",m:"2027-11-16",w:0.2694,v:39.2},
+{n:"SOUTHERN CALIFORNIA EDISON COMPANY",t:"SOUTHERN CAL EDISON 1ST MORTGAGE 06/26 4.9",s:"Corp",c:"US",cr:4.9,ct:"Fix",m:"2026-06-01",w:0.2679,v:39.0},
+{n:"MORGAN STANLEY",t:"MORGAN STANLEY SR UNSECURED 05/27 VAR",s:"Corp",c:"US",cr:1.593,ct:"Flt",m:"2027-05-04",w:0.2661,v:38.8},
+{n:"ROYAL BANK OF CANADA",t:"ROYAL BANK OF CANADA SR UNSECURED 08/26 VAR",s:"Corp",c:"CA",cr:4.3689,ct:"Flt",m:"2026-08-03",w:0.2654,v:38.7},
+{n:"ENERGY TRANSFER LP",t:"ENERGY TRANSFER LP SR UNSECURED 01/26 4.75",s:"Corp",c:"US",cr:4.75,ct:"Fix",m:"2026-01-15",w:0.2655,v:38.7},
+{n:"CREDIT AGRICOLE SA",t:"CREDIT AGRICOLE SA SR UNSECURED 144A 03/27 VAR",s:"Corp",c:"FR",cr:4.6005,ct:"Flt",m:"2027-03-11",w:0.2632,v:38.3},
+{n:"WELLS FARGO & COMPANY",t:"WELLS FARGO + COMPANY SR UNSECURED 06/27 VAR",s:"Corp",c:"US",cr:3.196,ct:"Flt",m:"2027-06-17",w:0.2631,v:38.3},
+{n:"ATHENE GLOBAL FUNDING",t:"ATHENE GLOBAL FUNDING SECURED 144A 08/26 VAR",s:"Corp",c:"US",cr:4.87,ct:"Flt",m:"2026-08-27",w:0.2597,v:37.8},
+{n:"NATIONAL BANK OF CANADA",t:"NATIONAL BANK OF CANADA COMPANY GUAR 03/27 VAR",s:"Corp",c:"CA",cr:4.702,ct:"Flt",m:"2027-03-05",w:0.2592,v:37.8},
+{n:"GOLDMAN SACHS BANK USA/NEW YORK BRANCH",t:"GOLDMAN SACHS BANK USA SR UNSECURED 05/27 VAR",s:"Corp",c:"US",cr:4.6043,ct:"Flt",m:"2027-05-21",w:0.2555,v:37.2},
+{n:"JP MORGAN CHASE & CO",t:"JPMORGAN CHASE + CO SR UNSECURED 01/27 VAR",s:"Corp",c:"US",cr:3.96,ct:"Flt",m:"2027-01-29",w:0.2524,v:36.8},
+{n:"FREDDIE MAC REMICS 5410",t:"FREDDIE MAC FHR 5410 FB",s:"Agency",c:"US",cr:5.1242,ct:"Flt",m:"2054-05-25",w:0.2524,v:36.8},
+{n:"FANNIE MAE REMICS 2025-24",t:"FANNIE MAE FNR 2025 24 FA",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2055-04-25",w:0.2497,v:36.4},
+{n:"TOYOTA MOTOR CREDIT CORPORATION",t:"TOYOTA MOTOR CREDIT CORP SR UNSECURED 08/26 VAR",s:"Corp",c:"US",cr:4.6524,ct:"Flt",m:"2026-08-07",w:0.248,v:36.1},
+{n:"WILLIAMS COS INC",t:"WILLIAMS COMPANIES INC SR UNSECURED 03/26 5.4",s:"Corp",c:"US",cr:5.4,ct:"Fix",m:"2026-03-02",w:0.247,v:36.0},
+{n:"STELLANTIS FINANCIAL UNDERWRITTEN ENHANCED LEASE TRUST 2025-BA",t:"STELLANTIS FINANCIAL UNDERWRIT SFUEL 2025 BA A2 144A",s:"ABS",c:"US",cr:4.31,ct:"Fix",m:"2028-05-22",w:0.2473,v:36.0},
+{n:"HYUNDAI AUTO LEASE SECURITIZATION TRUST 2025-C",t:"HYUNDAI AUTO LEASE SECURITIZAT HALST 2025 C A2B 144A",s:"ABS",c:"US",cr:4.3739,ct:"Flt",m:"2028-01-18",w:0.2466,v:35.9},
+{n:"CITIGROUP GLOBAL MARKETS HOLDINGS INC",t:"CITIGROUP GLOBAL MARKETS COMPANY GUAR 01/26 VAR",s:"Corp",c:"US",cr:4.23,ct:"Flt",m:"2026-01-20",w:0.2451,v:35.7},
+{n:"SYNOPSYS INC",t:"SYNOPSYS INC SR UNSECURED 04/27 4.55",s:"Corp",c:"US",cr:4.55,ct:"Fix",m:"2027-04-01",w:0.2449,v:35.7},
+{n:"JACKSON NATIONAL LIFE GLOBAL FUNDING",t:"JACKSON NATL LIFE GLOBAL SECURED 144A 06/27 VAR",s:"Corp",c:"US",cr:4.6512,ct:"Flt",m:"2027-06-09",w:0.2408,v:35.1},
+{n:"MPLX LP",t:"MPLX LP SR UNSECURED 03/26 1.75",s:"Corp",c:"US",cr:1.75,ct:"Fix",m:"2026-03-01",w:0.2397,v:34.9},
+{n:"ENTERPRISE FLEET FINANCING 2025-2 LLC",t:"ENTERPRISE FLEET FINANCING LLC EFF 2025 2 A2 144A",s:"ABS",c:"US",cr:4.51,ct:"Fix",m:"2028-02-22",w:0.2387,v:34.8},
+{n:"MERCEDES-BENZ FINANCE NORTH AMERICA LLC",t:"MERCEDES BENZ FIN NA COMPANY GUAR 144A 07/26 VAR",s:"Corp",c:"US",cr:4.5783,ct:"Flt",m:"2026-07-31",w:0.238,v:34.7},
+{n:"HYUNDAI AUTO LEASE SECURITIZATION TRUST 2025-B",t:"HYUNDAI AUTO LEASE SECURITIZAT HALST 2025 B A2B 144A",s:"ABS",c:"US",cr:4.6838,ct:"Flt",m:"2027-09-15",w:0.2378,v:34.6},
+{n:"GOLDEN CREDIT CARD TRUST 2022-1A",t:"GOLDEN CREDIT CARD TRUST GCCT 2022 1A A 144A",s:"ABS",c:"CA",cr:1.97,ct:"Fix",m:"2029-01-15",w:0.2369,v:34.5},
+{n:"ABN AMRO BANK NV",t:"ABN AMRO BANK NV 144A 12/28 VAR",s:"Corp",c:"NL",cr:4.7926,ct:"Flt",m:"2028-12-03",w:0.2364,v:34.4},
+{n:"STANDARD CHARTERED PLC",t:"STANDARD CHARTERED PLC SR UNSECURED REGS 01/27 VAR",s:"Corp",c:"GB",cr:1.456,ct:"Flt",m:"2027-01-14",w:0.2352,v:34.3},
+{n:"GA GLOBAL FUNDING TRUST",t:"GA GLOBAL FUNDING TRUST SECURED 144A 01/26 1.625",s:"Corp",c:"US",cr:1.625,ct:"Fix",m:"2026-01-15",w:0.2351,v:34.3},
+{n:"FEDERAL HOME LOAN MORTGAGE CORPORATION (FREDDIE MAC)",t:"FREDDIE MAC NOTES 09/28 4.125",s:"Agency",c:"US",cr:4.125,ct:"Fix",m:"2028-09-26",w:0.2347,v:34.2},
+{n:"CARMAX AUTO OWNER TRUST 2025-4",t:"CARMAX AUTO OWNER TRUST CARMX 2025 4 A2B",s:"ABS",c:"US",cr:4.3938,ct:"Flt",m:"2029-03-15",w:0.2316,v:33.7},
+{n:"DANSKE BANK A/S",t:"DANSKE BANK A/S 144A 09/27 VAR",s:"Corp",c:"DK",cr:1.549,ct:"Flt",m:"2027-09-10",w:0.23,v:33.5},
+{n:"AMERICAN EXPRESS COMPANY",t:"AMERICAN EXPRESS CO SR UNSECURED 02/26 VAR",s:"Corp",c:"US",cr:4.6363,ct:"Flt",m:"2026-02-13",w:0.2294,v:33.4},
+{n:"VOLKSWAGEN AUTO LEASE TRUST 2025-B",t:"VOLKSWAGEN AUTO LEASE TRUST VWALT 2025 B A2B",s:"ABS",c:"US",cr:4.2877,ct:"Flt",m:"2028-04-20",w:0.228,v:33.2},
+{n:"FORD MOTOR CREDIT COMPANY LLC",t:"FORD MOTOR CREDIT CO LLC SR UNSECURED 08/26 4.542",s:"Corp",c:"US",cr:4.542,ct:"Fix",m:"2026-08-01",w:0.2271,v:33.1},
+{n:"AIR LEASE CORPORATION",t:"AIR LEASE CORP DISC COML 01/26 ZCP",s:"Corp",c:"US",m:"2026-01-02",w:0.2265,v:33.0},
+{n:"OBX 2022-NQM2 TRUST",t:"ONSLOW BAY FINANCIAL LLC OBX 2022 NQM2 A1A 144A",s:"ABS",c:"US",cr:2.783,ct:"Var",m:"2062-01-25",w:0.2258,v:32.9},
+{n:"FREDDIE MAC REMICS 5549",t:"FREDDIE MAC FHR 5549 FA",s:"Agency",c:"US",cr:5.1242,ct:"Flt",m:"2055-06-25",w:0.2253,v:32.8},
+{n:"NAVIENT REFINANCE LOAN TRUST 2025-C",t:"NAVIENT REFINANCE LOAN TRUST NAVRL 2025 C A 144A",s:"ABS",c:"US",cr:4.8,ct:"Fix",m:"2055-10-15",w:0.2217,v:32.3},
+{n:"NTT FINANCE CORPORATION",t:"NTT FINANCE CORP COMPANY GUAR 144A 04/26 1.162",s:"Corp",c:"JP",cr:1.162,ct:"Fix",m:"2026-04-03",w:0.2213,v:32.2},
+{n:"NXP BV / NXP FUNDING LLC / NXP USA INC",t:"NXP BV/NXP FDG/NXP USA COMPANY GUAR 06/26 3.875",s:"Corp",c:"NL",cr:3.875,ct:"Fix",m:"2026-06-18",w:0.2193,v:31.9},
+{n:"CARMAX AUTO OWNER TRUST 2024-1",t:"CARMAX AUTO OWNER TRUST CARMX 2024 1 A3",s:"ABS",c:"US",cr:4.92,ct:"Fix",m:"2028-10-16",w:0.2189,v:31.9},
+{n:"GLOBAL PAYMENTS INC",t:"GLOBAL PAYMENTS INC SR UNSECURED 03/26 1.2",s:"Corp",c:"US",cr:1.2,ct:"Fix",m:"2026-03-01",w:0.2186,v:31.8},
+{n:"STANDARD CHARTERED PLC",t:"STANDARD CHARTERED PLC SR UNSECURED 144A 07/27 VAR",s:"Corp",c:"GB",cr:6.187,ct:"Flt",m:"2027-07-06",w:0.2186,v:31.8},
+{n:"FREDDIE MAC REMICS 5480",t:"FREDDIE MAC FHR 5480 FG",s:"Agency",c:"US",cr:5.0242,ct:"Flt",m:"2054-12-25",w:0.2176,v:31.7},
+{n:"CARMAX AUTO OWNER TRUST 2025-2",t:"CARMAX AUTO OWNER TRUST CARMX 2025 2 A2B",s:"ABS",c:"US",cr:4.6738,ct:"Flt",m:"2028-07-17",w:0.2166,v:31.6},
+{n:"COX COMMUNICATIONS INC",t:"COX COMMUNICATIONS INC SR UNSECURED 144A 09/26 3.35",s:"Corp",c:"US",cr:3.35,ct:"Fix",m:"2026-09-15",w:0.2172,v:31.6},
+{n:"ENTERPRISE FLEET FINANCING 2024-4 LLC",t:"ENTERPRISE FLEET FINANCING LLC EFF 2024 4 A2 144A",s:"ABS",c:"US",cr:4.69,ct:"Fix",m:"2027-07-20",w:0.2115,v:30.8},
+{n:"ABN AMRO BANK NV",t:"ABN AMRO BANK NV 144A 09/27 VAR",s:"Corp",c:"NL",cr:5.4994,ct:"Flt",m:"2027-09-18",w:0.2105,v:30.7},
+{n:"CANADIAN IMPERIAL BANK OF COMMERCE (CIBC)",t:"CANADIAN IMPERIAL BANK SR UNSECURED 09/27 VAR",s:"Corp",c:"CA",cr:4.6605,ct:"Flt",m:"2027-09-11",w:0.2104,v:30.7},
+{n:"FORD MOTOR CREDIT COMPANY LLC",t:"FORD MOTOR CREDIT CO LLC SR UNSECURED 01/26 4.389",s:"Corp",c:"US",cr:4.389,ct:"Fix",m:"2026-01-08",w:0.21,v:30.6},
+{n:"SUMITOMO MITSUI FINANCIAL GROUP INC",t:"SUMITOMO MITSUI FINL GRP SR UNSECURED 01/26 VAR",s:"Corp",c:"JP",cr:5.436,ct:"Flt",m:"2026-01-13",w:0.2103,v:30.6},
+{n:"FIDELITY NATIONAL INFORMATION SERVICES INC",t:"FIDELITY NATL INFO SERV SR UNSECURED 03/26 1.15",s:"Corp",c:"US",cr:1.15,ct:"Fix",m:"2026-03-01",w:0.2094,v:30.5},
+{n:"PROTECTIVE LIFE GLOBAL FUNDING",t:"PROTECTIVE LIFE GLOBAL SECURED 144A 07/26 VAR",s:"Corp",c:"US",cr:4.458,ct:"Flt",m:"2026-07-22",w:0.2097,v:30.5},
+{n:"EVERSOURCE ENERGY",t:"EVERSOURCE ENERGY SR UNSECURED 05/26 4.75",s:"Corp",c:"US",cr:4.75,ct:"Fix",m:"2026-05-15",w:0.208,v:30.3},
+{n:"SYDNEY AIRPORT FINANCE COMPANY PTY LIMITED",t:"SYDNEY AIRPORT FINANCE SR SECURED 144A 04/26 3.625",s:"Corp",c:"AU",cr:3.625,ct:"Fix",m:"2026-04-28",w:0.2075,v:30.2},
+{n:"FREDDIE MAC REMICS 5532",t:"FREDDIE MAC FHR 5532 FA",s:"Agency",c:"US",cr:4.8242,ct:"Flt",m:"2055-04-25",w:0.2075,v:30.2},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2020-H07",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2020 H07 FA",s:"Agency",c:"US",cr:4.8141,ct:"Flt",m:"2070-04-20",w:0.2053,v:29.9},
+{n:"ROYAL BANK OF CANADA",t:"ROYAL BANK OF CANADA SR UNSECURED 03/28 VAR",s:"Corp",c:"CA",cr:4.5791,ct:"Flt",m:"2028-03-27",w:0.2043,v:29.8},
+{n:"DAIMLER TRUCK FINANCE NORTH AMERICA LLC",t:"DAIMLER TRUCK FINAN NA COMPANY GUAR 144A 08/27 4.3",s:"Corp",c:"US",cr:4.3,ct:"Fix",m:"2027-08-12",w:0.2014,v:29.3},
+{n:"7-ELEVEN INC",t:"7 ELEVEN INC SR UNSECURED 144A 02/26 0.95",s:"Corp",c:"US",cr:0.95,ct:"Fix",m:"2026-02-10",w:0.2015,v:29.3},
+{n:"BARCLAYS PLC",t:"BARCLAYS PLC SR UNSECURED 09/27 VAR",s:"Corp",c:"GB",cr:5.5929,ct:"Flt",m:"2027-09-13",w:0.2014,v:29.3},
+{n:"FREDDIE MAC REMICS 5567",t:"FREDDIE MAC FHR 5567 FB",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2055-08-25",w:0.1988,v:29.0},
+{n:"TOYOTA AUTO RECEIVABLES 2025-B OWNER TRUST",t:"TOYOTA AUTO RECEIVABLES OWNER TAOT 2025 B A2B",s:"ABS",c:"US",cr:4.5239,ct:"Flt",m:"2028-03-15",w:0.1987,v:28.9},
+{n:"HYUNDAI AUTO LEASE SECURITIZATION TRUST 2025-A",t:"HYUNDAI AUTO LEASE SECURITIZAT HALST 2025 A A2B 144A",s:"ABS",c:"US",cr:4.3838,ct:"Flt",m:"2027-06-15",w:0.1975,v:28.8},
+{n:"BMW US CAPITAL LLC",t:"BMW US CAPITAL LLC COMPANY GUAR 144A 08/27 4.15",s:"Corp",c:"US",cr:4.15,ct:"Fix",m:"2027-08-11",w:0.1972,v:28.7},
+{n:"ATHENE GLOBAL FUNDING",t:"ATHENE GLOBAL FUNDING SECURED 144A 07/26 VAR",s:"Corp",c:"US",cr:4.7303,ct:"Flt",m:"2026-07-16",w:0.196,v:28.5},
+{n:"ENTERPRISE FLEET FINANCING 2025-3 LLC",t:"ENTERPRISE FLEET FINANCING LLC EFF 2025 3 A2 144A",s:"ABS",c:"US",cr:4.5,ct:"Fix",m:"2028-04-20",w:0.1926,v:28.1},
+{n:"FANNIE MAE REMICS 2024-103",t:"FANNIE MAE FNR 2024 103 FJ",s:"Agency",c:"US",cr:5.0742,ct:"Flt",m:"2055-01-25",w:0.1914,v:27.9},
+{n:"COOPERATIEVE RABOBANK UA/NEW YORK BRANCH",t:"COOPERAT RABOBANK UA/NY 08/26 VAR",s:"Corp",c:"NL",cr:4.46,ct:"Flt",m:"2026-08-28",w:0.1879,v:27.4},
+{n:"BMW US CAPITAL LLC",t:"BMW US CAPITAL LLC COMPANY GUAR 144A 08/26 VAR",s:"Corp",c:"US",cr:4.6763,ct:"Flt",m:"2026-08-13",w:0.1868,v:27.2},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2025-H21",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2025 H21 FA",s:"Agency",c:"US",cr:4.6177,ct:"Flt",m:"2075-10-20",w:0.1862,v:27.1},
+{n:"BAYER US FINANCE LLC",t:"BAYER US FINANCE LLC COMPANY GUAR 144A 11/26 6.125",s:"Corp",c:"US",cr:6.125,ct:"Fix",m:"2026-11-21",w:0.1849,v:26.9},
+{n:"PINNACLE WEST CAPITAL CORPORATION",t:"PINNACLE WEST CAPITAL SR UNSECURED 06/26 VAR",s:"Corp",c:"US",cr:4.5597,ct:"Flt",m:"2026-06-10",w:0.1832,v:26.7},
+{n:"CANADIAN IMPERIAL BANK OF COMMERCE (CIBC)",t:"CANADIAN IMPERIAL BANK SR UNSECURED 10/26 VAR",s:"Corp",c:"CA",cr:5.0369,ct:"Flt",m:"2026-10-02",w:0.1834,v:26.7},
+{n:"HPEFS EQUIPMENT TRUST 2025-2A",t:"HPEFS EQUIPMENT TRUST HPEFS 2025 2A A2 144A",s:"ABS",c:"US",cr:4.07,ct:"Fix",m:"2032-11-22",w:0.1829,v:26.6},
+{n:"HYUNDAI AUTO RECEIVABLES TRUST 2025-C",t:"HYUNDAI AUTO RECEIVABLES TRUST HART 2025 C A2B",s:"ABS",c:"US",cr:4.3338,ct:"Flt",m:"2028-07-17",w:0.1827,v:26.6},
+{n:"DEUTSCHE BANK AG/NEW YORK BRANCH",t:"DEUTSCHE BANK NY 01/26 4.1",s:"Corp",c:"DE",cr:4.1,ct:"Fix",m:"2026-01-13",w:0.1818,v:26.5},
+{n:"GM FINANCIAL AUTOMOBILE LEASING TRUST 2025-2",t:"GM FINANCIAL AUTOMOBILE LEASIN GMALT 2025 2 A2B",s:"ABS",c:"US",cr:4.4177,ct:"Flt",m:"2027-07-20",w:0.1822,v:26.5},
+{n:"AMERICAN TOWER CORP (AKA: AMERICAN TOWER REIT INC)",t:"AMERICAN TOWER CORP SR UNSECURED 04/26 1.6",s:"Corp",c:"US",cr:1.6,ct:"Fix",m:"2026-04-15",w:0.1787,v:26.0},
+{n:"ATHENE GLOBAL FUNDING",t:"ATHENE GLOBAL FUNDING SECURED 144A 01/27 VAR",s:"Corp",c:"US",cr:4.8358,ct:"Flt",m:"2027-01-07",w:0.1777,v:25.9},
+{n:"GOLDMAN SACHS GROUP INC",t:"GOLDMAN SACHS GROUP INC SR UNSECURED 03/27 VAR",s:"Corp",c:"US",cr:1.431,ct:"Flt",m:"2027-03-09",w:0.1772,v:25.8},
+{n:"SBNA AUTO LEASE TRUST 2024-B",t:"SBNA AUTO LEASE TRUST SBALT 2024 B A3 144A",s:"ABS",c:"US",cr:5.56,ct:"Fix",m:"2027-11-22",w:0.1752,v:25.5},
+{n:"HSBC HOLDINGS PLC",t:"HSBC HOLDINGS PLC SR UNSECURED 03/26 4.3",s:"Corp",c:"GB",cr:4.3,ct:"Fix",m:"2026-03-08",w:0.1744,v:25.4},
+{n:"BACARDI LIMITED",t:"BACARDI LTD COMPANY GUAR 144A 07/26 2.75",s:"Corp",c:"BM",cr:2.75,ct:"Fix",m:"2026-07-15",w:0.1736,v:25.3},
+{n:"UBS GROUP AG",t:"UBS GROUP AG SR UNSECURED 144A 01/27 VAR",s:"Corp",c:"CH",cr:1.364,ct:"Flt",m:"2027-01-30",w:0.1731,v:25.2},
+{n:"BMW US CAPITAL LLC",t:"BMW US CAPITAL LLC COMPANY GUAR 144A 04/26 VAR",s:"Corp",c:"US",cr:4.367,ct:"Flt",m:"2026-04-02",w:0.1726,v:25.1},
+{n:"DNB BANK ASA",t:"DNB BANK ASA 144A 05/27 VAR",s:"Corp",c:"NO",cr:1.535,ct:"Flt",m:"2027-05-25",w:0.1714,v:25.0},
+{n:"UBS GROUP AG",t:"UBS GROUP AG SR UNSECURED 144A 04/26 4.125",s:"Corp",c:"CH",cr:4.125,ct:"Fix",m:"2026-04-15",w:0.1717,v:25.0},
+{n:"FREDDIE MAC REMICS 5516",t:"FREDDIE MAC FHR 5516 FB",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2055-03-25",w:0.1706,v:24.9},
+{n:"VOLKSWAGEN GROUP OF AMERICA FINANCE LLC",t:"VOLKSWAGEN GROUP AMERICA COMPANY GUAR 144A 08/26 VAR",s:"Corp",c:"US",cr:4.9325,ct:"Flt",m:"2026-08-14",w:0.1698,v:24.7},
+{n:"BMW US CAPITAL LLC",t:"BMW US CAPITAL LLC COMPANY GUAR 144A 03/27 VAR",s:"Corp",c:"US",cr:4.5008,ct:"Flt",m:"2027-03-19",w:0.1692,v:24.7},
+{n:"AMERICAN TOWER CORP (AKA: AMERICAN TOWER REIT INC)",t:"AMERICAN TOWER CORP SR UNSECURED 10/26 3.375",s:"Corp",c:"US",cr:3.375,ct:"Fix",m:"2026-10-15",w:0.1689,v:24.6},
+{n:"FREDDIE MAC REMICS 5505",t:"FREDDIE MAC FHR 5505 AF",s:"Agency",c:"US",cr:5.0085,ct:"Flt",m:"2050-03-15",w:0.1672,v:24.4},
+{n:"UBS GROUP AG",t:"UBS GROUP AG SR UNSECURED REGS 04/26 4.125",s:"Corp",c:"CH",cr:4.125,ct:"Fix",m:"2026-04-15",w:0.1669,v:24.3},
+{n:"GOLDMAN SACHS GROUP INC",t:"GOLDMAN SACHS GROUP INC SR UNSECURED 09/27 VAR",s:"Corp",c:"US",cr:4.5597,ct:"Flt",m:"2027-09-10",w:0.164,v:23.9},
+{n:"PERNOD RICARD",t:"PERNOD RICARD SA SR UNSECURED 144A 06/26 3.25",s:"Corp",c:"FR",cr:3.25,ct:"Fix",m:"2026-06-08",w:0.1633,v:23.8},
+{n:"MARVELL TECHNOLOGY INC",t:"MARVELL TECHNOLOGY INC COMPANY GUAR 04/26 1.65",s:"Corp",c:"US",cr:1.65,ct:"Fix",m:"2026-04-15",w:0.1625,v:23.7},
+{n:"AMPHENOL CORPORATION",t:"AMPHENOL CORP SR UNSECURED 11/27 VAR",s:"Corp",c:"US",cr:4.4115,ct:"Flt",m:"2027-11-15",w:0.161,v:23.4},
+{n:"HYUNDAI AUTO RECEIVABLES TRUST 2023-C",t:"HYUNDAI AUTO RECEIVABLES TRUST HART 2023 C A3",s:"ABS",c:"US",cr:5.54,ct:"Fix",m:"2028-10-16",w:0.1599,v:23.3},
+{n:"CANADIAN IMPERIAL BANK OF COMMERCE (CIBC)",t:"CANADIAN IMPERIAL BANK SR UNSECURED 01/28 VAR",s:"Corp",c:"CA",cr:4.7123,ct:"Flt",m:"2028-01-13",w:0.16,v:23.3},
+{n:"BMW VEHICLE OWNER TRUST 2024-A",t:"BMW VEHICLE OWNER TRUST BMWOT 2024 A A3",s:"ABS",c:"US",cr:5.18,ct:"Fix",m:"2029-02-26",w:0.1567,v:22.8},
+{n:"WELLS FARGO & COMPANY",t:"WELLS FARGO + COMPANY SR UNSECURED 01/28 VAR",s:"Corp",c:"US",cr:4.7305,ct:"Flt",m:"2028-01-24",w:0.1566,v:22.8},
+{n:"CARMX 2025-1",t:"CARMAX AUTO OWNER TRUST CARMX 2025 1 A2B",s:"ABS",c:"US",cr:4.4139,ct:"Flt",m:"2028-03-15",w:0.1557,v:22.7},
+{n:"VERIZON MASTER TRUST 2024-6",t:"VERIZON MASTER TRUST VZMT 2024 6 A1B",s:"ABS",c:"US",cr:4.5877,ct:"Flt",m:"2030-08-20",w:0.156,v:22.7},
+{n:"BOEING CO/THE",t:"BOEING CO SR UNSECURED 02/26 2.75",s:"Corp",c:"US",cr:2.75,ct:"Fix",m:"2026-02-01",w:0.1548,v:22.6},
+{n:"BARCLAYS PLC",t:"BARCLAYS PLC SR UNSECURED 09/27 VAR",s:"Corp",c:"GB",cr:6.496,ct:"Flt",m:"2027-09-13",w:0.1539,v:22.4},
+{n:"TOYOTA LEASE OWNER TRUST 2025-B",t:"TOYOTA LEASE OWNER TRUST TLOT 2025 B A2B 144A",s:"ABS",c:"US",cr:4.2576,ct:"Flt",m:"2028-05-22",w:0.1522,v:22.2},
+{n:"SOUTHWEST AIRLINES CO",t:"SOUTHWEST AIRLINES CO SR UNSECURED 11/26 3",s:"Corp",c:"US",cr:3.0,ct:"Fix",m:"2026-11-15",w:0.1521,v:22.2},
+{n:"FANNIE MAE REMICS 2024-82",t:"FANNIE MAE FNR 2024 82 EF",s:"Agency",c:"US",cr:4.7242,ct:"Flt",m:"2054-11-25",w:0.1521,v:22.2},
+{n:"MORGAN STANLEY",t:"MORGAN STANLEY SR UNSECURED 01/27 VAR",s:"Corp",c:"US",cr:5.05,ct:"Flt",m:"2027-01-28",w:0.1511,v:22.0},
+{n:"BANK OF AMERICA CORPORATION",t:"BANK OF AMERICA CORP SR UNSECURED 07/27 VAR",s:"Corp",c:"US",cr:1.734,ct:"Flt",m:"2027-07-22",w:0.1507,v:22.0},
+{n:"AMERICAN EXPRESS COMPANY",t:"AMERICAN EXPRESS CO SR UNSECURED 04/27 VAR",s:"Corp",c:"US",cr:4.7048,ct:"Flt",m:"2027-04-23",w:0.1512,v:22.0},
+{n:"EQUITABLE AMERICA GLOBAL FUNDING",t:"EQUITABLE AMERICA GLOBAL SECURED 144A 09/27 VAR",s:"Corp",c:"US",cr:4.4229,ct:"Flt",m:"2027-09-15",w:0.1499,v:21.8},
+{n:"AIR LEASE CORPORATION",t:"AIR LEASE CORP SR UNSECURED 01/26 2.875",s:"Corp",c:"US",cr:2.875,ct:"Fix",m:"2026-01-15",w:0.1476,v:21.5},
+{n:"FREDDIE MAC REMICS 5510",t:"FREDDIE MAC FHR 5510 FA",s:"Agency",c:"US",cr:4.8542,ct:"Flt",m:"2055-02-25",w:0.1473,v:21.5},
+{n:"KEURIG DR PEPPER INC",t:"KEURIG DR PEPPER INC COMPANY GUAR 11/26 VAR",s:"Corp",c:"US",cr:4.45,ct:"Flt",m:"2026-11-15",w:0.1456,v:21.2},
+{n:"FREDDIE MAC REMICS 5499",t:"FREDDIE MAC FHR 5499 FH",s:"Agency",c:"US",cr:5.0742,ct:"Flt",m:"2055-02-25",w:0.1444,v:21.0},
+{n:"ATHENE GLOBAL FUNDING",t:"ATHENE GLOBAL FUNDING SECURED 144A 01/27 4.95",s:"Corp",c:"US",cr:4.95,ct:"Fix",m:"2027-01-07",w:0.1437,v:20.9},
+{n:"JP MORGAN CHASE & CO",t:"JPMORGAN CHASE + CO SR UNSECURED 09/27 VAR",s:"Corp",c:"US",cr:4.4875,ct:"Flt",m:"2027-09-22",w:0.1426,v:20.8},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2025-H22",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2025 H22 F",s:"Agency",c:"US",cr:4.6977,ct:"Flt",m:"2075-10-20",w:0.1418,v:20.7},
+{n:"BANK OF AMERICA CORPORATION",t:"BANK OF AMERICA CORP SR UNSECURED 04/27 VAR",s:"Corp",c:"US",cr:3.559,ct:"Flt",m:"2027-04-23",w:0.1419,v:20.7},
+{n:"DLLAA LLC 2025-1A",t:"DLLAA LLC DLLAA 2025 1A A2 144A",s:"ABS",c:"US",cr:4.7,ct:"Fix",m:"2027-10-20",w:0.1421,v:20.7},
+{n:"GM FINANCIAL AUTOMOBILE LEASING TRUST 2025-3",t:"GM FINANCIAL AUTOMOBILE LEASIN GMALT 2025 3 A2B",s:"ABS",c:"US",cr:4.2676,ct:"Flt",m:"2027-10-20",w:0.1415,v:20.6},
+{n:"HSBC HOLDINGS PLC",t:"HSBC HOLDINGS PLC SR UNSECURED 08/27 VAR",s:"Corp",c:"GB",cr:5.4556,ct:"Flt",m:"2027-08-14",w:0.1413,v:20.6},
+{n:"BANK OF NEW YORK MELLON/THE",t:"BANK OF NEW YORK MELLON SR UNSECURED 04/27 VAR",s:"Corp",c:"US",cr:4.587,ct:"Flt",m:"2027-04-20",w:0.1406,v:20.5},
+{n:"AVIATION CAPITAL GROUP LLC",t:"AVIATION CAPITAL GROUP SR UNSECURED 144A 09/26 1.95",s:"Corp",c:"US",cr:1.95,ct:"Fix",m:"2026-09-20",w:0.1386,v:20.2},
+{n:"PENSKE TRUCK LEASING CO LP / PTL FINANCE CORP",t:"PENSKE TRUCK LEASING/PTL SR UNSECURED 144A 11/26 3.4",s:"Corp",c:"US",cr:3.4,ct:"Fix",m:"2026-11-15",w:0.1385,v:20.2},
+{n:"AMERICAN EXPRESS COMPANY",t:"AMERICAN EXPRESS CO SR UNSECURED 11/26 VAR",s:"Corp",c:"US",cr:4.5564,ct:"Flt",m:"2026-11-04",w:0.1381,v:20.1},
+{n:"NAVIENT PRIVATE EDUCATION REFI LOAN TRUST 2021-G",t:"NAVIENT STUDENT LOAN TRUST NAVSL 2021 GA A 144A",s:"ABS",c:"US",cr:1.58,ct:"Fix",m:"2070-04-15",w:0.1365,v:19.9},
+{n:"GOLDMAN SACHS GROUP INC",t:"GOLDMAN SACHS GROUP INC SR UNSECURED 03/27 VAR",s:"Corp",c:"US",cr:4.5712,ct:"Flt",m:"2027-03-09",w:0.1368,v:19.9},
+{n:"LLOYDS BANKING GROUP PLC",t:"LLOYDS BANKING GROUP PLC SR UNSECURED 08/27 VAR",s:"Corp",c:"GB",cr:5.4715,ct:"Flt",m:"2027-08-07",w:0.1365,v:19.9},
+{n:"PENSKE TRUCK LEASING CO LP / PTL FINANCE CORP",t:"PENSKE TRUCK LEASING/PTL SR UNSECURED 144A 06/26 1.7",s:"Corp",c:"US",cr:1.7,ct:"Fix",m:"2026-06-15",w:0.1356,v:19.8},
+{n:"DEUTSCHE BANK AG/NEW YORK BRANCH",t:"DEUTSCHE BANK NY 01/28 VAR",s:"Corp",c:"DE",cr:2.552,ct:"Flt",m:"2028-01-07",w:0.1351,v:19.7},
+{n:"JP MORGAN CHASE & CO",t:"JPMORGAN CHASE + CO SR UNSECURED 02/28 VAR",s:"Corp",c:"US",cr:5.0326,ct:"Flt",m:"2028-02-24",w:0.1347,v:19.6},
+{n:"CHASE AUTO OWNER TRUST 2024-4A",t:"CHASE AUTO OWNER TRUST CHAOT 2024 4A A3 144A",s:"ABS",c:"US",cr:4.94,ct:"Fix",m:"2029-07-25",w:0.1324,v:19.3},
+{n:"BANK OF MONTREAL",t:"BANK OF MONTREAL SR UNSECURED 01/27 VAR",s:"Corp",c:"CA",cr:0.949,ct:"Flt",m:"2027-01-22",w:0.1316,v:19.2},
+{n:"FREDDIE MAC REMICS 5495",t:"FREDDIE MAC FHR 5495 AF",s:"Agency",c:"US",cr:5.0242,ct:"Flt",m:"2055-01-25",w:0.1321,v:19.2},
+{n:"FREDDIE MAC REMICS 5557",t:"FREDDIE MAC FHR 5557 FM",s:"Agency",c:"US",cr:4.9742,ct:"Flt",m:"2055-07-25",w:0.1297,v:18.9},
+{n:"EDISON INTERNATIONAL",t:"EDISON INTERNATIONAL 01/26 ZCP",s:"Corp",c:"US",m:"2026-01-05",w:0.129,v:18.8},
+{n:"JP MORGAN CHASE & CO",t:"JPMORGAN CHASE + CO SR UNSECURED 01/28 VAR",s:"Corp",c:"US",cr:5.1548,ct:"Flt",m:"2028-01-23",w:0.1289,v:18.8},
+{n:"JP MORGAN CHASE & CO",t:"JPMORGAN CHASE + CO SR UNSECURED 04/27 VAR",s:"Corp",c:"US",cr:4.843,ct:"Flt",m:"2027-04-22",w:0.1283,v:18.7},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2024-P4",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2024 P4 A3",s:"ABS",c:"US",cr:4.64,ct:"Fix",m:"2030-01-10",w:0.1285,v:18.7},
+{n:"AMERICAN HONDA FINANCE CORPORATION",t:"AMERICAN HONDA FINANCE SR UNSECURED 07/27 VAR",s:"Corp",c:"US",cr:4.8663,ct:"Flt",m:"2027-07-09",w:0.1276,v:18.6},
+{n:"HCA INC",t:"HCA INC COMPANY GUAR 09/26 5.375",s:"Corp",c:"US",cr:5.375,ct:"Fix",m:"2026-09-01",w:0.1276,v:18.6},
+{n:"FANNIE MAE REMICS 2025-10",t:"FANNIE MAE FNR 2025 10 AF",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2055-02-25",w:0.1271,v:18.5},
+{n:"AERCAP IRELAND CAPITAL DAC / AERCAP GLOBAL AVIATION TRUST",t:"AERCAP IRELAND CAP/GLOBA COMPANY GUAR 04/26 4.45",s:"Corp",c:"IE",cr:4.45,ct:"Fix",m:"2026-04-03",w:0.1268,v:18.5},
+{n:"SUMITOMO MITSUI TRUST BANK LIMITED",t:"SUMITOMO MITSUI TR BK LT SR UNSECURED 144A 03/26 VAR",s:"Corp",c:"JP",cr:4.8964,ct:"Flt",m:"2026-03-09",w:0.1265,v:18.4},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2023-H20",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2023 H20 FL",s:"Agency",c:"US",cr:5.0176,ct:"Flt",m:"2073-05-20",w:0.1254,v:18.3},
+{n:"CITIZENS AUTO RECEIVABLES TRUST 2024-2",t:"CITIZENS AUTO RECEIVABLES TRUS CITZN 2024 2 A3 144A",s:"ABS",c:"US",cr:5.33,ct:"Fix",m:"2028-08-15",w:0.1253,v:18.3},
+{n:"FREDDIE MAC REMICS 5565",t:"FREDDIE MAC FHR 5565 FA",s:"Agency",c:"US",cr:5.0242,ct:"Flt",m:"2055-08-25",w:0.1252,v:18.2},
+{n:"NEXTERA ENERGY CAPITAL HOLDINGS INC",t:"NEXTERA ENERGY CAPITAL COMPANY GUAR 09/27 4.685",s:"Corp",c:"US",cr:4.685,ct:"Fix",m:"2027-09-01",w:0.1251,v:18.2},
+{n:"AREIT TRUST 2022-CRE6",t:"AREIT CRE TRUST AREIT 2022 CRE6 A 144A",s:"ABS",c:"KY",cr:5.1867,ct:"Flt",m:"2037-01-20",w:0.1248,v:18.2},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2024-P1",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2024 P1 A3 144A",s:"ABS",c:"US",cr:5.05,ct:"Fix",m:"2029-04-10",w:0.1233,v:18.0},
+{n:"ROYAL BANK OF CANADA",t:"ROYAL BANK OF CANADA SR UNSECURED REGS 10/26 VAR",s:"Corp",c:"CA",cr:4.2994,ct:"Flt",m:"2026-10-09",w:0.1236,v:18.0},
+{n:"FANNIE MAE REMICS 2025-1",t:"FANNIE MAE FNR 2025 1 FD",s:"Agency",c:"US",cr:5.0742,ct:"Flt",m:"2055-02-25",w:0.1229,v:17.9},
+{n:"BANQUE FEDERATIVE DU CREDIT MUTUEL (BFCM)",t:"BANQUE FED CRED MUTUEL 144A 01/27 VAR",s:"Corp",c:"FR",cr:5.0848,ct:"Flt",m:"2027-01-23",w:0.1212,v:17.6},
+{n:"FANNIE MAE REMICS 2024-101",t:"FANNIE MAE FNR 2024 101 FB",s:"Agency",c:"US",cr:4.9742,ct:"Flt",m:"2055-01-25",w:0.1206,v:17.6},
+{n:"FANNIE MAE 2025-35",t:"FANNIE MAE FNR 2025 35 FB",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2055-05-25",w:0.1196,v:17.4},
+{n:"TOYOTA AUTO RECEIVABLES 2024-D OWNER TRUST",t:"TOYOTA AUTO RECEIVABLES OWNER TAOT 2024 D A2B",s:"ABS",c:"US",cr:4.3739,ct:"Flt",m:"2027-08-16",w:0.1198,v:17.4},
+{n:"MERCEDES-BENZ FINANCE NORTH AMERICA LLC",t:"MERCEDES BENZ FIN NA COMPANY GUAR REGS 04/27 VAR",s:"Corp",c:"US",cr:4.5969,ct:"Flt",m:"2027-04-01",w:0.1185,v:17.3},
+{n:"IMPERIAL BRANDS FINANCE PLC (AKA: IMPERIAL TOBACCO FINANCE PLC)",t:"IMPERIAL BRANDS FIN PLC COMPANY GUAR 144A 07/26 3.5",s:"Corp",c:"GB",cr:3.5,ct:"Fix",m:"2026-07-26",w:0.1187,v:17.3},
+{n:"COLT 2021-4 MORTGAGE LOAN TRUST",t:"COLT FUNDING LLC COLT 2021 4 A1 144A",s:"ABS",c:"US",cr:1.397,ct:"Var",m:"2066-10-25",w:0.1191,v:17.3},
+{n:"TELEFONICA EMISIONES SA",t:"TELEFONICA EMISIONES SAU COMPANY GUAR 03/27 4.103",s:"Corp",c:"ES",cr:4.103,ct:"Fix",m:"2027-03-08",w:0.1191,v:17.3},
+{n:"M&T BANK AUTO RECEIVABLES TRUST 2025-1A",t:"M+T BANK AUTO RECEIVABLES TRUS MTBAT 2025 1A A2B 144A",s:"ABS",c:"US",cr:4.4839,ct:"Flt",m:"2028-05-15",w:0.1183,v:17.2},
+{n:"STARWOOD PROPERTY MORTGAGE TRUST 2021-LIH",t:"STARWOOD COMMERCIAL MORTGAGE T STWD 2021 LIH A 144A",s:"ABS",c:"US",cr:4.723,ct:"Flt",m:"2036-11-15",w:0.1179,v:17.2},
+{n:"CITIZENS AUTO RECEIVABLES TRUST 2024-1",t:"CITIZENS AUTO RECEIVABLES TRUS CITZN 2024 1 A3 144A",s:"ABS",c:"US",cr:5.11,ct:"Fix",m:"2028-04-17",w:0.1178,v:17.2},
+{n:"FREDDIE MAC REMICS 5498",t:"FREDDIE MAC FHR 5498 FC",s:"Agency",c:"US",cr:5.0242,ct:"Flt",m:"2055-01-25",w:0.118,v:17.2},
+{n:"FANNIE MAE REMICS 2025-95",t:"FANNIE MAE FNR 2025 95 F",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2053-12-25",w:0.1176,v:17.1},
+{n:"JPMCC-2019-BKWD",t:"JP MORGAN CHASE COMMERCIAL MOR JPMCC 2019 BKWD A 144A",s:"ABS",c:"US",cr:5.3655,ct:"Flt",m:"2029-09-15",w:0.117,v:17.0},
+{n:"FORD CREDIT AUTO LEASE TRUST 2025-A",t:"FORD CREDIT AUTO LEASE TRUST FORDL 2025 A A2B",s:"ABS",c:"US",cr:4.3938,ct:"Flt",m:"2027-08-15",w:0.1159,v:16.9},
+{n:"ARI FLEET LEASE TRUST 2025-B",t:"ARI FLEET LEASE TRUST ARIFL 2025 B A2 144A",s:"ABS",c:"US",cr:4.59,ct:"Fix",m:"2034-03-15",w:0.1162,v:16.9},
+{n:"JACKSON NATIONAL LIFE GLOBAL FUNDING",t:"JACKSON NATL LIFE GLOBAL SECURED 144A 01/27 4.9",s:"Corp",c:"US",cr:4.9,ct:"Fix",m:"2027-01-13",w:0.1149,v:16.7},
+{n:"FREDDIE MAC REMICS 5560",t:"FREDDIE MAC FHR 5560 FB",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2055-06-25",w:0.1131,v:16.5},
+{n:"NAVIENT PRIVATE EDUCATION REFI LOAN TRUST 2022-A",t:"NAVIENT STUDENT LOAN TRUST NAVSL 2022 A A 144A",s:"ABS",c:"US",cr:2.23,ct:"Fix",m:"2070-07-15",w:0.1129,v:16.4},
+{n:"SFS AUTO RECEIVABLES SECURITIZATION TRUST 2024-2A",t:"SFS AUTO RECEIVABLES SECURITIZ SFAST 2024 2A A3 144A",s:"ABS",c:"US",cr:5.33,ct:"Fix",m:"2029-11-20",w:0.1126,v:16.4},
+{n:"FREDDIE MAC REMICS 5601",t:"FREDDIE MAC FHR 5601 F",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2055-11-25",w:0.1116,v:16.3},
+{n:"LLOYDS BANKING GROUP PLC",t:"LLOYDS BANKING GROUP PLC SR UNSECURED 05/27 VAR",s:"Corp",c:"GB",cr:1.627,ct:"Flt",m:"2027-05-11",w:0.1109,v:16.2},
+{n:"NATWEST MARKETS PLC",t:"NATWEST MARKETS PLC SR UNSECURED REGS 05/27 VAR",s:"Corp",c:"GB",cr:4.77,ct:"Flt",m:"2027-05-17",w:0.1105,v:16.1},
+{n:"ENEL AMERICAS SA (AKA: ENERSIS SA)",t:"ENEL AMERICAS SA SR UNSECURED 10/26 4",s:"Corp",c:"CL",cr:4.0,ct:"Fix",m:"2026-10-25",w:0.1096,v:16.0},
+{n:"ATHENE GLOBAL FUNDING",t:"ATHENE GLOBAL FUNDING SECURED 144A 08/26 VAR",s:"Corp",c:"US",cr:4.5615,ct:"Flt",m:"2026-08-10",w:0.1079,v:15.7},
+{n:"GCAT 2022-HX1 TRUST",t:"GCAT GCAT 2022 HX1 A1 144A",s:"ABS",c:"US",cr:2.885,ct:"Var",m:"2066-12-27",w:0.1069,v:15.6},
+{n:"BERRY GLOBAL INC",t:"BERRY GLOBAL INC SR SECURED 144A 07/26 4.875",s:"Corp",c:"US",cr:4.875,ct:"Fix",m:"2026-07-15",w:0.107,v:15.6},
+{n:"ILLUMINA INC",t:"ILLUMINA INC SR UNSECURED 09/26 4.65",s:"Corp",c:"US",cr:4.65,ct:"Fix",m:"2026-09-09",w:0.107,v:15.6},
+{n:"AIR LEASE CORPORATION",t:"AIR LEASE CORP SR UNSECURED 06/26 5.3",s:"Corp",c:"US",cr:5.3,ct:"Fix",m:"2026-06-25",w:0.1062,v:15.5},
+{n:"FREDDIE MAC REMICS 5500",t:"FREDDIE MAC FHR 5500 QF",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2054-09-25",w:0.104,v:15.2},
+{n:"FREDDIE MAC REMICS 5508",t:"FREDDIE MAC FHR 5508 FB",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2055-02-25",w:0.1038,v:15.1},
+{n:"NATWEST GROUP PLC",t:"NATWEST GROUP PLC SR UNSECURED 03/27 VAR",s:"Corp",c:"GB",cr:5.847,ct:"Flt",m:"2027-03-02",w:0.1034,v:15.1},
+{n:"CARMAX AUTO OWNER TRUST 2023-4",t:"CARMAX AUTO OWNER TRUST CARMX 2023 4 A3",s:"ABS",c:"US",cr:6.0,ct:"Fix",m:"2028-07-17",w:0.1036,v:15.1},
+{n:"AERCAP IRELAND CAPITAL DAC / AERCAP GLOBAL AVIATION TRUST",t:"AERCAP IRELAND CAP/GLOBA COMPANY GUAR 01/26 1.75",s:"Corp",c:"IE",cr:1.75,ct:"Fix",m:"2026-01-30",w:0.102,v:14.9},
+{n:"VOLKSWAGEN GROUP OF AMERICA FINANCE LLC",t:"VOLKSWAGEN GROUP AMERICA COMPANY GUAR REGS 03/26 VAR",s:"Corp",c:"US",cr:4.5525,ct:"Flt",m:"2026-03-20",w:0.1018,v:14.8},
+{n:"WORLD OMNI AUTOMOBILE LEASE SECURITIZATION TRUST 2025-A",t:"WORLD OMNI AUTOMOBILE LEASE SE WOLS 2025 A A2B",s:"ABS",c:"US",cr:4.3739,ct:"Flt",m:"2027-12-15",w:0.1017,v:14.8},
+{n:"NXP BV/NXP FUNDING LLC",t:"NXP BV/NXP FUNDING LLC COMPANY GUAR 03/26 5.35",s:"Corp",c:"NL",cr:5.35,ct:"Fix",m:"2026-03-01",w:0.1,v:14.6},
+{n:"JP MORGAN CHASE & CO",t:"JPMORGAN CHASE + CO SR UNSECURED 04/28 VAR",s:"Corp",c:"US",cr:4.878,ct:"Flt",m:"2028-04-22",w:0.0997,v:14.5},
+{n:"CITIBANK NA",t:"CITIBANK NA SR UNSECURED 04/26 VAR",s:"Corp",c:"US",cr:4.5114,ct:"Flt",m:"2026-04-30",w:0.0996,v:14.5},
+{n:"ORACLE CORPORATION",t:"ORACLE CORP SR UNSECURED 07/26 2.65",s:"Corp",c:"US",cr:2.65,ct:"Fix",m:"2026-07-15",w:0.0979,v:14.3},
+{n:"HYUNDAI AUTO RECEIVABLES TRUST 2024-C",t:"HYUNDAI AUTO RECEIVABLES TRUST HART 2024 C A2B",s:"ABS",c:"US",cr:4.3838,ct:"Flt",m:"2027-09-15",w:0.0977,v:14.2},
+{n:"CANADIAN IMPERIAL BANK OF COMMERCE (CIBC)",t:"CANADIAN IMPERIAL BANK SR UNSECURED 06/27 VAR",s:"Corp",c:"CA",cr:4.6991,ct:"Flt",m:"2027-06-28",w:0.0974,v:14.2},
+{n:"STELLANTIS FINANCIAL UNDERWRITTEN ENHANCED LEASE TRUST 2025-AA",t:"STELLANTIS FINANCIAL UNDERWRIT SFUEL 2025 AA A2 144A",s:"ABS",c:"US",cr:4.63,ct:"Fix",m:"2027-07-20",w:0.0971,v:14.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2025-H20",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2025 H20 FA",s:"Agency",c:"US",cr:4.6876,ct:"Flt",m:"2075-09-20",w:0.0971,v:14.1},
+{n:"BLACK HILLS CORPORATION",t:"BLACK HILLS CORP SR UNSECURED 01/26 3.95",s:"Corp",c:"US",cr:3.95,ct:"Fix",m:"2026-01-15",w:0.0959,v:14.0},
+{n:"UPGRADE AUTO RECEIVABLES TRUST 25-1A",t:"UPGRADE AUTO RECEIVABLES TRUST UPGA 2025 1A A2 144A",s:"ABS",c:"US",cr:4.54,ct:"Fix",m:"2029-05-15",w:0.0962,v:14.0},
+{n:"STANDARD CHARTERED PLC",t:"STANDARD CHARTERED PLC SR UNSECURED REGS 07/27 VAR",s:"Corp",c:"GB",cr:5.6974,ct:"Flt",m:"2027-07-06",w:0.0961,v:14.0},
+{n:"FANNIE MAE 2025-35",t:"FANNIE MAE FNR 2025 35 FM",s:"Agency",c:"US",cr:4.9242,ct:"Flt",m:"2055-05-25",w:0.0945,v:13.8},
+{n:"SUMITOMO MITSUI TRUST BANK LIMITED",t:"SUMITOMO MITSUI TR BK LT SR UNSECURED REGS 03/26 VAR",s:"Corp",c:"JP",cr:4.8964,ct:"Flt",m:"2026-03-09",w:0.0944,v:13.8},
+{n:"AMERICAN HONDA FINANCE CORPORATION",t:"AMERICAN HONDA FINANCE SR UNSECURED 10/26 VAR",s:"Corp",c:"US",cr:4.3672,ct:"Flt",m:"2026-10-06",w:0.0949,v:13.8},
+{n:"ENERGY TRANSFER LP",t:"ENERGY TRANSFER LP SR UNSECURED 07/26 3.9",s:"Corp",c:"US",cr:3.9,ct:"Fix",m:"2026-07-15",w:0.0933,v:13.6},
+{n:"FANNIE MAE REMICS 2024-100",t:"FANNIE MAE FNR 2024 100 FA",s:"Agency",c:"US",cr:4.9742,ct:"Flt",m:"2054-06-25",w:0.0936,v:13.6},
+{n:"CARMAX AUTO OWNER TRUST 2023-3",t:"CARMAX AUTO OWNER TRUST CARMX 2023 3 A3",s:"ABS",c:"US",cr:5.28,ct:"Fix",m:"2028-05-15",w:0.0931,v:13.6},
+{n:"ALGONQUIN POWER & UTILITIES CORP",t:"ALGONQUIN PWR + UTILITY SR UNSECURED 06/26 VAR",s:"Corp",c:"CA",cr:5.365,ct:"Fix",m:"2026-06-15",w:0.0924,v:13.5},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2024-H02",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2024 H02 FH",s:"Agency",c:"US",cr:4.8476,ct:"Flt",m:"2074-01-20",w:0.0924,v:13.5},
+{n:"EMERA US FINANCE LP",t:"EMERA US FINANCE LP COMPANY GUAR 06/26 3.55",s:"Corp",c:"US",cr:3.55,ct:"Fix",m:"2026-06-15",w:0.0926,v:13.5},
+{n:"ROGERS COMMUNICATIONS INC",t:"ROGERS COMMUNICATIONS IN COMPANY GUAR 11/26 2.9",s:"Corp",c:"CA",cr:2.9,ct:"Fix",m:"2026-11-15",w:0.0919,v:13.4},
+{n:"ENBRIDGE INC",t:"ENBRIDGE INC COMPANY GUAR 12/26 4.25",s:"Corp",c:"CA",cr:4.25,ct:"Fix",m:"2026-12-01",w:0.0917,v:13.4},
+{n:"AIRCASTLE LIMITED",t:"AIRCASTLE LTD COMPANY GUAR 06/26 4.25",s:"Corp",c:"BM",cr:4.25,ct:"Fix",m:"2026-06-15",w:0.0919,v:13.4},
+{n:"HYUNDAI AUTO RECEIVABLES TRUST 2024-C",t:"HYUNDAI AUTO RECEIVABLES TRUST HART 2024 C A3",s:"ABS",c:"US",cr:4.41,ct:"Fix",m:"2029-05-15",w:0.0913,v:13.3},
+{n:"FREDDIE MAC REMICS 5500",t:"FREDDIE MAC FHR 5500 AF",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2055-02-25",w:0.091,v:13.3},
+{n:"FLEX LTD (AKA: FLEXTRONICS INTERNATIONAL LTD)",t:"FLEX LTD SR UNSECURED 02/26 3.75",s:"Corp",c:"SG",cr:3.75,ct:"Fix",m:"2026-02-01",w:0.0908,v:13.2},
+{n:"ENERGY TRANSFER LP",t:"ENERGY TRANSFER LP SR UNSECURED 12/26 6.05",s:"Corp",c:"US",cr:6.05,ct:"Fix",m:"2026-12-01",w:0.0907,v:13.2},
+{n:"WORLD OMNI AUTO RECEIVABLES TRUST 2024-A",t:"WORLD OMNI AUTO RECEIVABLES TR WOART 2024 A A3",s:"ABS",c:"US",cr:4.86,ct:"Fix",m:"2029-03-15",w:0.0904,v:13.2},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2025-89",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2025 89 PF",s:"Agency",c:"US",cr:4.8677,ct:"Flt",m:"2055-05-20",w:0.0899,v:13.1},
+{n:"CARMAX AUTO OWNER TRUST 2025-3",t:"CARMAX AUTO OWNER TRUST CARMX 2025 3 A2B",s:"ABS",c:"US",cr:4.3539,ct:"Fix",m:"2028-08-15",w:0.0893,v:13.0},
+{n:"M&T EQUIPMENT 2025-LEAF1 LLC",t:"M+T EQUIPMENT NOTES MTLRF 2025 1A A2 144A",s:"ABS",c:"US",cr:4.7,ct:"Fix",m:"2027-12-16",w:0.0883,v:12.9},
+{n:"SOCIETE GENERALE",t:"SOCIETE GENERALE 144A 01/27 VAR",s:"Corp",c:"FR",cr:6.447,ct:"Flt",m:"2027-01-12",w:0.0884,v:12.9},
+{n:"MITSUBISHI UFJ FINANCIAL GROUP INC (MUFG)",t:"MITSUBISHI UFJ FIN GRP SR UNSECURED 07/27 VAR",s:"Corp",c:"JP",cr:1.538,ct:"Flt",m:"2027-07-20",w:0.088,v:12.8},
+{n:"CROWN CASTLE INTERNATIONAL CORP (CCI)",t:"CROWN CASTLE 01/26 ZCP",s:"Corp",c:"US",m:"2026-01-21",w:0.087,v:12.7},
+{n:"SANTANDER HOLDINGS USA INC",t:"SANTANDER HOLDINGS USA SR UNSECURED 05/27 VAR",s:"Corp",c:"US",cr:6.124,ct:"Flt",m:"2027-05-31",w:0.0864,v:12.6},
+{n:"CHASE AUTO OWNER TRUST 2023-AA",t:"CHASE AUTO OWNER TRUST CHAOT 2023 AA A3 144A",s:"ABS",c:"US",cr:5.68,ct:"Fix",m:"2029-01-25",w:0.0867,v:12.6},
+{n:"T-MOBILE USA INC",t:"T MOBILE USA INC COMPANY GUAR 04/26 2.625",s:"Corp",c:"US",cr:2.625,ct:"Fix",m:"2026-04-15",w:0.0851,v:12.4},
+{n:"SPECTRA ENERGY PARTNERS LP",t:"SPECTRA ENERGY PARTNERS COMPANY GUAR 10/26 3.375",s:"Corp",c:"US",cr:3.375,ct:"Fix",m:"2026-10-15",w:0.0834,v:12.1},
+{n:"BNP PARIBAS",t:"BNP PARIBAS 144A 06/27 VAR",s:"Corp",c:"FR",cr:1.675,ct:"Flt",m:"2027-06-30",w:0.0826,v:12.0},
+{n:"COREBRIDGE FINANCIAL INC",t:"COREBRIDGE FINANCIAL INC SR UNSECURED 04/27 3.65",s:"Corp",c:"US",cr:3.65,ct:"Fix",m:"2027-04-05",w:0.0826,v:12.0},
+{n:"GA GLOBAL FUNDING TRUST",t:"GA GLOBAL FUNDING TRUST SECURED 144A 01/27 2.25",s:"Corp",c:"US",cr:2.25,ct:"Fix",m:"2027-01-06",w:0.0802,v:11.7},
+{n:"AVOLON HOLDINGS FUNDING LIMITED",t:"AVOLON HOLDINGS FNDG LTD COMPANY GUAR 144A 02/26 2.125",s:"Corp",c:"KY",cr:2.125,ct:"Fix",m:"2026-02-21",w:0.0799,v:11.6},
+{n:"BANQUE FEDERATIVE DU CREDIT MUTUEL (BFCM)",t:"BANQUE FED CRED MUTUEL 144A 07/26 VAR",s:"Corp",c:"FR",cr:5.3923,ct:"Flt",m:"2026-07-13",w:0.08,v:11.6},
+{n:"NISSAN AUTO RECEIVABLES OWNER TRUST 2024-B",t:"NISSAN AUTO RECEIVABLES OWNER NAROT 2024 B A2B",s:"ABS",c:"US",cr:4.3639,ct:"Flt",m:"2027-06-15",w:0.0787,v:11.5},
+{n:"BARCLAYS PLC",t:"BARCLAYS PLC SR UNSECURED 03/28 VAR",s:"Corp",c:"GB",cr:5.2114,ct:"Flt",m:"2028-03-12",w:0.0788,v:11.5},
+{n:"FANNIE MAE REMICS 2025-4",t:"FANNIE MAE FNR 2025 4 FB",s:"Agency",c:"US",cr:5.0742,ct:"Flt",m:"2053-12-25",w:0.0788,v:11.5},
+{n:"FREDDIE MAC REMICS 5491",t:"FREDDIE MAC FHR 5491 FL",s:"Agency",c:"US",cr:5.0742,ct:"Flt",m:"2055-01-25",w:0.0788,v:11.5},
+{n:"DEUTSCHE BANK AKTIENGESELLSCHAFT",t:"DEUTSCHE BANK AG 01/26 4.1",s:"Corp",c:"DE",cr:4.1,ct:"Fix",m:"2026-01-13",w:0.0787,v:11.5},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2025-P2",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2025 P2 A2",s:"ABS",c:"US",cr:4.56,ct:"Fix",m:"2028-08-10",w:0.0785,v:11.4},
+{n:"NISSAN AUTO LEASE TRUST 2024-B",t:"NISSAN AUTO LEASE TRUST NALT 2024 B A2B",s:"ABS",c:"US",cr:4.3938,ct:"Flt",m:"2027-06-15",w:0.0784,v:11.4},
+{n:"DISCOVER CARD EXECUTION NOTE TRUST 2023-A2",t:"DISCOVER CARD EXECUTION NOTE T DCENT 2023 A2 A",s:"ABS",c:"US",cr:4.93,ct:"Fix",m:"2028-06-15",w:0.0772,v:11.3},
+{n:"GATX CORPORATION",t:"GATX CORP SR UNSECURED 09/26 3.25",s:"Corp",c:"US",cr:3.25,ct:"Fix",m:"2026-09-15",w:0.0778,v:11.3},
+{n:"FORD MOTOR CREDIT COMPANY LLC",t:"FORD MOTOR CREDIT CO LLC SR UNSECURED 03/26 6.95",s:"Corp",c:"US",cr:6.95,ct:"Fix",m:"2026-03-06",w:0.0771,v:11.2},
+{n:"HARLEY-DAVIDSON MOTORCYCLE TRUST 2025-A",t:"HARLEY DAVIDSON MOTORCYCLE TRU HDMOT 2025 A A2B",s:"ABS",c:"US",cr:4.6438,ct:"Flt",m:"2028-07-17",w:0.0771,v:11.2},
+{n:"FREDDIE MAC REMICS 5564",t:"FREDDIE MAC FHR 5564 FB",s:"Agency",c:"US",cr:5.0742,ct:"Flt",m:"2055-08-25",w:0.0772,v:11.2},
+{n:"TOYOTA MOTOR CREDIT CORPORATION",t:"TOYOTA MOTOR CREDIT CORP SR UNSECURED 05/26 VAR",s:"Corp",c:"US",cr:4.32,ct:"Flt",m:"2026-05-15",w:0.077,v:11.2},
+{n:"BANK OF AMERICA AUTO TRUST 2024-1A",t:"BOFA AUTO TRUST BAAT 2024 1A A3 144A",s:"ABS",c:"US",cr:5.35,ct:"Fix",m:"2028-11-15",w:0.0765,v:11.1},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 01/27 VAR",s:"Corp",c:"US",cr:5.4939,ct:"Flt",m:"2027-01-08",w:0.0765,v:11.1},
+{n:"FANNIE MAE REMICS 2025-12",t:"FANNIE MAE FNR 2025 12 EF",s:"Agency",c:"US",cr:4.7842,ct:"Flt",m:"2055-03-25",w:0.0755,v:11.0},
+{n:"GOLDMAN SACHS GROUP INC",t:"GOLDMAN SACHS GROUP INC SR UNSECURED 10/27 VAR",s:"Corp",c:"US",cr:4.888,ct:"Flt",m:"2027-10-21",w:0.0753,v:11.0},
+{n:"FANNIE MAE REMICS 2025-54",t:"FANNIE MAE FNR 2025 54 FM",s:"Agency",c:"US",cr:4.9742,ct:"Flt",m:"2055-07-25",w:0.0754,v:11.0},
+{n:"GM FINANCIAL CONSUMER AUTOMOBILE RECEIVABLES TRUST 2024-4",t:"GM FINANCIAL SECURITIZED TERM GMCAR 2024 4 A2B",s:"ABS",c:"US",cr:4.3742,ct:"Flt",m:"2027-10-18",w:0.0751,v:10.9},
+{n:"USB AUTO OWNER TRUST 2025-1A",t:"USB AUTO OWNER TRUST USCAR 2025 1A A2 144A",s:"ABS",c:"US",cr:4.51,ct:"Fix",m:"2028-06-15",w:0.0749,v:10.9},
+{n:"FANNIE MAE REMICS 2025-6",t:"FANNIE MAE FNR 2025 6 FA",s:"Agency",c:"US",cr:5.1242,ct:"Flt",m:"2055-02-25",w:0.0749,v:10.9},
+{n:"PENSKE TRUCK LEASING CO LP / PTL FINANCE CORP",t:"PENSKE TRUCK LEASING/PTL SR UNSECURED 144A 01/26 4.45",s:"Corp",c:"US",cr:4.45,ct:"Fix",m:"2026-01-29",w:0.0738,v:10.8},
+{n:"FANNIE MAE REMICS 2025-12",t:"FANNIE MAE FNR 2025 12 FG",s:"Agency",c:"US",cr:4.8242,ct:"Flt",m:"2055-03-25",w:0.0739,v:10.8},
+{n:"SWEDBANK AB",t:"SWEDBANK AB REGS 06/26 VAR",s:"Corp",c:"SE",cr:5.0984,ct:"Flt",m:"2026-06-15",w:0.0725,v:10.6},
+{n:"HPEFS EQUIPMENT TRUST 2025-2A",t:"HPEFS EQUIPMENT TRUST HPEFS 2025 2A A1 144A",s:"ABS",c:"US",cr:4.153,ct:"Fix",m:"2026-10-20",w:0.0719,v:10.5},
+{n:"CARMAX AUTO OWNER TRUST 2024-3",t:"CARMAX AUTO OWNER TRUST CARMX 2024 3 A2B",s:"ABS",c:"US",cr:4.4539,ct:"Flt",m:"2027-09-15",w:0.0712,v:10.4},
+{n:"GENERAL MOTORS FINANCIAL COMPANY INC",t:"GENERAL MOTORS FINL CO SR UNSECURED 04/26 5.4",s:"Corp",c:"US",cr:5.4,ct:"Fix",m:"2026-04-06",w:0.0713,v:10.4},
+{n:"FANNIE MAE REMICS 2025-88",t:"FANNIE MAE FNR 2025 88 FM",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2055-08-25",w:0.0707,v:10.3},
+{n:"ABN AMRO BANK NV",t:"ABN AMRO BANK NV 144A 09/27 VAR",s:"Corp",c:"NL",cr:6.339,ct:"Flt",m:"2027-09-18",w:0.0704,v:10.3},
+{n:"FREDDIE MAC REMICS 5573",t:"FREDDIE MAC FHR 5573 FB",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2055-09-25",w:0.0707,v:10.3},
+{n:"STANDARD CHARTERED PLC",t:"STANDARD CHARTERED PLC SR UNSECURED 144A 04/26 4.05",s:"Corp",c:"GB",cr:4.05,ct:"Fix",m:"2026-04-12",w:0.0707,v:10.3},
+{n:"FORD MOTOR CREDIT COMPANY LLC",t:"FORD MOTOR CREDIT CO LLC SR UNSECURED 11/26 5.125",s:"Corp",c:"US",cr:5.125,ct:"Fix",m:"2026-11-05",w:0.0698,v:10.2},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 06/27 VAR",s:"Corp",c:"US",cr:4.8466,ct:"Flt",m:"2027-06-23",w:0.0684,v:10.0},
+{n:"VENTAS REALTY LP",t:"VENTAS REALTY LP COMPANY GUAR 01/26 4.125",s:"Corp",c:"US",cr:4.125,ct:"Fix",m:"2026-01-15",w:0.0684,v:10.0},
+{n:"BANK OF MONTREAL",t:"BANK OF MONTREAL SR UNSECURED 09/27 VAR",s:"Corp",c:"CA",cr:4.567,ct:"Flt",m:"2027-09-10",w:0.0689,v:10.0},
+{n:"THE BANK OF NOVA SCOTIA",t:"BANK OF NOVA SCOTIA SR UNSECURED 02/26 4.75",s:"Corp",c:"CA",cr:4.75,ct:"Fix",m:"2026-02-02",w:0.0687,v:10.0},
+{n:"NATWEST MARKETS PLC",t:"NATWEST MARKETS PLC SR UNSECURED 144A 09/26 VAR",s:"Corp",c:"GB",cr:4.5191,ct:"Flt",m:"2026-09-29",w:0.0684,v:10.0},
+{n:"BARCLAYS BANK PLC",t:"BARCLAYS BANK PLC SR UNSECURED 11/27 VAR",s:"Corp",c:"GB",cr:4.7326,ct:"Flt",m:"2027-11-26",w:0.0689,v:10.0},
+{n:"AMERICAN HONDA FINANCE CORPORATION",t:"AMERICAN HONDA FINANCE SR UNSECURED 07/26 VAR",s:"Corp",c:"US",cr:5.0122,ct:"Flt",m:"2026-07-15",w:0.0674,v:9.8},
+{n:"FREDDIE MAC REMICS 5565",t:"FREDDIE MAC FHR 5565 FB",s:"Agency",c:"US",cr:4.8242,ct:"Flt",m:"2055-08-25",w:0.0675,v:9.8},
+{n:"FREDDIE MAC REMICS 5500",t:"FREDDIE MAC FHR 5500 UF",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2054-11-25",w:0.0667,v:9.7},
+{n:"SOUTHERN CALIFORNIA EDISON COMPANY",t:"SOUTHERN CAL EDISON 1ST MORTGAGE 02/26 1.2",s:"Corp",c:"US",cr:1.2,ct:"Fix",m:"2026-02-01",w:0.0664,v:9.7},
+{n:"BNP PARIBAS",t:"BNP PARIBAS REGS 01/27 VAR",s:"Corp",c:"FR",cr:1.323,ct:"Flt",m:"2027-01-13",w:0.0665,v:9.7},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2023-H22",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2023 H22 FB",s:"Agency",c:"US",cr:4.8677,ct:"Flt",m:"2073-09-20",w:0.0661,v:9.6},
+{n:"HSBC USA INC (AKA: HSBC AMERICAS INC)",t:"HSBC USA INC SR UNSECURED 03/27 VAR",s:"Corp",c:"US",cr:4.7416,ct:"Flt",m:"2027-03-04",w:0.0656,v:9.6},
+{n:"BANK OF MONTREAL",t:"BANK OF MONTREAL SR UNSECURED 09/26 VAR",s:"Corp",c:"CA",cr:4.3329,ct:"Flt",m:"2026-09-15",w:0.0659,v:9.6},
+{n:"GOLDMAN SACHS BANK USA/NEW YORK BRANCH",t:"GOLDMAN SACHS BANK USA SR UNSECURED 03/27 VAR",s:"Corp",c:"US",cr:4.4894,ct:"Flt",m:"2027-03-18",w:0.0656,v:9.5},
+{n:"FREDDIE MAC REMICS 5517",t:"FREDDIE MAC FHR 5517 MF",s:"Agency",c:"US",cr:4.8242,ct:"Flt",m:"2055-03-25",w:0.0654,v:9.5},
+{n:"NORDEA BANK ABP",t:"NORDEA BANK ABP REGS 03/27 VAR",s:"Corp",c:"FI",cr:4.4608,ct:"Flt",m:"2027-03-19",w:0.0655,v:9.5},
+{n:"SYNCHRONY FINANCIAL",t:"SYNCHRONY FINANCIAL SR UNSECURED 08/26 3.7",s:"Corp",c:"US",cr:3.7,ct:"Fix",m:"2026-08-04",w:0.0644,v:9.4},
+{n:"FANNIE MAE REMICS 2025-99",t:"FANNIE MAE FNR 2025 99 KF",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2055-11-25",w:0.0638,v:9.3},
+{n:"SGSP (AUSTRALIA) ASSETS PTY LTD",t:"SGSP AUSTRALIA ASSETS COMPANY GUAR REGS 07/26 3.25",s:"Corp",c:"AU",cr:3.25,ct:"Fix",m:"2026-07-29",w:0.0632,v:9.2},
+{n:"FANNIE MAE REMICS 2025-16",t:"FANNIE MAE FNR 2025 16 FM",s:"Agency",c:"US",cr:4.8242,ct:"Flt",m:"2055-01-25",w:0.0615,v:9.0},
+{n:"SK HYNIX INC",t:"SK HYNIX INC SR UNSECURED REGS 01/26 1.5",s:"Corp",c:"KR",cr:1.5,ct:"Fix",m:"2026-01-19",w:0.0619,v:9.0},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2025-P3",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2025 P3 A2",s:"ABS",c:"US",cr:4.07,ct:"Fix",m:"2029-02-12",w:0.0611,v:8.9},
+{n:"TOWD POINT MORTGAGE TRUST 2019-4",t:"TOWD POINT MORTGAGE TRUST TPMT 2019 4 A1 144A",s:"ABS",c:"US",cr:2.9,ct:"Var",m:"2059-10-25",w:0.0613,v:8.9},
+{n:"RGA GLOBAL FUNDING",t:"RGA GLOBAL FUNDING SR SECURED 144A 11/26 2",s:"Corp",c:"US",cr:2.0,ct:"Fix",m:"2026-11-30",w:0.0607,v:8.8},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 09/26 5.95",s:"Corp",c:"US",cr:5.95,ct:"Fix",m:"2026-09-21",w:0.0607,v:8.8},
+{n:"SUMITOMO MITSUI FINANCIAL GROUP INC",t:"SUMITOMO MITSUI FINL GRP SR UNSECURED 01/27 VAR",s:"Corp",c:"JP",cr:4.886,ct:"Flt",m:"2027-01-14",w:0.0598,v:8.7},
+{n:"CSMC 2020-FACT TRUST",t:"CREDIT SUISSE MORTGAGE TRUST CSMC 2020 FACT A 144A",s:"ABS",c:"US",cr:5.7155,ct:"Flt",m:"2037-10-15",w:0.0596,v:8.7},
+{n:"ING GROEP NV",t:"ING GROEP NV SR UNSECURED 09/27 VAR",s:"Corp",c:"NL",cr:5.2905,ct:"Flt",m:"2027-09-11",w:0.0594,v:8.7},
+{n:"THE BANK OF NOVA SCOTIA",t:"BANK OF NOVA SCOTIA SR UNSECURED 03/26 VAR",s:"Corp",c:"CA",cr:4.3668,ct:"Flt",m:"2026-03-02",w:0.0594,v:8.7},
+{n:"DOMINION ENERGY INC",t:"DOMINION ENERGY INC SR UNSECURED 08/26 2.85",s:"Corp",c:"US",cr:2.85,ct:"Fix",m:"2026-08-15",w:0.0589,v:8.6},
+{n:"ELEVANCE HEALTH INC",t:"ELEVANCE HEALTH INC SR UNSECURED 03/26 1.5",s:"Corp",c:"US",cr:1.5,ct:"Fix",m:"2026-03-15",w:0.0586,v:8.5},
+{n:"ENTERPRISE FLEET FINANCING 2024-2 LLC",t:"ENTERPRISE FLEET FINANCING LLC EFF 2024 2 A2 144A",s:"ABS",c:"US",cr:5.74,ct:"Fix",m:"2026-12-20",w:0.0584,v:8.5},
+{n:"KUBOTA CREDIT OWNER TRUST 2024-2A",t:"KUBOTA CREDIT OWNER TRUST KCOT 2024 2A A2 144A",s:"ABS",c:"US",cr:5.45,ct:"Fix",m:"2027-04-15",w:0.0575,v:8.4},
+{n:"STWD 2022-FL3 LTD",t:"STARWOOD COMMERCIAL MORTGAGE T STWD 2022 FL3 A 144A",s:"ABS",c:"KY",cr:5.3338,ct:"Flt",m:"2038-11-15",w:0.0579,v:8.4},
+{n:"SANTANDER HOLDINGS USA INC",t:"SANTANDER HOLDINGS USA SR UNSECURED 10/26 3.244",s:"Corp",c:"US",cr:3.244,ct:"Fix",m:"2026-10-05",w:0.0574,v:8.4},
+{n:"GM FINANCIAL AUTOMOBILE LEASING TRUST 2024-3",t:"GM FINANCIAL AUTOMOBILE LEASIN GMALT 2024 3 A2B",s:"ABS",c:"US",cr:4.3876,ct:"Flt",m:"2027-01-20",w:0.0574,v:8.4},
+{n:"GM FINANCIAL CONSUMER AUTOMOBILE RECEIVABLES TRUST 2024-2",t:"GM FINANCIAL SECURITIZED TERM GMCAR 2024 2 A3",s:"ABS",c:"US",cr:5.1,ct:"Fix",m:"2029-03-16",w:0.0579,v:8.4},
+{n:"NELNET STUDENT LOAN TRUST 2019-3A",t:"NELNET STUDENT LOAN TRUST NSLT 2019 3A A 144A",s:"ABS",c:"US",cr:4.6462,ct:"Flt",m:"2067-08-25",w:0.0571,v:8.3},
+{n:"COLORADO INTERSTATE GAS CO LLC / COLORADO INTERSTATE ISSUING CORP",t:"COLORADO INT GAS CO/ISS COMPANY GUAR 144A 08/26 4.15",s:"Corp",c:"US",cr:4.15,ct:"Fix",m:"2026-08-15",w:0.0562,v:8.2},
+{n:"MARS INCORPORATED",t:"MARS INC SR UNSECURED 144A 03/27 4.45",s:"Corp",c:"US",cr:4.45,ct:"Fix",m:"2027-03-01",w:0.0553,v:8.1},
+{n:"PNC BANK NA",t:"PNC BANK NA SR UNSECURED 01/27 VAR",s:"Corp",c:"US",cr:4.775,ct:"Flt",m:"2027-01-15",w:0.0546,v:8.0},
+{n:"TOYOTA MOTOR CREDIT CORPORATION",t:"TOYOTA MOTOR CREDIT CORP SR UNSECURED 01/26 VAR",s:"Corp",c:"US",cr:4.6606,ct:"Flt",m:"2026-01-05",w:0.0549,v:8.0},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2021-H01",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2021 H01 FB",s:"Agency",c:"US",cr:4.4841,ct:"Flt",m:"2070-11-20",w:0.054,v:7.9},
+{n:"BANQUE FEDERATIVE DU CREDIT MUTUEL (BFCM)",t:"BANQUE FED CRED MUTUEL REGS 07/26 VAR",s:"Corp",c:"FR",cr:5.3923,ct:"Flt",m:"2026-07-13",w:0.0546,v:7.9},
+{n:"IMPERIAL BRANDS FINANCE PLC (AKA: IMPERIAL TOBACCO FINANCE PLC)",t:"IMPERIAL BRANDS FIN PLC COMPANY GUAR REGS 07/26 3.5",s:"Corp",c:"GB",cr:3.5,ct:"Fix",m:"2026-07-26",w:0.0539,v:7.9},
+{n:"BANK OF AMERICA CORPORATION",t:"BANK OF AMERICA CORP SR UNSECURED 09/27 VAR",s:"Corp",c:"US",cr:5.0779,ct:"Flt",m:"2027-09-15",w:0.054,v:7.9},
+{n:"CONSTELLATION BRANDS INC",t:"CONSTELLATION BRANDS INC COMPANY GUAR 12/26 3.7",s:"Corp",c:"US",cr:3.7,ct:"Fix",m:"2026-12-06",w:0.0533,v:7.8},
+{n:"ROGERS COMMUNICATIONS INC",t:"ROGERS COMMUNICATIONS IN COMPANY GUAR 03/27 3.2",s:"Corp",c:"CA",cr:3.2,ct:"Fix",m:"2027-03-15",w:0.0532,v:7.8},
+{n:"BMW US CAPITAL LLC",t:"BMW US CAPITAL LLC COMPANY GUAR 144A 03/27 4.65",s:"Corp",c:"US",cr:4.65,ct:"Fix",m:"2027-03-19",w:0.0526,v:7.7},
+{n:"CREDIT AGRICOLE SA",t:"CREDIT AGRICOLE SA SR UNSECURED REGS 03/27 VAR",s:"Corp",c:"FR",cr:4.6005,ct:"Flt",m:"2027-03-11",w:0.0518,v:7.5},
+{n:"NOMURA HOLDINGS INC",t:"NOMURA HOLDINGS INC SR UNSECURED 07/27 VAR",s:"Corp",c:"JP",cr:4.9705,ct:"Flt",m:"2027-07-02",w:0.0513,v:7.5},
+{n:"USAA AUTO OWNER TRUST 2024-A",t:"USAA AUTO OWNER TRUST USAOT 2024 A A3 144A",s:"ABS",c:"US",cr:5.03,ct:"Fix",m:"2029-03-15",w:0.0512,v:7.5},
+{n:"UBS GROUP AG",t:"UBS GROUP AG SR UNSECURED 144A 08/27 4.703",s:"Corp",c:"CH",cr:4.703,ct:"Flt",m:"2027-08-05",w:0.0513,v:7.5},
+{n:"AMEREN CORPORATION",t:"AMEREN CORP AMEREN CORP",s:"Corp",c:"US",cr:5.7,ct:"Fix",m:"2026-12-01",w:0.0517,v:7.5},
+{n:"SOFI CONSUMER LOAN PROGRAM 2025-3 TRUST",t:"SOFI CONSUMER LOAN PROGRAM TRU SCLP 2025 3 A 144A",s:"ABS",c:"US",cr:4.47,ct:"Fix",m:"2034-08-15",w:0.0512,v:7.5},
+{n:"NATWEST MARKETS PLC",t:"NATWEST MARKETS PLC SR UNSECURED 144A 05/27 VAR",s:"Corp",c:"GB",cr:4.77,ct:"Flt",m:"2027-05-17",w:0.0505,v:7.4},
+{n:"BNP PARIBAS",t:"BNP PARIBAS REGS 06/27 VAR",s:"Corp",c:"FR",cr:1.675,ct:"Flt",m:"2027-06-30",w:0.0502,v:7.3},
+{n:"BANK OF AMERICA AUTO TRUST 2025-1A",t:"BANK OF AMERICA AUTO TRUST BAAT 2025 1A A2B 144A",s:"ABS",c:"US",cr:4.4676,ct:"Flt",m:"2027-11-22",w:0.0502,v:7.3},
+{n:"FIRSTENERGY PENNSYLVANIA ELECTRIC CO",t:"FIRSTENERGY PENN ELECTRI SR UNSECURED 144A 03/26 5.15",s:"Corp",c:"US",cr:5.15,ct:"Fix",m:"2026-03-30",w:0.049,v:7.1},
+{n:"TESLA LEASE ELECTRIC VEHICLE SECURITIZATION 2025-A LLC",t:"TESLA LEASE ELECTRIC VEHICLE S TLEVS 2025 A A2 144A",s:"ABS",c:"US",cr:4.14,ct:"Fix",m:"2028-06-20",w:0.0482,v:7.0},
+{n:"SA GLOBAL SUKUK LIMITED",t:"SA GLOBAL SUKUK LTD SR UNSECURED REGS 06/26 1.602",s:"Corp",c:"KY",cr:1.602,ct:"Fix",m:"2026-06-17",w:0.0482,v:7.0},
+{n:"ARROYO MORTGAGE TRUST 2021-1R",t:"ARROYO MORTGAGE TRUST ARRW 2021 1R A1 144A",s:"ABS",c:"US",cr:1.175,ct:"Var",m:"2048-10-25",w:0.0481,v:7.0},
+{n:"SMB PRIVATE EDUCATION LOAN TRUST 2020-B",t:"SMB PRIVATE EDUCATION LOAN TRU SMB 2020 B A1A 144A",s:"ABS",c:"US",cr:1.29,ct:"Fix",m:"2053-07-15",w:0.0473,v:6.9},
+{n:"BANK OF AMERICA CORPORATION",t:"BANK OF AMERICA CORP SR UNSECURED 03/27 VAR",s:"Corp",c:"US",cr:1.658,ct:"Flt",m:"2027-03-11",w:0.0471,v:6.9},
+{n:"CIFC FUNDING LTD 2017-4A",t:"CIFC FUNDING LTD CIFC 2017 4A A1R 144A",s:"ABS",c:"KY",cr:5.077,ct:"Flt",m:"2030-10-24",w:0.0471,v:6.9},
+{n:"ROYAL CARIBBEAN CRUISES LTD",t:"ROYAL CARIBBEAN CRUISES SR UNSECURED 144A 07/26 4.25",s:"Corp",c:"LR",cr:4.25,ct:"Fix",m:"2026-07-01",w:0.0467,v:6.8},
+{n:"BRIXMOR OPERATING PARTNERSHIP LP",t:"BRIXMOR OPERATING PART SR UNSECURED 06/26 4.125",s:"Corp",c:"US",cr:4.125,ct:"Fix",m:"2026-06-15",w:0.0462,v:6.7},
+{n:"CITIGROUP INC",t:"CITIGROUP INC SR UNSECURED 06/27 VAR",s:"Corp",c:"US",cr:4.5312,ct:"Flt",m:"2027-06-09",w:0.0457,v:6.7},
+{n:"GOLUB CAPITAL PARTNERS CLO 60A LTD",t:"GOLUB CAPITAL PARTNERS CLO, LT GCBSL 2022 60A AR 144A",s:"ABS",c:"KY",cr:5.168,ct:"Flt",m:"2034-10-25",w:0.0454,v:6.6},
+{n:"FREDDIE MAC REMICS 5428",t:"FREDDIE MAC FHR 5428 CF",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2054-07-25",w:0.0451,v:6.6},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2021-H01",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2021 H01 FD",s:"Agency",c:"US",cr:4.4841,ct:"Flt",m:"2070-12-20",w:0.0449,v:6.5},
+{n:"PENSKE TRUCK LEASING CO LP / PTL FINANCE CORP",t:"PENSKE TRUCK LEASING/PTL SR UNSECURED 144A 05/26 5.75",s:"Corp",c:"US",cr:5.75,ct:"Fix",m:"2026-05-24",w:0.0449,v:6.5},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 06/27 VAR",s:"Corp",c:"US",cr:4.7836,ct:"Flt",m:"2027-06-24",w:0.0441,v:6.4},
+{n:"BANK OF AMERICA AUTO TRUST 2023-1A",t:"BANK OF AMERICA AUTO TRUST BAAT 2023 1A A3 144A",s:"ABS",c:"US",cr:5.53,ct:"Fix",m:"2028-02-15",w:0.0441,v:6.4},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED REGS 03/27 VAR",s:"Corp",c:"US",cr:4.7608,ct:"Flt",m:"2027-03-19",w:0.0441,v:6.4},
+{n:"CARMAX AUTO OWNER TRUST 2023-2",t:"CARMAX AUTO OWNER TRUST CARMX 2023 2 A3",s:"ABS",c:"US",cr:5.05,ct:"Fix",m:"2028-01-18",w:0.0442,v:6.4},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2025-118",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2025 118 FA",s:"Agency",c:"US",cr:5.0677,ct:"Flt",m:"2055-07-20",w:0.0438,v:6.4},
+{n:"SOFI PROFESSIONAL LOAN PROGRAM LLC 2020-C",t:"SOCIAL PROFESSIONAL LOAN PROGR SOFI 2020 C AFX 144A",s:"ABS",c:"US",cr:1.95,ct:"Fix",m:"2046-02-15",w:0.0439,v:6.4},
+{n:"SOUTHWESTERN ELECTRIC POWER COMPANY",t:"SOUTHWESTERN ELEC POWER SR UNSECURED 10/26 2.75",s:"Corp",c:"US",cr:2.75,ct:"Fix",m:"2026-10-01",w:0.0437,v:6.4},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED REGS 06/27 VAR",s:"Corp",c:"US",cr:4.8466,ct:"Flt",m:"2027-06-23",w:0.0442,v:6.4},
+{n:"GENERAL MOTORS FINANCIAL COMPANY INC",t:"GENERAL MOTORS FINL CO COMPANY GUAR 03/26 5.25",s:"Corp",c:"US",cr:5.25,ct:"Fix",m:"2026-03-01",w:0.0436,v:6.4},
+{n:"GOLDMAN SACHS GROUP INC",t:"GOLDMAN SACHS GROUP INC SR UNSECURED 10/27 VAR",s:"Corp",c:"US",cr:5.871,ct:"Flt",m:"2027-10-28",w:0.0439,v:6.4},
+{n:"FREDDIE MAC REMICS 5564",t:"FREDDIE MAC FHR 5564 PF",s:"Agency",c:"US",cr:5.0742,ct:"Flt",m:"2055-08-25",w:0.0433,v:6.3},
+{n:"ARI FLEET LEASE TRUST 2024-B",t:"ARI FLEET LEASE TRUST ARIFL 2024 B A2 144A",s:"ABS",c:"US",cr:5.54,ct:"Fix",m:"2033-04-15",w:0.043,v:6.3},
+{n:"FREDDIE MAC REMICS 4842",t:"FREDDIE MAC FHR 4842 FW",s:"Agency",c:"US",cr:4.673,ct:"Flt",m:"2037-10-15",w:0.0434,v:6.3},
+{n:"TPMT-2019-1",t:"TOWD POINT MORTGAGE TRUST TPMT 2019 1 A1 144A",s:"ABS",c:"US",cr:3.75,ct:"Var",m:"2058-03-25",w:0.0428,v:6.2},
+{n:"PEAC SOLUTIONS RECEIVABLES 2025-1A LLC",t:"PEAC SOLUTIONS RECEIVABLES LLC PEAC 2025 1A A2 144A",s:"ABS",c:"US",cr:4.94,ct:"Fix",m:"2028-10-20",w:0.0428,v:6.2},
+{n:"CREDIT AGRICOLE SA",t:"CREDIT AGRICOLE SA REGS 07/26 VAR",s:"Corp",c:"FR",cr:5.16,ct:"Flt",m:"2026-07-05",w:0.0418,v:6.1},
+{n:"NAVIENT PRIVATE EDUCATION REFI LOAN TRUST 2020-HA",t:"NAVIENT STUDENT LOAN TRUST NAVSL 2020 HA A 144A",s:"ABS",c:"US",cr:1.31,ct:"Fix",m:"2069-01-15",w:0.0409,v:6.0},
+{n:"AMERICAN TOWER CORP (AKA: AMERICAN TOWER REIT INC)",t:"AMERICAN TOWER CORP SR UNSECURED 02/26 4.4",s:"Corp",c:"US",cr:4.4,ct:"Fix",m:"2026-02-15",w:0.0412,v:6.0},
+{n:"PLAINS ALL AMERICAN PIPELINE LP / PAA FINANCE CORP",t:"PLAINS ALL AMER PIPELINE SR UNSECURED 12/26 4.5",s:"Corp",c:"US",cr:4.5,ct:"Fix",m:"2026-12-15",w:0.0403,v:5.9},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2018-H08",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2018 H08 LF",s:"Agency",c:"US",cr:4.6774,ct:"Flt",m:"2068-06-20",w:0.0404,v:5.9},
+{n:"SCCU AUTO RECEIVABLES TRUST 2025-1 2025-1A",t:"SPACE COAST CREDIT UNION SCCU 2025 1A A2 144A",s:"ABS",c:"US",cr:4.67,ct:"Fix",m:"2028-11-15",w:0.0408,v:5.9},
+{n:"CITIZENS AUTO RECEIVABLES TRUST 2023-2",t:"CITIZENS AUTO RECEIVABLES TRUS CITZN 2023 2 A3 144A",s:"ABS",c:"US",cr:5.83,ct:"Fix",m:"2028-02-15",w:0.0403,v:5.9},
+{n:"F&G GLOBAL FUNDING",t:"F+G GLOBAL FUNDING SECURED 144A 04/27 2.3",s:"Corp",c:"US",cr:2.3,ct:"Fix",m:"2027-04-11",w:0.0402,v:5.9},
+{n:"SOUTHERN CALIFORNIA EDISON COMPANY",t:"SO. CALIF EDISON",s:"Corp",c:"US",m:"2026-01-05",w:0.0401,v:5.8},
+{n:"FORD MOTOR CREDIT COMPANY LLC",t:"FORD MOTOR CREDIT CO LLC SR UNSECURED 08/26 2.7",s:"Corp",c:"US",cr:2.7,ct:"Fix",m:"2026-08-10",w:0.0399,v:5.8},
+{n:"BANK OF AMERICA CORPORATION",t:"BANK OF AMERICA CORP SR UNSECURED 07/27 VAR",s:"Corp",c:"US",cr:4.9115,ct:"Flt",m:"2027-07-22",w:0.0399,v:5.8},
+{n:"JP MORGAN CHASE & CO",t:"JPMORGAN CHASE + CO SR UNSECURED 07/28 VAR",s:"Corp",c:"US",cr:4.888,ct:"Flt",m:"2028-07-22",w:0.0392,v:5.7},
+{n:"FORD MOTOR CREDIT COMPANY LLC",t:"FORD MOTOR CREDIT CO LLC SR UNSECURED 01/27 4.271",s:"Corp",c:"US",cr:4.271,ct:"Fix",m:"2027-01-09",w:0.0391,v:5.7},
+{n:"WELLS FARGO & COMPANY",t:"WELLS FARGO + COMPANY SR UNSECURED 04/28 VAR",s:"Corp",c:"US",cr:5.028,ct:"Flt",m:"2028-04-22",w:0.039,v:5.7},
+{n:"HCA INC",t:"HCA INC DISC COML PAPER 01/26 ZCP",s:"Corp",c:"US",m:"2026-01-21",w:0.0384,v:5.6},
+{n:"EVERSOURCE ENERGY",t:"EVERSOURCE ENERGY SR UNSECURED 03/27 2.9",s:"Corp",c:"US",cr:2.9,ct:"Fix",m:"2027-03-01",w:0.0386,v:5.6},
+{n:"GOLDMAN SACHS GROUP INC",t:"GOLDMAN SACHS GROUP INC SR UNSECURED 02/28 VAR",s:"Corp",c:"US",cr:4.9726,ct:"Flt",m:"2028-02-24",w:0.0383,v:5.6},
+{n:"CITIBANK CREDIT CARD ISSUANCE TRUST 2017-A6",t:"CITIBANK CREDIT CARD ISSUANCE CCCIT 2017 A6 A6",s:"ABS",c:"US",cr:4.6346,ct:"Flt",m:"2029-05-14",w:0.0384,v:5.6},
+{n:"ROYAL BANK OF CANADA",t:"ROYAL BANK OF CANADA SR UNSECURED 10/28 VAR",s:"Corp",c:"CA",cr:4.8327,ct:"Flt",m:"2028-10-18",w:0.0383,v:5.6},
+{n:"EQUITABLE AMERICA GLOBAL FUNDING",t:"EQUITABLE AMERICA GLOBAL SECURED 144A 09/27 3.95",s:"Corp",c:"US",cr:3.95,ct:"Fix",m:"2027-09-15",w:0.0377,v:5.5},
+{n:"WORLD OMNI AUTO RECEIVABLES TRUST 2024-C",t:"WORLD OMNI AUTO RECEIVABLES TR WOART 2024 C A3",s:"ABS",c:"US",cr:4.43,ct:"Fix",m:"2029-12-17",w:0.0376,v:5.5},
+{n:"BMW US CAPITAL LLC",t:"BMW US CAPITAL LLC COMPANY GUAR REGS 03/27 VAR",s:"Corp",c:"US",cr:4.5008,ct:"Flt",m:"2027-03-19",w:0.0377,v:5.5},
+{n:"CHESAPEAKE FUNDING II LLC 2024-1A",t:"CHESAPEAKE FUNDING II LLC CFII 2024 1A A2 144A",s:"ABS",c:"US",cr:4.7538,ct:"Flt",m:"2036-05-15",w:0.0374,v:5.5},
+{n:"WEYERHAEUSER COMPANY",t:"WEYERHAEUSER CO SR UNSECURED 05/26 4.75",s:"Corp",c:"US",cr:4.75,ct:"Fix",m:"2026-05-15",w:0.0378,v:5.5},
+{n:"BANK OF AMERICA AUTO TRUST 2025-1A",t:"BANK OF AMERICA AUTO TRUST BAAT 2025 1A A3 144A",s:"ABS",c:"US",cr:4.35,ct:"Fix",m:"2029-11-20",w:0.0376,v:5.5},
+{n:"GM FINANCIAL AUTOMOBILE LEASING TRUST 2025-1",t:"GM FINANCIAL AUTOMOBILE LEASIN GMALT 2025 1 A2A",s:"ABS",c:"US",cr:4.54,ct:"Fix",m:"2027-05-20",w:0.0379,v:5.5},
+{n:"BANK OF MONTREAL",t:"BANK OF MONTREAL SR UNSECURED 12/26 VAR",s:"Corp",c:"CA",cr:4.8905,ct:"Flt",m:"2026-12-11",w:0.0376,v:5.5},
+{n:"CARMAX AUTO OWNER TRUST 2024-4",t:"CARMAX AUTO OWNER TRUST CARMX 2024 4 A2B",s:"ABS",c:"US",cr:4.4338,ct:"Flt",m:"2027-12-15",w:0.0377,v:5.5},
+{n:"FREDDIE MAC REMICS 5582",t:"FREDDIE MAC FHR 5582 FA",s:"Agency",c:"US",cr:4.7242,ct:"Flt",m:"2055-10-25",w:0.0368,v:5.4},
+{n:"DELL EQUIPMENT FINANCE TRUST 2025-1",t:"DELL EQUIPMENT FINANCE TRUST DEFT 2025 1 A2 144A",s:"ABS",c:"US",cr:4.68,ct:"Fix",m:"2027-07-22",w:0.0372,v:5.4},
+{n:"HCA INC",t:"HCA INC DISC COML PAPER 01/26 ZCP",s:"Corp",c:"US",m:"2026-01-20",w:0.037,v:5.4},
+{n:"HONDA AUTO RECEIVABLES OWNER TRUST 2024-4",t:"HONDA AUTO RECEIVABLES OWNER T HAROT 2024 4 A2",s:"ABS",c:"US",cr:4.56,ct:"Fix",m:"2027-03-15",w:0.0371,v:5.4},
+{n:"NAVIENT STUDENT LOAN TRUST 2020-IA",t:"NAVIENT STUDENT LOAN TRUST NAVSL 2020 IA A1B 144A",s:"ABS",c:"US",cr:4.8646,ct:"Flt",m:"2069-04-15",w:0.0359,v:5.2},
+{n:"CROWN CASTLE INTERNATIONAL CORP (CCI)",t:"CROWN CASTLE INC SR UNSECURED 02/26 4.45",s:"Corp",c:"US",cr:4.45,ct:"Fix",m:"2026-02-15",w:0.036,v:5.2},
+{n:"MERCEDES-BENZ FINANCE NORTH AMERICA LLC",t:"MERCEDES BENZ FIN NA COMPANY GUAR 144A 04/27 VAR",s:"Corp",c:"US",cr:4.5969,ct:"Flt",m:"2027-04-01",w:0.0358,v:5.2},
+{n:"CITIZENS AUTO RECEIVABLES TRUST 2023-1",t:"CITIZENS AUTO RECEIVABLES TRUS CITZN 2023 1 A3 144A",s:"ABS",c:"US",cr:5.84,ct:"Fix",m:"2028-01-18",w:0.036,v:5.2},
+{n:"NATIONWIDE BUILDING SOCIETY",t:"NATIONWIDE BLDG SOCIETY 144A 10/27 VAR",s:"Corp",c:"GB",cr:6.557,ct:"Flt",m:"2027-10-18",w:0.035,v:5.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2015-H11",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2015 H11 FC",s:"Agency",c:"US",cr:4.6641,ct:"Flt",m:"2065-05-20",w:0.0351,v:5.1},
+{n:"M&T BANK AUTO RECEIVABLES TRUST 2024-1A",t:"M+T BANK AUTO RECEIVABLES TRUS MTBAT 2024 1A A3 144A",s:"ABS",c:"US",cr:5.22,ct:"Fix",m:"2032-02-17",w:0.035,v:5.1},
+{n:"VOLKSWAGEN GROUP OF AMERICA FINANCE LLC",t:"VOLKSWAGEN GROUP AMERICA COMPANY GUAR 144A 09/26 3.2",s:"Corp",c:"US",cr:3.2,ct:"Fix",m:"2026-09-26",w:0.0341,v:5.0},
+{n:"VW CREDIT INC",t:"VW CR INC",s:"Corp",c:"US",m:"2026-01-13",w:0.0343,v:5.0},
+{n:"EQUINIX INC",t:"EQUINIX INC SR UNSECURED 05/26 1.45",s:"Corp",c:"US",cr:1.45,ct:"Fix",m:"2026-05-15",w:0.034,v:5.0},
+{n:"BANK OF MONTREAL",t:"BANK OF MONTREAL SR UNSECURED 06/26 VAR",s:"Corp",c:"CA",cr:5.1035,ct:"Flt",m:"2026-06-05",w:0.0345,v:5.0},
+{n:"HYUNDAI AUTO LEASE SECURITIZATION TRUST 2024-C",t:"HYUNDAI AUTO LEASE SECURITIZAT HALST 2024 C A2B 144A",s:"ABS",c:"US",cr:4.4839,ct:"Flt",m:"2027-03-15",w:0.0335,v:4.9},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2025-100",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2025 100 FA",s:"Agency",c:"US",cr:5.0677,ct:"Flt",m:"2055-06-20",w:0.0333,v:4.9},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 06/26 1.5",s:"Corp",c:"US",cr:1.5,ct:"Fix",m:"2026-06-15",w:0.0339,v:4.9},
+{n:"BANK OF AMERICA AUTO TRUST 2025-1A",t:"BANK OF AMERICA AUTO TRUST BAAT 2025 1A A2A 144A",s:"ABS",c:"US",cr:4.52,ct:"Fix",m:"2027-11-22",w:0.0326,v:4.8},
+{n:"FORD CREDIT AUTO OWNER TRUST 2024-B",t:"FORD CREDIT AUTO OWNER TRUST FORDO 2024 B A2B",s:"ABS",c:"US",cr:4.3838,ct:"Flt",m:"2027-04-15",w:0.0331,v:4.8},
+{n:"COLUMBIA PIPELINES HOLDING COMPANY LLC",t:"COLUMBIA PIPELINE HOLDCO SR UNSECURED 144A 08/26 6.055",s:"Corp",c:"US",cr:6.055,ct:"Fix",m:"2026-08-15",w:0.0328,v:4.8},
+{n:"NELNET STUDENT LOAN TRUST 2016-1A",t:"NELNET STUDENT LOAN TRUST NSLT 2016 1A A 144A",s:"ABS",c:"US",cr:4.7887,ct:"Flt",m:"2065-09-25",w:0.0322,v:4.7},
+{n:"FANNIE MAE REMICS 2018-39",t:"FANNIE MAE FNR 2018 39 FW",s:"Agency",c:"US",cr:4.623,ct:"Flt",m:"2048-06-25",w:0.0322,v:4.7},
+{n:"HARLEY-DAVIDSON MOTORCYCLE TRUST 2024-B",t:"HARLEY DAVIDSON MOTORCYCLE TRU HDMOT 2024 B A2",s:"ABS",c:"US",cr:4.62,ct:"Fix",m:"2027-08-16",w:0.0325,v:4.7},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2014-H23",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2014 H23 FA",s:"Agency",c:"US",cr:4.7641,ct:"Flt",m:"2064-11-20",w:0.0317,v:4.6},
+{n:"ING GROEP NV",t:"ING GROEP NV SR UNSECURED 144A 01/26 4.625",s:"Corp",c:"NL",cr:4.625,ct:"Fix",m:"2026-01-06",w:0.0314,v:4.6},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2024-13",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2024 13 FA",s:"Agency",c:"US",cr:4.8677,ct:"Flt",m:"2054-01-20",w:0.0319,v:4.6},
+{n:"EVERSOURCE ENERGY",t:"EVERSOURCE ENERGY SR UNSECURED 08/26 1.4",s:"Corp",c:"US",cr:1.4,ct:"Fix",m:"2026-08-15",w:0.0313,v:4.6},
+{n:"NELNET STUDENT LOAN TRUST 2017-3A",t:"NELNET STUDENT LOAN TRUST NSLT 2017 3A A 144A",s:"ABS",c:"US",cr:4.8387,ct:"Flt",m:"2066-02-25",w:0.0318,v:4.6},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 11/26 3.5",s:"Corp",c:"US",cr:3.5,ct:"Fix",m:"2026-11-02",w:0.0317,v:4.6},
+{n:"SUMITOMO MITSUI TRUST BANK LIMITED",t:"SUMITOMO MITSUI TR BK LT SR UNSECURED 144A 09/26 VAR",s:"Corp",c:"JP",cr:4.8756,ct:"Flt",m:"2026-09-14",w:0.0319,v:4.6},
+{n:"SFS AUTO RECEIVABLES SECURITIZATION TRUST 2023-1A",t:"SFS AUTO RECEIVABLES SECURITIZ SFAST 2023 1A A3 144A",s:"ABS",c:"US",cr:5.47,ct:"Fix",m:"2028-10-20",w:0.0314,v:4.6},
+{n:"BMW VEHICLE OWNER TRUST 2023-A",t:"BMW VEHICLE OWNER TRUST BMWOT 2023 A A3",s:"ABS",c:"US",cr:5.47,ct:"Fix",m:"2028-02-25",w:0.0318,v:4.6},
+{n:"HCA INC",t:"HCA INC COMPANY GUAR 06/26 5.25",s:"Corp",c:"US",cr:5.25,ct:"Fix",m:"2026-06-15",w:0.0309,v:4.5},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2011-72",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2011 72 AF",s:"Agency",c:"US",cr:4.4684,ct:"Flt",m:"2041-05-20",w:0.0308,v:4.5},
+{n:"VOYA FINANCIAL INC",t:"VOYA FINANCIAL INC COMPANY GUAR 06/26 3.65",s:"Corp",c:"US",cr:3.65,ct:"Fix",m:"2026-06-15",w:0.0312,v:4.5},
+{n:"FANNIE MAE 2020-12",t:"FANNIE MAE FNR 2020 12 WF",s:"Agency",c:"US",cr:4.723,ct:"Flt",m:"2060-03-25",w:0.0311,v:4.5},
+{n:"FANNIE MAE REMICS 2025-88",t:"FANNIE MAE FNR 2025 88 KF",s:"Agency",c:"US",cr:4.9242,ct:"Flt",m:"2055-09-25",w:0.0301,v:4.4},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2019-H02",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2019 H02 FB",s:"Agency",c:"US",cr:5.1994,ct:"Flt",m:"2068-12-20",w:0.03,v:4.4},
+{n:"BANK OF AMERICA CORPORATION",t:"BANK OF AMERICA CORP SR UNSECURED 02/28 VAR",s:"Corp",c:"US",cr:4.9564,ct:"Flt",m:"2028-02-04",w:0.0293,v:4.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2010-129",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 129 FJ",s:"Agency",c:"US",cr:4.4784,ct:"Flt",m:"2040-10-20",w:0.0293,v:4.3},
+{n:"SFS AUTO RECEIVABLES SECURITIZATION TRUST 2025-1A",t:"SFS AUTO RECEIVABLES SECURITIZ SFAST 2025 1A A2 144A",s:"ABS",c:"US",cr:4.65,ct:"Fix",m:"2028-05-22",w:0.0295,v:4.3},
+{n:"COOPERATIEVE RABOBANK UA (AKA: RABOBANK NEDERLAND)",t:"COOPERATIEVE RABOBANK UA REGS 02/27 VAR",s:"Corp",c:"NL",cr:1.106,ct:"Flt",m:"2027-02-24",w:0.0289,v:4.2},
+{n:"GM FINANCIAL CONSUMER AUTOMOBILE RECEIVABLES TRUST 2024-3",t:"GM FINANCIAL SECURITIZED TERM GMCAR 2024 3 A3",s:"ABS",c:"US",cr:5.13,ct:"Fix",m:"2029-04-16",w:0.0287,v:4.2},
+{n:"WEC ENERGY GROUP INC",t:"WEC ENERGY GROUP INC SR UNSECURED 01/26 4.75",s:"Corp",c:"US",cr:4.75,ct:"Fix",m:"2026-01-09",w:0.0287,v:4.2},
+{n:"TAKE-TWO INTERACTIVE SOFTWARE",t:"TAKE TWO INTERACTIVE SOF SR UNSECURED 03/26 5",s:"Corp",c:"US",cr:5.0,ct:"Fix",m:"2026-03-28",w:0.0282,v:4.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2010-H18",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 H18 AF",s:"Agency",c:"US",cr:4.4141,ct:"Flt",m:"2060-09-20",w:0.0278,v:4.1},
+{n:"BRIGHTHOUSE FINANCIAL GLOBAL FUNDING",t:"BRIGHTHSE FIN GLBL FUND SECURED 144A 05/26 1.55",s:"Corp",c:"US",cr:1.55,ct:"Fix",m:"2026-05-24",w:0.0283,v:4.1},
+{n:"ELFI GRADUATE LOAN PROGRAM 2021-A LLC",t:"ELFI GRADUATE LOAN PROGRAM 202 ELFI 2021 A A 144A",s:"ABS",c:"US",cr:1.53,ct:"Fix",m:"2046-12-26",w:0.0279,v:4.1},
+{n:"LEGACY MORTGAGE ASSET TRUST 2021-GS1",t:"LEGACY MORTGAGE ASSET TRUST LMAT 2021 GS1 A1 144A",s:"ABS",c:"US",cr:5.892,ct:"Var",m:"2066-10-25",w:0.0284,v:4.1},
+{n:"BANCO SANTANDER SA",t:"BANCO SANTANDER SA SR UNSECURED 09/27 VAR",s:"Corp",c:"ES",cr:1.722,ct:"Flt",m:"2027-09-14",w:0.0276,v:4.0},
+{n:"LOWE'S COMPANIES INC",t:"LOWE S COS INC SR UNSECURED 04/26 2.5",s:"Corp",c:"US",cr:2.5,ct:"Fix",m:"2026-04-15",w:0.0276,v:4.0},
+{n:"FANNIE MAE REMICS 2019-28",t:"FANNIE MAE FNR 2019 28 FJ",s:"Agency",c:"US",cr:4.4387,ct:"Flt",m:"2059-06-25",w:0.0274,v:4.0},
+{n:"BMW US CAPITAL LLC",t:"BMW US CAPITAL LLC COMPANY GUAR REGS 08/26 VAR",s:"Corp",c:"US",cr:4.6763,ct:"Flt",m:"2026-08-13",w:0.0275,v:4.0},
+{n:"N/A",t:"REPO BANK AMERICA REPO",s:"Other",c:"US",w:0.0275,v:4.0},
+{n:"STANDARD CHARTERED BANK/NEW YORK BRANCH",t:"STANDARD CHARTERED BK/NY SR UNSECURED 10/26 VAR",s:"Corp",c:"GB",cr:4.6485,ct:"Flt",m:"2026-10-08",w:0.0275,v:4.0},
+{n:"SMBC AVIATION CAPITAL FINANCE DESIGNATED ACTIVITY COMPANY",t:"SMBC AVIATION CAPITAL FI COMPANY GUAR 144A 10/26 1.9",s:"Corp",c:"IE",cr:1.9,ct:"Fix",m:"2026-10-15",w:0.027,v:3.9},
+{n:"ROYAL CARIBBEAN CRUISES LTD",t:"ROYAL CARIBBEAN CRUISES SR UNSECURED 144A 07/27 5.375",s:"Corp",c:"LR",cr:5.375,ct:"Fix",m:"2027-07-15",w:0.0271,v:3.9},
+{n:"FORD CREDIT AUTO LEASE TRUST 2024-B",t:"FORD CREDIT AUTO LEASE TRUST FORDL 2024 B A2B",s:"ABS",c:"US",cr:4.3838,ct:"Flt",m:"2027-02-15",w:0.027,v:3.9},
+{n:"FREDDIE MAC REMICS 5607",t:"FREDDIE MAC FHR 5607 FA",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2055-12-25",w:0.0268,v:3.9},
+{n:"FANNIE MAE REMICS 2025-87",t:"FANNIE MAE FNR 2025 87 FC",s:"Agency",c:"US",cr:4.9742,ct:"Flt",m:"2055-10-25",w:0.027,v:3.9},
+{n:"AMERICAN EXPRESS COMPANY",t:"AMERICAN EXPRESS CO SR UNSECURED 07/27 VAR",s:"Corp",c:"US",cr:4.9117,ct:"Flt",m:"2027-07-28",w:0.0262,v:3.8},
+{n:"FANNIE MAE REMICS 2019-53",t:"FANNIE MAE FNR 2019 53 FA",s:"Agency",c:"US",cr:4.723,ct:"Flt",m:"2049-09-25",w:0.0264,v:3.8},
+{n:"BANQUE FEDERATIVE DU CREDIT MUTUEL (BFCM)",t:"BANQUE FED CRED MUTUEL REGS 01/27 VAR",s:"Corp",c:"FR",cr:5.0848,ct:"Flt",m:"2027-01-23",w:0.0263,v:3.8},
+{n:"BLUEMOUNTAIN CLO LTD 2018-3A",t:"BLUEMOUNTAIN CLO LTD BLUEM 2018 3A A1R 144A",s:"ABS",c:"KY",cr:5.048,ct:"Flt",m:"2030-10-25",w:0.026,v:3.8},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 01/27 5.25",s:"Corp",c:"US",cr:5.25,ct:"Fix",m:"2027-01-08",w:0.0257,v:3.7},
+{n:"FORD CREDIT AUTO OWNER TRUST 2024-C",t:"FORD CREDIT AUTO OWNER TRUST FORDO 2024 C A2A",s:"ABS",c:"US",cr:4.32,ct:"Fix",m:"2027-08-15",w:0.0253,v:3.7},
+{n:"VOLKSWAGEN AUTO LEASE TRUST 2024-A",t:"VOLKSWAGEN AUTO LEASE TRUST VWALT 2024 A A2B",s:"ABS",c:"US",cr:4.3876,ct:"Flt",m:"2026-12-21",w:0.0257,v:3.7},
+{n:"NATIONAL BANK OF CANADA",t:"NATIONAL BANK OF CANADA COMPANY GUAR 07/27 VAR",s:"Corp",c:"CA",cr:4.847,ct:"Flt",m:"2027-07-02",w:0.0251,v:3.7},
+{n:"SOUTHERN CALIFORNIA GAS COMPANY",t:"SOUTHERN CALIF GAS CO 1ST MORTGAGE 06/26 2.6",s:"Corp",c:"US",cr:2.6,ct:"Fix",m:"2026-06-15",w:0.0255,v:3.7},
+{n:"ENTERPRISE FLEET FINANCING 2025-1 LLC",t:"ENTERPRISE FLEET FINANCING LLC EFF 2025 1 A2 144A",s:"ABS",c:"US",cr:4.65,ct:"Fix",m:"2027-10-20",w:0.0257,v:3.7},
+{n:"NAVIENT STUDENT LOAN TRUST 2017-5A",t:"NAVIENT STUDENT LOAN TRUST NAVSL 2017 5A A 144A",s:"ABS",c:"US",cr:4.7887,ct:"Flt",m:"2066-07-26",w:0.0255,v:3.7},
+{n:"WESTERN MIDSTREAM OPERATING LP",t:"WESTERN MIDSTREAM OPERAT SR UNSECURED 07/26 4.65",s:"Corp",c:"US",cr:4.65,ct:"Fix",m:"2026-07-01",w:0.0253,v:3.7},
+{n:"F&G GLOBAL FUNDING",t:"F+G GLOBAL FUNDING SECURED 144A 06/26 1.75",s:"Corp",c:"US",cr:1.75,ct:"Fix",m:"2026-06-30",w:0.0253,v:3.7},
+{n:"NAVIENT PRIVATE EDUCATION REFI LOAN TRUST 2020-DA",t:"NAVIENT STUDENT LOAN TRUST NAVSL 2020 DA A 144A",s:"ABS",c:"US",cr:1.69,ct:"Fix",m:"2069-05-15",w:0.0248,v:3.6},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2019-78",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2019 78 FJ",s:"Agency",c:"US",cr:4.2984,ct:"Flt",m:"2049-06-20",w:0.0244,v:3.6},
+{n:"FREDDIE MAC REMICS 4913",t:"FREDDIE MAC FHR 4913 FC",s:"Agency",c:"US",cr:4.743,ct:"Flt",m:"2044-06-15",w:0.0251,v:3.6},
+{n:"SYDNEY AIRPORT FINANCE COMPANY PTY LIMITED",t:"SYDNEY AIRPORT FINANCE SR SECURED REGS 04/26 3.625",s:"Corp",c:"AU",cr:3.625,ct:"Fix",m:"2026-04-28",w:0.0248,v:3.6},
+{n:"COOPERATIEVE RABOBANK UA (AKA: RABOBANK NEDERLAND)",t:"COOPERATIEVE RABOBANK UA 144A 02/27 VAR",s:"Corp",c:"NL",cr:1.106,ct:"Flt",m:"2027-02-24",w:0.0244,v:3.6},
+{n:"BMW VEHICLE LEASE TRUST 2024-2",t:"BMW VEHICLE LEASE TRUST BMWLT 2024 2 A2B",s:"ABS",c:"US",cr:4.2942,ct:"Flt",m:"2027-01-25",w:0.0247,v:3.6},
+{n:"MADISON PARK FUNDING XXXV LTD",t:"MADISON PARK FUNDING LTD MDPK 2019 35A A1R 144A",s:"ABS",c:"KY",cr:5.1361,ct:"Flt",m:"2032-04-20",w:0.0248,v:3.6},
+{n:"FREDDIE MAC REMICS 5593",t:"FREDDIE MAC FHR 5593 FB",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2055-11-25",w:0.025,v:3.6},
+{n:"SFS AUTO RECEIVABLES SECURITIZATION TRUST 2024-1A",t:"SFS AUTO RECEIVABLES SECURITIZ SFAST 2024 1A A3 144A",s:"ABS",c:"US",cr:4.95,ct:"Fix",m:"2029-05-21",w:0.025,v:3.6},
+{n:"RTX CORPORATION",t:"RTX CORP SR UNSECURED 11/26 5.75",s:"Corp",c:"US",cr:5.75,ct:"Fix",m:"2026-11-08",w:0.0241,v:3.5},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2019-44",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2019 44 FE",s:"Agency",c:"US",cr:4.2984,ct:"Flt",m:"2049-04-20",w:0.0243,v:3.5},
+{n:"GM FINANCIAL CONSUMER AUTOMOBILE RECEIVABLES TRUST 2023-3",t:"GM FINANCIAL SECURITIZED TERM GMCAR 2023 3 A3",s:"ABS",c:"US",cr:5.45,ct:"Fix",m:"2028-06-16",w:0.0237,v:3.5},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2025-205",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2025 205 FH",s:"Agency",c:"US",cr:4.8355,ct:"Flt",m:"2054-04-20",w:0.024,v:3.5},
+{n:"HCA INC",t:"HCA INC DISC COML PAPER 02/26 ZCP",s:"Corp",c:"US",m:"2026-02-04",w:0.0232,v:3.4},
+{n:"WABTEC CORP (AKA: WESTINGHOUSE AIR BRAKE TECHNOLOGIES CORP)",t:"WESTINGHOUSE AIR BRAKE COMPANY GUAR 11/26 3.45",s:"Corp",c:"US",cr:3.45,ct:"Fix",m:"2026-11-15",w:0.0232,v:3.4},
+{n:"SEMPRA",t:"SEMPRA SR UNSECURED 08/26 5.4",s:"Corp",c:"US",cr:5.4,ct:"Fix",m:"2026-08-01",w:0.0235,v:3.4},
+{n:"DRYDEN CLO LTD 2018-64A",t:"DRYDEN SENIOR LOAN FUND DRSLF 2018 64A A 144A",s:"ABS",c:"KY",cr:5.1161,ct:"Flt",m:"2031-04-18",w:0.0232,v:3.4},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2022-P3",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2022 P3 A3",s:"ABS",c:"US",cr:4.61,ct:"Fix",m:"2027-11-10",w:0.0231,v:3.4},
+{n:"GALLATIN FUNDING LTD, GALLATIN CLO VII LLC 2017-1A",t:"GALLATIN LOAN MANAGEMENT, LLC GALL 2017 1A A1R 144A",s:"ABS",c:"KY",cr:5.2561,ct:"Flt",m:"2031-07-15",w:0.0232,v:3.4},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2019-31",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2019 31 CF",s:"Agency",c:"US",cr:4.2984,ct:"Flt",m:"2049-03-20",w:0.0233,v:3.4},
+{n:"KYNDRYL HOLDINGS INC",t:"KYNDRYL HOLDINGS INC SR UNSECURED 10/26 2.05",s:"Corp",c:"US",cr:2.05,ct:"Fix",m:"2026-10-15",w:0.0228,v:3.3},
+{n:"BROOKLYN UNION GAS CO/THE",t:"BROOKLYN UNION GAS CO SR UNSECURED 144A 03/26 3.407",s:"Corp",c:"US",cr:3.407,ct:"Fix",m:"2026-03-10",w:0.0226,v:3.3},
+{n:"CHESAPEAKE FUNDING II LLC 2023-1A",t:"CHESAPEAKE FUNDING II LLC CFII 2023 1A A2 144A",s:"ABS",c:"US",cr:5.2339,ct:"Flt",m:"2035-05-15",w:0.0228,v:3.3},
+{n:"CITIBANK NA",t:"CITIBANK NA SR UNSECURED 08/26 VAR",s:"Corp",c:"US",cr:4.5824,ct:"Flt",m:"2026-08-06",w:0.0224,v:3.3},
+{n:"FREDDIE MAC REMICS 5584",t:"FREDDIE MAC FHR 5584 DF",s:"Agency",c:"US",cr:4.7742,ct:"Flt",m:"2055-10-25",w:0.0225,v:3.3},
+{n:"CREDIT AGRICOLE SA",t:"CREDIT AGRICOLE SA 144A 07/26 VAR",s:"Corp",c:"FR",cr:5.16,ct:"Flt",m:"2026-07-05",w:0.0228,v:3.3},
+{n:"KINDER MORGAN INC",t:"KINDER MORGAN INC COMPANY GUAR 11/26 1.75",s:"Corp",c:"US",cr:1.75,ct:"Fix",m:"2026-11-15",w:0.0223,v:3.3},
+{n:"CROWN CASTLE INTERNATIONAL CORP (CCI)",t:"CROWN CASTLE INC SR UNSECURED 07/26 1.05",s:"Corp",c:"US",cr:1.05,ct:"Fix",m:"2026-07-15",w:0.0217,v:3.2},
+{n:"FREDDIE MAC REMICS 5580",t:"FREDDIE MAC FHR 5580 FP",s:"Agency",c:"US",cr:4.8242,ct:"Flt",m:"2055-09-25",w:0.0219,v:3.2},
+{n:"FANNIE MAE 2025-40",t:"FANNIE MAE FNR 2025 40 F",s:"Agency",c:"US",cr:4.8742,ct:"Flt",m:"2055-02-25",w:0.0219,v:3.2},
+{n:"ENBRIDGE INC",t:"ENBRIDGE INC COMPANY GUAR 10/26 1.6",s:"Corp",c:"CA",cr:1.6,ct:"Fix",m:"2026-10-04",w:0.0219,v:3.2},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2024-P3",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2024 P3 A3",s:"ABS",c:"US",cr:4.26,ct:"Fix",m:"2029-10-10",w:0.0223,v:3.2},
+{n:"FANNIE MAE REMICS 2014-50",t:"FANNIE MAE FNR 2014 50 FC",s:"Agency",c:"US",cr:4.673,ct:"Flt",m:"2044-08-25",w:0.0219,v:3.2},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2010-37",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 37 FG",s:"Agency",c:"US",cr:4.6484,ct:"Flt",m:"2040-03-20",w:0.0218,v:3.2},
+{n:"CNH INDUSTRIAL CAPITAL LLC",t:"CNH INDUSTRIAL CAP LLC COMPANY GUAR 07/26 1.45",s:"Corp",c:"US",cr:1.45,ct:"Fix",m:"2026-07-15",w:0.0218,v:3.2},
+{n:"FREDDIE MAC REMICS 5104",t:"FREDDIE MAC FHR 5104 DC",s:"Agency",c:"US",cr:1.0,ct:"Fix",m:"2044-08-15",w:0.0215,v:3.1},
+{n:"FREDDIE MAC REMICS 4367",t:"FREDDIE MAC FHR 4367 GF",s:"Agency",c:"US",cr:4.673,ct:"Flt",m:"2037-03-15",w:0.0213,v:3.1},
+{n:"SMB PRIVATE EDUCATION LOAN TRUST 2021-D",t:"SMB PRIVATE EDUCATION LOAN TRU SMB 2021 D A1B 144A",s:"ABS",c:"US",cr:4.4646,ct:"Flt",m:"2053-03-17",w:0.0212,v:3.1},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 03/27 VAR",s:"Corp",c:"US",cr:4.7608,ct:"Flt",m:"2027-03-19",w:0.0211,v:3.1},
+{n:"ZIMMER BIOMET HOLDINGS INC",t:"ZIMMER BIOMET HOLDINGS SR UNSECURED 02/27 4.7",s:"Corp",c:"US",cr:4.7,ct:"Fix",m:"2027-02-19",w:0.0215,v:3.1},
+{n:"FRESENIUS MEDICAL CARE US FINANCE III INC",t:"FRESENIUS MED CARE III COMPANY GUAR 144A 12/26 1.875",s:"Corp",c:"US",cr:1.875,ct:"Fix",m:"2026-12-01",w:0.0205,v:3.0},
+{n:"OSCAR US FUNDING XVII LLC 2024-2A",t:"OSCAR US FUNDING TRUST OSCAR 2024 2A A3 144A",s:"ABS",c:"US",cr:4.47,ct:"Fix",m:"2029-03-12",w:0.0209,v:3.0},
+{n:"VOLKSWAGEN AUTO LOAN ENHANCED TRUST 2023-1",t:"VOLKSWAGEN AUTO LOAN ENHANCED VALET 2023 1 A3",s:"ABS",c:"US",cr:5.02,ct:"Fix",m:"2028-06-20",w:0.0207,v:3.0},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2010-50",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 50 GF",s:"Agency",c:"US",cr:4.6184,ct:"Flt",m:"2040-04-20",w:0.0208,v:3.0},
+{n:"SUMITOMO MITSUI TRUST BANK LIMITED",t:"SUMITOMO MITSUI TR BK LT SR UNSECURED REGS 09/26 VAR",s:"Corp",c:"JP",cr:4.8756,ct:"Flt",m:"2026-09-14",w:0.0197,v:2.9},
+{n:"GLOBAL PAYMENTS INC",t:"GLOBAL PAYMENTS INC SR UNSECURED 01/27 2.15",s:"Corp",c:"US",cr:2.15,ct:"Fix",m:"2027-01-15",w:0.0202,v:2.9},
+{n:"TOYOTA LEASE OWNER TRUST 2024-B",t:"TOYOTA LEASE OWNER TRUST TLOT 2024 B A2B 144A",s:"ABS",c:"US",cr:4.3576,ct:"Flt",m:"2027-02-22",w:0.0202,v:2.9},
+{n:"SOCIETE GENERALE",t:"SOCIETE GENERALE REGS 01/27 VAR",s:"Corp",c:"FR",cr:6.447,ct:"Flt",m:"2027-01-12",w:0.0197,v:2.9},
+{n:"CREDIT AGRICOLE SA/LONDON BRANCH",t:"CREDIT AGRICOLE LONDON 144A 01/27 4.125",s:"Corp",c:"FR",cr:4.125,ct:"Fix",m:"2027-01-10",w:0.0197,v:2.9},
+{n:"FANNIE MAE REMICS 2016-40",t:"FANNIE MAE FNR 2016 40 EF",s:"Agency",c:"US",cr:4.773,ct:"Flt",m:"2046-07-25",w:0.0202,v:2.9},
+{n:"FELLS POINT FUNDING TRUST",t:"FELLS POINT FUNDING TR SR UNSECURED 144A 01/27 3.046",s:"Corp",c:"US",cr:3.046,ct:"Fix",m:"2027-01-31",w:0.0194,v:2.8},
+{n:"SCENTRE MANAGEMENT LTD (SCENTRE GROUP TRUST 1/SCENTRE GROUP TRUST 2)",t:"SCENTRE GROUP TRUST 1/2 COMPANY GUAR 144A 01/26 3.625",s:"Corp",c:"AU",cr:3.625,ct:"Fix",m:"2026-01-28",w:0.0193,v:2.8},
+{n:"ESSEX PORTFOLIO LP",t:"ESSEX PORTFOLIO LP COMPANY GUAR 04/26 3.375",s:"Corp",c:"US",cr:3.375,ct:"Fix",m:"2026-04-15",w:0.019,v:2.8},
+{n:"PACIFIC GAS AND ELECTRIC COMPANY",t:"PACIFIC GAS + ELECTRIC 1ST MORTGAGE 03/26 2.95",s:"Corp",c:"US",cr:2.95,ct:"Fix",m:"2026-03-01",w:0.0192,v:2.8},
+{n:"UBS GROUP AG",t:"UBS GROUP AG SR UNSECURED 144A 01/27 VAR",s:"Corp",c:"CH",cr:5.711,ct:"Flt",m:"2027-01-12",w:0.0186,v:2.7},
+{n:"BANQUE FEDERATIVE DU CREDIT MUTUEL (BFCM)",t:"BANQUE FED CRED MUTUEL REGS 01/26 4.935",s:"Corp",c:"FR",cr:4.935,ct:"Fix",m:"2026-01-26",w:0.0185,v:2.7},
+{n:"WORLD OMNI AUTO RECEIVABLES TRUST 2023-B",t:"WORLD OMNI AUTO RECEIVABLES TR WOART 2023 B A3",s:"ABS",c:"US",cr:4.66,ct:"Fix",m:"2028-05-15",w:0.0183,v:2.7},
+{n:"FANNIE MAE REMICS 2025-66",t:"FANNIE MAE FNR 2025 66 FK",s:"Agency",c:"US",cr:5.0542,ct:"Flt",m:"2055-08-25",w:0.0185,v:2.7},
+{n:"HSBC HOLDINGS PLC",t:"HSBC HOLDINGS PLC SR UNSECURED 08/27 VAR",s:"Corp",c:"GB",cr:5.887,ct:"Flt",m:"2027-08-14",w:0.0189,v:2.7},
+{n:"MF1 MULTIFAMILY HOUSING MORTGAGE LOAN TRUST 2021-W10",t:"MF1 MULTIFAMILY HOUSING MORTGA MF1 2021 W10 A 144A",s:"ABS",c:"US",cr:4.8203,ct:"Flt",m:"2034-12-15",w:0.0185,v:2.7},
+{n:"NATIXIS COMMERCIAL MORTGAGE SECURITIES TRUST 2021-APPL",t:"NATIXIS COMMERCIAL MORTGAGE SE NCMS 2021 APPL A 144A",s:"ABS",c:"US",cr:4.9655,ct:"Flt",m:"2038-08-15",w:0.0186,v:2.7},
+{n:"MMAF EQUIPMENT FINANCE LLC 2024-A",t:"MMAF EQUIPMENT FINANCE LLC MMAF 2024 A A2 144A",s:"ABS",c:"US",cr:5.2,ct:"Fix",m:"2027-09-13",w:0.0181,v:2.6},
+{n:"AMPHENOL CORPORATION",t:"AMPHENOL CORP SR UNSECURED 11/28 3.9",s:"Corp",c:"US",cr:3.9,ct:"Fix",m:"2028-11-15",w:0.0178,v:2.6},
+{n:"ROYAL BANK OF CANADA",t:"ROYAL BANK OF CANADA SR UNSECURED 11/26 VAR",s:"Corp",c:"CA",cr:4.4989,ct:"Flt",m:"2026-11-02",w:0.0179,v:2.6},
+{n:"FREDDIE MAC REMICS 4794",t:"FREDDIE MAC FHR 4794 WF",s:"Agency",c:"US",cr:4.673,ct:"Flt",m:"2043-03-15",w:0.0181,v:2.6},
+{n:"UNITEDHEALTH GROUP INCORPORATED",t:"UNITEDHEALTH GROUP INC SR UNSECURED 07/26 VAR",s:"Corp",c:"US",cr:4.4902,ct:"Flt",m:"2026-07-15",w:0.018,v:2.6},
+{n:"NAVIENT PRIVATE EDUCATION REFI LOAN TRUST 2021-A",t:"NAVIENT STUDENT LOAN TRUST NAVSL 2021 A A 144A",s:"ABS",c:"US",cr:0.84,ct:"Fix",m:"2069-05-15",w:0.0173,v:2.5},
+{n:"JACKSON NATIONAL LIFE GLOBAL FUNDING",t:"JACKSON NATL LIFE GLOBAL SECURED 144A 01/26 5.5",s:"Corp",c:"US",cr:5.5,ct:"Fix",m:"2026-01-09",w:0.0172,v:2.5},
+{n:"EQUINIX INC",t:"EQUINIX INC SR UNSECURED 11/26 2.9",s:"Corp",c:"US",cr:2.9,ct:"Fix",m:"2026-11-18",w:0.0174,v:2.5},
+{n:"HONDA AUTO RECEIVABLES-2024-1 OWNER TRUST",t:"HONDA AUTO RECEIVABLES OWNER T HAROT 2024 1 A3",s:"ABS",c:"US",cr:5.21,ct:"Fix",m:"2028-08-15",w:0.0169,v:2.5},
+{n:"AMERICAN HONDA FINANCE CORPORATION",t:"AMERICAN HONDA FINANCE SR UNSECURED 03/27 VAR",s:"Corp",c:"US",cr:4.4914,ct:"Flt",m:"2027-03-12",w:0.0173,v:2.5},
+{n:"GPMT LLC 2021-FL3",t:"GPMT LTD. GPMT 2021 FL3 A 144A",s:"ABS",c:"KY",cr:5.349,ct:"Flt",m:"2035-07-16",w:0.0174,v:2.5},
+{n:"FANNIE MAE REMICS 2019-60",t:"FANNIE MAE FNR 2019 60 WF",s:"Agency",c:"US",cr:4.723,ct:"Flt",m:"2059-10-25",w:0.017,v:2.5},
+{n:"ARI FLEET LEASE TRUST 2023-A",t:"ARI FLEET LEASE TRUST ARIFL 2023 A A2 144A",s:"ABS",c:"US",cr:5.41,ct:"Fix",m:"2032-02-17",w:0.017,v:2.5},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2015-H10",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2015 H10 FB",s:"Agency",c:"US",cr:4.7441,ct:"Flt",m:"2065-04-20",w:0.0167,v:2.4},
+{n:"FORD MOTOR CREDIT COMPANY LLC",t:"FORD MOTOR CREDIT CO LLC SR UNSECURED 03/26 VAR",s:"Corp",c:"US",cr:6.717,ct:"Flt",m:"2026-03-06",w:0.0167,v:2.4},
+{n:"THE BANK OF NOVA SCOTIA",t:"BANK OF NOVA SCOTIA SR UNSECURED 09/26 VAR",s:"Corp",c:"CA",cr:4.3229,ct:"Flt",m:"2026-09-15",w:0.0162,v:2.4},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2015-H25",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2015 H25 FD",s:"Agency",c:"US",cr:4.7641,ct:"Flt",m:"2065-10-20",w:0.0168,v:2.4},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2025-P1",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2025 P1 A2",s:"ABS",c:"US",cr:4.5,ct:"Fix",m:"2028-06-12",w:0.0165,v:2.4},
+{n:"PHEAA STUDENT LOAN TRUST 2016-2A",t:"PENNSYLVANIA HIGHER EDUCATION PHEAA 2016 2A A 144A",s:"ABS",c:"US",cr:4.9387,ct:"Flt",m:"2065-11-25",w:0.0162,v:2.4},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 03/26 5.5",s:"Corp",c:"US",cr:5.5,ct:"Fix",m:"2026-03-30",w:0.0156,v:2.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2021-H01",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2021 H01 FC",s:"Agency",c:"US",cr:4.5141,ct:"Flt",m:"2070-11-20",w:0.0156,v:2.3},
+{n:"FREDDIE MAC STRIPS 328",t:"FREDDIEMAC STRIP FHS 328 F4",s:"Agency",c:"US",cr:4.673,ct:"Flt",m:"2038-02-15",w:0.0161,v:2.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2010-115",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 115 FP",s:"Agency",c:"US",cr:4.4484,ct:"Flt",m:"2040-09-20",w:0.016,v:2.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2016-H04",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2016 H04 FK",s:"Agency",c:"US",cr:5.1641,ct:"Flt",m:"2066-02-20",w:0.0158,v:2.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2017-H14",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2017 H14 FE",s:"Agency",c:"US",cr:5.2274,ct:"Flt",m:"2067-06-20",w:0.0159,v:2.3},
+{n:"DRSLF-2017-54A",t:"DRYDEN SENIOR LOAN FUND DRSLF 2017 54A AR 144A",s:"ABS",c:"KY",cr:5.0344,ct:"Flt",m:"2029-10-19",w:0.015,v:2.2},
+{n:"SLM STUDENT LOAN TRUST 2005-A",t:"SLM STUDENT LOAN TRUST SLMA 2005 A A4",s:"ABS",c:"US",cr:4.2948,ct:"Flt",m:"2038-12-15",w:0.0151,v:2.2},
+{n:"OCTAGON INVESTMENT PARTNERS 39 LTD 2018-3A",t:"OCTAGON INVESTMENT PARTNERS 39 OCT39 2018 3A AR 144A",s:"ABS",c:"KY",cr:5.0344,ct:"Flt",m:"2030-10-20",w:0.0151,v:2.2},
+{n:"FORD CREDIT AUTO OWNER TRUST 2023-B",t:"FORD CREDIT AUTO OWNER TRUST FORDO 2023 B A3",s:"ABS",c:"US",cr:5.23,ct:"Fix",m:"2028-05-15",w:0.0153,v:2.2},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2015-H04",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2015 H04 FA",s:"Agency",c:"US",cr:4.7641,ct:"Flt",m:"2064-12-20",w:0.0151,v:2.2},
+{n:"TOYOTA AUTO RECEIVABLES 2023-A OWNER TRUST",t:"TOYOTA AUTO RECEIVABLES OWNER TAOT 2023 A A3",s:"ABS",c:"US",cr:4.63,ct:"Fix",m:"2027-09-15",w:0.0148,v:2.2},
+{n:"AOZORA BANK LTD",t:"AOZORA BANK SR UNSECURED REGS 09/26 5.9",s:"Corp",c:"JP",cr:5.9,ct:"Fix",m:"2026-09-08",w:0.015,v:2.2},
+{n:"PENSKE TRUCK LEASING CO LP / PTL FINANCE CORP",t:"PENSKE TRUCK LEASING/PTL SR UNSECURED 144A 04/27 4.2",s:"Corp",c:"US",cr:4.2,ct:"Fix",m:"2027-04-01",w:0.0144,v:2.1},
+{n:"STANDARD CHARTERED PLC",t:"STANDARD CHARTERED PLC SR UNSECURED REGS 07/27 VAR",s:"Corp",c:"GB",cr:6.187,ct:"Flt",m:"2027-07-06",w:0.0146,v:2.1},
+{n:"FREDDIE MAC REMICS 4875",t:"FREDDIE MAC FHR 4875 F",s:"Agency",c:"US",cr:4.5483,ct:"Flt",m:"2049-04-15",w:0.0144,v:2.1},
+{n:"CARMAX AUTO OWNER TRUST 2023-1",t:"CARMAX AUTO OWNER TRUST CARMX 2023 1 A3",s:"ABS",c:"US",cr:4.75,ct:"Fix",m:"2027-10-15",w:0.0146,v:2.1},
+{n:"STANDARD CHARTERED PLC",t:"STANDARD CHARTERED PLC SR UNSECURED 144A 01/27 VAR",s:"Corp",c:"GB",cr:6.17,ct:"Flt",m:"2027-01-09",w:0.0143,v:2.1},
+{n:"MPLX LP",t:"MPLX LP SR UNSECURED 03/27 4.125",s:"Corp",c:"US",cr:4.125,ct:"Fix",m:"2027-03-01",w:0.0146,v:2.1},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 09/27 VAR",s:"Corp",c:"US",cr:4.7736,ct:"Flt",m:"2027-09-24",w:0.0145,v:2.1},
+{n:"CHASE AUTO OWNER TRUST 2024-5A",t:"CHASE AUTO OWNER TRUST CHAOT 2024 5A A3 144A",s:"ABS",c:"US",cr:4.18,ct:"Fix",m:"2029-08-27",w:0.0145,v:2.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2015-H12",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2015 H12 FD",s:"Agency",c:"US",cr:4.7141,ct:"Flt",m:"2065-05-20",w:0.0142,v:2.1},
+{n:"FANNIE MAE REMICS 2014-61",t:"FANNIE MAE FNR 2014 61 FA",s:"Agency",c:"US",cr:4.673,ct:"Flt",m:"2044-10-25",w:0.0146,v:2.1},
+{n:"FREDDIE MAC REMICS 4736",t:"FREDDIE MAC FHR 4736 AF",s:"Agency",c:"US",cr:4.673,ct:"Flt",m:"2042-08-15",w:0.0145,v:2.1},
+{n:"PENFED AUTO RECEIVABLES OWNER TRUST 2025-A",t:"PENFED AUTO RECEIVABLES OWNER PNFED 2025 A A2 144A",s:"ABS",c:"US",cr:4.12,ct:"Fix",m:"2028-09-15",w:0.0138,v:2.0},
+{n:"FREDDIE MAC REMICS 4600",t:"FREDDIE MAC FHR 4600 FA",s:"Agency",c:"US",cr:4.723,ct:"Flt",m:"2044-11-15",w:0.0135,v:2.0},
+{n:"FANNIE MAE REMICS 2024-70",t:"FANNIE MAE FNR 2024 70 FA",s:"Agency",c:"US",cr:4.9242,ct:"Flt",m:"2054-10-25",w:0.0137,v:2.0},
+{n:"SOUTHWESTERN ELECTRIC POWER COMPANY",t:"SOUTHWESTERN ELEC POWER SR UNSECURED 03/26 1.65",s:"Corp",c:"US",cr:1.65,ct:"Fix",m:"2026-03-15",w:0.0138,v:2.0},
+{n:"NTT FINANCE CORPORATION",t:"NTT FINANCE CORP COMPANY GUAR REGS 04/26 1.162",s:"Corp",c:"JP",cr:1.162,ct:"Fix",m:"2026-04-03",w:0.0136,v:2.0},
+{n:"NATWEST GROUP PLC",t:"NATWEST GROUP PLC SR UNSECURED 06/27 VAR",s:"Corp",c:"GB",cr:1.642,ct:"Flt",m:"2027-06-14",w:0.0136,v:2.0},
+{n:"AVOLON HOLDINGS FUNDING LIMITED",t:"AVOLON HOLDINGS FNDG LTD COMPANY GUAR 144A 04/26 4.25",s:"Corp",c:"KY",cr:4.25,ct:"Fix",m:"2026-04-15",w:0.0137,v:2.0},
+{n:"FREDDIE MAC REMICS 5439",t:"FREDDIE MAC FHR 5439 FJ",s:"Agency",c:"US",cr:4.9742,ct:"Flt",m:"2054-08-25",w:0.014,v:2.0},
+{n:"ATHENE GLOBAL FUNDING",t:"ATHENE GLOBAL FUNDING SECURED 144A 03/27 VAR",s:"Corp",c:"US",cr:4.9596,ct:"Flt",m:"2027-03-25",w:0.0138,v:2.0},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 01/26 1.3",s:"Corp",c:"US",cr:1.3,ct:"Fix",m:"2026-01-08",w:0.0138,v:2.0},
+{n:"FANNIE MAE REMICS 2016-40",t:"FANNIE MAE FNR 2016 40 DF",s:"Agency",c:"US",cr:4.823,ct:"Flt",m:"2046-07-25",w:0.0139,v:2.0},
+{n:"AIR LEASE CORPORATION",t:"AIR LEASE CORP DISC COML 01/26 ZCP",s:"Corp",c:"US",m:"2026-01-15",w:0.013,v:1.9},
+{n:"FANNIE MAE REMICS 2025-16",t:"FANNIE MAE FNR 2025 16 FN",s:"Agency",c:"US",cr:4.8242,ct:"Flt",m:"2055-01-25",w:0.0129,v:1.9},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2025-101",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2025 101 FC",s:"Agency",c:"US",cr:4.9177,ct:"Flt",m:"2055-06-20",w:0.013,v:1.9},
+{n:"WORLD OMNI AUTO RECEIVABLES TRUST 2024-C",t:"WORLD OMNI AUTO RECEIVABLES TR WOART 2024 C A2A",s:"ABS",c:"US",cr:4.78,ct:"Fix",m:"2028-01-18",w:0.0129,v:1.9},
+{n:"VERUS SECURITIZATION TRUST 2021-R1",t:"VERUS SECURITIZATION TRUST VERUS 2021 R1 A1 144A",s:"ABS",c:"US",cr:0.82,ct:"Var",m:"2063-10-25",w:0.0125,v:1.8},
+{n:"TOYOTA AUTO RECEIVABLES 2024-B OWNER TRUST",t:"TOYOTA AUTO RECEIVABLES OWNER TAOT 2024 B A3",s:"ABS",c:"US",cr:5.33,ct:"Fix",m:"2029-01-16",w:0.0121,v:1.8},
+{n:"NISSAN AUTO LEASE TRUST 2025-A",t:"NISSAN AUTO LEASE TRUST NALT 2025 A A2A",s:"ABS",c:"US",cr:4.6,ct:"Fix",m:"2027-11-15",w:0.0117,v:1.7},
+{n:"MORGAN STANLEY CAPITAL I TRUST 2017-ASHF",t:"MORGAN STANLEY CAPITAL I TRUST MSC 2017 ASHF A 144A",s:"ABS",c:"US",cr:4.898,ct:"Flt",m:"2034-11-15",w:0.0114,v:1.7},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2010-4",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 4 FM",s:"Agency",c:"US",cr:4.5487,ct:"Flt",m:"2040-01-16",w:0.0113,v:1.7},
+{n:"WORLD OMNI AUTOMOBILE LEASE SECURITIZATION TRUST 2024-A",t:"WORLD OMNI AUTOMOBILE LEASE SE WOLS 2024 A A2B",s:"ABS",c:"US",cr:4.4139,ct:"Flt",m:"2027-02-16",w:0.0118,v:1.7},
+{n:"TOYOTA AUTO RECEIVABLES 2022-D OWNER TRUST",t:"TOYOTA AUTO RECEIVABLES OWNER TAOT 2022 D A3",s:"ABS",c:"US",cr:5.3,ct:"Fix",m:"2027-09-15",w:0.0117,v:1.7},
+{n:"CROSSROADS ASSET TRUST 2025-A",t:"CROSSROADS ASSET TRUST XROAD 2025 A A2 144A",s:"ABS",c:"US",cr:4.91,ct:"Fix",m:"2032-02-20",w:0.0115,v:1.7},
+{n:"BMW US CAPITAL LLC",t:"BMW US CAPITAL LLC COMPANY GUAR REGS 08/27 VAR",s:"Corp",c:"US",cr:4.7963,ct:"Flt",m:"2027-08-13",w:0.0115,v:1.7},
+{n:"PIMCO FUNDS",t:"PIMCO GOVERNMENT MONEY MARKET FUND",s:"Muni",c:"US",w:0.0115,v:1.7},
+{n:"SARANAC CLO LTD 2018-6A",t:"SARANAC CLO LTD SRANC 2018 6A A1R 144A",s:"ABS",c:"JE",cr:5.1248,ct:"Flt",m:"2031-08-13",w:0.0118,v:1.7},
+{n:"NTT FINANCE CORPORATION",t:"NTT FINANCE CORP SR UNSECURED 144A 07/27 4.567",s:"Corp",c:"JP",cr:4.567,ct:"Fix",m:"2027-07-16",w:0.0118,v:1.7},
+{n:"UBS GROUP AG",t:"UBS GROUP AG SR UNSECURED REGS 01/27 VAR",s:"Corp",c:"CH",cr:1.364,ct:"Flt",m:"2027-01-30",w:0.0115,v:1.7},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED REGS 06/27 VAR",s:"Corp",c:"US",cr:4.7836,ct:"Flt",m:"2027-06-24",w:0.0117,v:1.7},
+{n:"FORD CREDIT AUTO OWNER TRUST 2023-A",t:"FORD CREDIT AUTO OWNER TRUST FORDO 2023 A A3",s:"ABS",c:"US",cr:4.65,ct:"Fix",m:"2028-02-15",w:0.0118,v:1.7},
+{n:"FANNIE MAE REMICS 2014-49",t:"FANNIE MAE FNR 2014 49 AF",s:"Agency",c:"US",cr:4.643,ct:"Flt",m:"2044-08-25",w:0.0109,v:1.6},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2023-P1",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2023 P1 A3 144A",s:"ABS",c:"US",cr:5.98,ct:"Fix",m:"2027-12-10",w:0.0108,v:1.6},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED REGS 01/28 VAR",s:"Corp",c:"US",cr:4.9258,ct:"Flt",m:"2028-01-07",w:0.011,v:1.6},
+{n:"ENERGY TRANSFER LP",t:"ENERGY TRANSFER LP SR UNSECURED 03/27 4.4",s:"Corp",c:"US",cr:4.4,ct:"Fix",m:"2027-03-15",w:0.0107,v:1.6},
+{n:"ENEL FINANCE INTERNATIONAL NV",t:"ENEL FINANCE INTL NV COMPANY GUAR REGS 07/26 1.625",s:"Corp",c:"NL",cr:1.625,ct:"Var",m:"2026-07-12",w:0.0108,v:1.6},
+{n:"FREDDIE MAC STRIPS 330",t:"FREDDIEMAC STRIP FHS 330 F4",s:"Agency",c:"US",cr:4.673,ct:"Flt",m:"2037-10-15",w:0.0106,v:1.5},
+{n:"SLM STUDENT LOAN TRUST 2012-2",t:"SLM STUDENT LOAN TRUST SLMA 2012 2 A",s:"ABS",c:"US",cr:4.6887,ct:"Flt",m:"2029-01-25",w:0.0101,v:1.5},
+{n:"CARMAX AUTO OWNER TRUST 2022-4",t:"CARMAX AUTO OWNER TRUST CARMX 2022 4 A3",s:"ABS",c:"US",cr:5.34,ct:"Fix",m:"2027-08-16",w:0.0105,v:1.5},
+{n:"STANDARD CHARTERED PLC",t:"STANDARD CHARTERED PLC SR UNSECURED 144A 07/27 VAR",s:"Corp",c:"GB",cr:5.6974,ct:"Flt",m:"2027-07-06",w:0.0104,v:1.5},
+{n:"ATCLO-2021-17A",t:"ATLAS SENIOR LOAN FUND LTD ATCLO 2021 17A AR 144A",s:"ABS",c:"KY",cr:4.9444,ct:"Flt",m:"2034-10-20",w:0.0106,v:1.5},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2010-15",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 15 AF",s:"Agency",c:"US",cr:4.5884,ct:"Flt",m:"2040-02-20",w:0.01,v:1.5},
+{n:"STARWOOD MORTGAGE RESIDENTIAL TRUST 2020-INV1",t:"STARWOOD MORTGAGE RESIDENTIAL STAR 2020 INV1 A1 144A",s:"ABS",c:"US",cr:1.027,ct:"Fix",m:"2055-11-25",w:0.01,v:1.4},
+{n:"UBS GROUP AG",t:"UBS GROUP AG SR UNSECURED REGS 01/27 VAR",s:"Corp",c:"CH",cr:5.711,ct:"Flt",m:"2027-01-12",w:0.0096,v:1.4},
+{n:"VONTIER CORPORATION",t:"VONTIER CORP COMPANY GUAR 04/26 1.8",s:"Corp",c:"US",cr:1.8,ct:"Fix",m:"2026-04-01",w:0.0093,v:1.4},
+{n:"MERCEDES-BENZ AUTO LEASE TRUST 2024-B",t:"MERCEDES BENZ AUTO LEASE TRUST MBALT 2024 B A2B",s:"ABS",c:"US",cr:4.4238,ct:"Flt",m:"2026-12-15",w:0.0096,v:1.4},
+{n:"NATIONAL FUEL GAS COMPANY",t:"NATIONAL FUEL GAS CO SR UNSECURED 10/26 5.5",s:"Corp",c:"US",cr:5.5,ct:"Fix",m:"2026-10-01",w:0.0098,v:1.4},
+{n:"AIR LEASE CORPORATION",t:"AIR LEASE CORP SR UNSECURED 04/27 3.625",s:"Corp",c:"US",cr:3.625,ct:"Fix",m:"2027-04-01",w:0.0086,v:1.3},
+{n:"GENERAL MOTORS FINANCIAL COMPANY INC",t:"GENERAL MOTORS FINL CO SR UNSECURED 01/26 1.25",s:"Corp",c:"US",cr:1.25,ct:"Fix",m:"2026-01-08",w:0.0092,v:1.3},
+{n:"FEDERATION DES CAISSES DESJARDINS DU QUEBEC",t:"FED CAISSES DESJARDINS SR UNSECURED REGS 01/27 VAR",s:"Corp",c:"CA",cr:4.5764,ct:"Flt",m:"2027-01-27",w:0.0088,v:1.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2011-69",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2011 69 FB",s:"Agency",c:"US",cr:4.4984,ct:"Flt",m:"2041-05-20",w:0.0086,v:1.3},
+{n:"KOREA NATIONAL OIL CORP (KNOC)",t:"KOREA NATIONAL OIL CORP SR UNSECURED 144A 11/26 VAR",s:"Corp",c:"KR",cr:4.953,ct:"Flt",m:"2026-11-14",w:0.0087,v:1.3},
+{n:"AUTOZONE INC",t:"AUTOZONE INC SR UNSECURED 04/26 3.125",s:"Corp",c:"US",cr:3.125,ct:"Fix",m:"2026-04-21",w:0.009,v:1.3},
+{n:"GOLDMAN SACHS GROUP INC",t:"GOLDMAN SACHS GROUP INC SR UNSECURED 04/28 VAR",s:"Corp",c:"US",cr:5.2448,ct:"Flt",m:"2028-04-23",w:0.0091,v:1.3},
+{n:"BLUEMOUNTAIN CLO LTD 2016-3A",t:"BLUEMOUNTAIN CLO LTD BLUEM 2016 3A A1R2 144A",s:"ABS",c:"KY",cr:5.0518,ct:"Flt",m:"2030-11-15",w:0.0086,v:1.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2012-H08",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2012 H08 FA",s:"Agency",c:"US",cr:4.7141,ct:"Flt",m:"2062-01-20",w:0.0093,v:1.3},
+{n:"AMERICAN TOWER CORP (AKA: AMERICAN TOWER REIT INC)",t:"AMERICAN TOWER CORP SR UNSECURED 01/27 2.75",s:"Corp",c:"US",cr:2.75,ct:"Fix",m:"2027-01-15",w:0.0081,v:1.2},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2016-H02",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2016 H02 FH",s:"Agency",c:"US",cr:5.1141,ct:"Flt",m:"2066-01-20",w:0.0083,v:1.2},
+{n:"TOYOTA AUTO RECEIVABLES 2022-C OWNER TRUST",t:"TOYOTA AUTO RECEIVABLES OWNER TAOT 2022 C A3",s:"ABS",c:"US",cr:3.76,ct:"Fix",m:"2027-04-15",w:0.0083,v:1.2},
+{n:"SLM STUDENT LOAN TRUST 2012-3",t:"SLM STUDENT LOAN TRUST SLMA 2012 3 A",s:"ABS",c:"US",cr:4.6387,ct:"Flt",m:"2038-12-27",w:0.0084,v:1.2},
+{n:"CMS ENERGY CORPORATION",t:"CMS ENERGY CORP SR UNSECURED 05/26 3",s:"Corp",c:"US",cr:3.0,ct:"Fix",m:"2026-05-15",w:0.0079,v:1.2},
+{n:"AIR LEASE CORPORATION",t:"AIR LEASE CORP SR UNSECURED 06/26 3.75",s:"Corp",c:"US",cr:3.75,ct:"Fix",m:"2026-06-01",w:0.0084,v:1.2},
+{n:"FANNIE MAE REMICS 2014-42",t:"FANNIE MAE FNR 2014 42 FA",s:"Agency",c:"US",cr:4.723,ct:"Flt",m:"2044-07-25",w:0.008,v:1.2},
+{n:"ROMARK CLO LTD 2017-1A",t:"ROMARK CLO LTD RMRK 2017 1A A1R 144A",s:"ABS",c:"KY",cr:5.1514,ct:"Flt",m:"2030-10-23",w:0.0078,v:1.1},
+{n:"BPCE SA",t:"BPCE SA REGS 01/27 VAR",s:"Corp",c:"FR",cr:5.975,ct:"Flt",m:"2027-01-18",w:0.0072,v:1.1},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2023-P4",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2023 P4 A3 144A",s:"ABS",c:"US",cr:6.16,ct:"Fix",m:"2028-10-10",w:0.0073,v:1.1},
+{n:"USAA AUTO OWNER TRUST 2023-A",t:"USAA AUTO OWNER TRUST USAOT 2023 A A3 144A",s:"ABS",c:"US",cr:5.58,ct:"Fix",m:"2028-05-15",w:0.0076,v:1.1},
+{n:"FANNIE MAE REMICS 2015-87",t:"FANNIE MAE FNR 2015 87 BF",s:"Agency",c:"US",cr:4.2887,ct:"Flt",m:"2045-12-25",w:0.0076,v:1.1},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2024-P2",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2024 P2 A3",s:"ABS",c:"US",cr:5.33,ct:"Fix",m:"2029-07-10",w:0.0068,v:1.0},
+{n:"VIRGINIA ELECTRIC AND POWER COMPANY",t:"VIRGINIA ELEC + POWER CO SR UNSECURED 11/26 2.95",s:"Corp",c:"US",cr:2.95,ct:"Fix",m:"2026-11-15",w:0.007,v:1.0},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2020-21",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2020 21 AC",s:"Agency",c:"US",cr:2.5,ct:"Fix",m:"2049-01-20",w:0.0071,v:1.0},
+{n:"GENERAL MOTORS FINANCIAL COMPANY INC",t:"GENERAL MOTORS FINL CO COMPANY GUAR 10/26 4",s:"Corp",c:"US",cr:4.0,ct:"Fix",m:"2026-10-06",w:0.0072,v:1.0},
+{n:"FREDDIE MAC REMICS 4722",t:"FREDDIE MAC FHR 4722 FA",s:"Agency",c:"US",cr:4.643,ct:"Flt",m:"2038-05-15",w:0.007,v:1.0},
+{n:"COOPERATIEVE RABOBANK UA/NEW YORK BRANCH",t:"COOPERAT RABOBANK UA/NY 10/26 VAR",s:"Corp",c:"NL",cr:4.7701,ct:"Flt",m:"2026-10-05",w:0.0066,v:1.0},
+{n:"VOLKSWAGEN GROUP OF AMERICA FINANCE LLC",t:"VOLKSWAGEN GROUP AMERICA COMPANY GUAR REGS 09/26 5.7",s:"Corp",c:"US",cr:5.7,ct:"Fix",m:"2026-09-12",w:0.0069,v:1.0},
+{n:"NOMURA HOLDINGS INC",t:"NOMURA HOLDINGS INC SR UNSECURED 01/27 2.329",s:"Corp",c:"JP",cr:2.329,ct:"Fix",m:"2027-01-22",w:0.0067,v:1.0},
+{n:"FNMA PASS THRU POOLS",t:"FNMA POOL AL7183 FN 01/36 FLOATING VAR",s:"Agency",c:"US",cr:6.27,ct:"Flt",m:"2036-01-01",w:0.0069,v:1.0},
+{n:"BMW US CAPITAL LLC",t:"BMW US CAPITAL LLC COMPANY GUAR 144A 03/28 VAR",s:"Corp",c:"US",cr:4.6425,ct:"Flt",m:"2028-03-21",w:0.0071,v:1.0},
+{n:"FREDDIE MAC REMICS 4521",t:"FREDDIE MAC FHR 4521 AF",s:"Agency",c:"US",cr:4.653,ct:"Flt",m:"2041-05-15",w:0.0069,v:1.0},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2016-H17",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2016 H17 FC",s:"Agency",c:"US",cr:4.9441,ct:"Flt",m:"2066-08-20",w:0.0069,v:1.0},
+{n:"SVENSKA HANDELSBANKEN AB",t:"SVENSKA HANDELSBANKEN AB 144A 06/26 VAR",s:"Corp",c:"SE",cr:4.9629,ct:"Flt",m:"2026-06-15",w:0.0069,v:1.0},
+{n:"CAPITAL ONE PRIME AUTO RECEIVABLES TRUST 2023-2",t:"CAPITAL ONE PRIME AUTO RECEIVA COPAR 2023 2 A3",s:"ABS",c:"US",cr:5.82,ct:"Fix",m:"2028-06-15",w:0.0068,v:1.0},
+{n:"SBNA AUTO LEASE TRUST 2025-A",t:"SBNA AUTO LEASE TRUST SBALT 2025 A A2 144A",s:"ABS",c:"US",cr:4.68,ct:"Fix",m:"2027-04-20",w:0.0061,v:0.9},
+{n:"BANQUE FEDERATIVE DU CREDIT MUTUEL (BFCM)",t:"BANQUE FED CRED MUTUEL 144A 02/28 VAR",s:"Corp",c:"FR",cr:4.94,ct:"Flt",m:"2028-02-16",w:0.0062,v:0.9},
+{n:"GM FINANCIAL CONSUMER AUTOMOBILE RECEIVABLES TRUST 2023-1",t:"GM FINANCIAL SECURITIZED TERM GMCAR 2023 1 A3",s:"ABS",c:"US",cr:4.66,ct:"Fix",m:"2028-02-16",w:0.0063,v:0.9},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2010-H27",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 H27 FA",s:"Agency",c:"US",cr:4.4941,ct:"Flt",m:"2060-12-20",w:0.0058,v:0.9},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2020-17",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2020 17 EU",s:"Agency",c:"US",cr:2.5,ct:"Fix",m:"2049-10-20",w:0.0061,v:0.9},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2022-N1",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2022 N1 A2 144A",s:"ABS",c:"US",cr:3.21,ct:"Fix",m:"2028-12-11",w:0.0063,v:0.9},
+{n:"FREDDIE MAC REMICS 4678",t:"FREDDIE MAC FHR 4678 AF",s:"Agency",c:"US",cr:4.723,ct:"Flt",m:"2042-12-15",w:0.006,v:0.9},
+{n:"SMB PRIVATE EDUCATION LOAN TRUST 2020-B",t:"SMB PRIVATE EDUCATION LOAN TRU SMB 2020 B A1B 144A",s:"ABS",c:"US",cr:4.9646,ct:"Flt",m:"2053-07-15",w:0.0063,v:0.9},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2016-H06",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2016 H06 FD",s:"Agency",c:"US",cr:5.0341,ct:"Flt",m:"2065-07-20",w:0.0061,v:0.9},
+{n:"ING INVESTMENT MANAGEMENT CLO LTD 2012-4A",t:"VOYA CLO LTD INGIM 2012 4A A1R3 144A",s:"ABS",c:"KY",cr:5.1662,ct:"Flt",m:"2030-10-15",w:0.0064,v:0.9},
+{n:"GCAT LLC 2019-RPL1",t:"GCAT GCAT 2019 RPL1 A1 144A",s:"ABS",c:"US",cr:2.65,ct:"Var",m:"2068-10-25",w:0.0059,v:0.9},
+{n:"ENTERPRISE FLEET FINANCING 2024-3 LLC",t:"ENTERPRISE FLEET FINANCING LLC EFF 2024 3 A2 144A",s:"ABS",c:"US",cr:5.31,ct:"Fix",m:"2027-04-20",w:0.0061,v:0.9},
+{n:"BANK OF MONTREAL",t:"BANK OF MONTREAL SR UNSECURED 06/27 VAR",s:"Corp",c:"CA",cr:4.5416,ct:"Flt",m:"2027-06-04",w:0.0062,v:0.9},
+{n:"POST CLO 2021-1 LTD",t:"POST CLO LTD POST 2021 1A AR 144A",s:"ABS",c:"KY",cr:4.9845,ct:"Flt",m:"2034-10-15",w:0.0055,v:0.8},
+{n:"NELNET STUDENT LOAN TRUST 2005-3",t:"NELNET STUDENT LOAN TRUST NSLT 2005 3 A5",s:"ABS",c:"US",cr:4.4594,ct:"Flt",m:"2035-12-24",w:0.0054,v:0.8},
+{n:"CONAGRA BRANDS INC",t:"CONAGRA BRANDS INC SR UNSECURED 10/26 7.125",s:"Corp",c:"US",cr:7.125,ct:"Fix",m:"2026-10-01",w:0.0055,v:0.8},
+{n:"AVIATION CAPITAL GROUP LLC",t:"AVIATION CAPITAL GROUP SR UNSECURED 144A 04/27 4.75",s:"Corp",c:"US",cr:4.75,ct:"Fix",m:"2027-04-14",w:0.0055,v:0.8},
+{n:"BANQUE FEDERATIVE DU CREDIT MUTUEL (BFCM)",t:"BANQUE FED CRED MUTUEL 144A 07/26 5.896",s:"Corp",c:"FR",cr:5.896,ct:"Fix",m:"2026-07-13",w:0.0055,v:0.8},
+{n:"GLENCORE FUNDING LLC",t:"GLENCORE FUNDING LLC COMPANY GUAR 144A 04/26 1.625",s:"Corp",c:"US",cr:1.625,ct:"Fix",m:"2026-04-27",w:0.0056,v:0.8},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2018-H20",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2018 H20 FC",s:"Agency",c:"US",cr:4.3371,ct:"Flt",m:"2068-10-20",w:0.0053,v:0.8},
+{n:"NAVIENT STUDENT LOAN TRUST 2019-CA",t:"NAVIENT STUDENT LOAN TRUST NAVSL 2019 CA A2 144A",s:"ABS",c:"US",cr:3.13,ct:"Fix",m:"2068-02-15",w:0.0055,v:0.8},
+{n:"GOVERNMENT NATL MTGE ASSOC 2010-H11",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 H11 FA",s:"Agency",c:"US",cr:5.0302,ct:"Flt",m:"2060-06-20",w:0.0045,v:0.7},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2017-H05",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2017 H05 FC",s:"Agency",c:"US",cr:4.8641,ct:"Flt",m:"2067-02-20",w:0.005,v:0.7},
+{n:"VOLKSWAGEN GROUP OF AMERICA FINANCE LLC",t:"VOLKSWAGEN GROUP AMERICA COMPANY GUAR REGS 08/26 VAR",s:"Corp",c:"US",cr:4.9325,ct:"Flt",m:"2026-08-14",w:0.0046,v:0.7},
+{n:"NEWARK BSL CLO 2 LTD 2017 1A",t:"NEWARK BSL CLO 2 LTD. NBCLO 2017 1A A1R 144A",s:"ABS",c:"KY",cr:5.0896,ct:"Flt",m:"2030-07-25",w:0.0049,v:0.7},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2024-P4",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2024 P4 A2",s:"ABS",c:"US",cr:4.62,ct:"Fix",m:"2028-02-10",w:0.0049,v:0.7},
+{n:"FHLMC PASS THRU POOLS",t:"FED HM LN PC POOL 849407 FH 09/37 FLOATING VAR",s:"Agency",c:"US",cr:6.3,ct:"Flt",m:"2037-09-01",w:0.005,v:0.7},
+{n:"CARVANA AUTO RECEIVABLES TRUST 2023-P5",t:"CARVANA AUTO RECEIVABLES TRUST CRVNA 2023 P5 A3 144A",s:"ABS",c:"US",cr:5.62,ct:"Fix",m:"2029-01-10",w:0.0047,v:0.7},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 09/26 1.65",s:"Corp",c:"US",cr:1.65,ct:"Fix",m:"2026-09-17",w:0.0047,v:0.7},
+{n:"PNC BANK NA",t:"PNC BANK NA SR UNSECURED 07/28 VAR",s:"Corp",c:"US",cr:4.698,ct:"Flt",m:"2028-07-21",w:0.0048,v:0.7},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED REGS 01/27 VAR",s:"Corp",c:"US",cr:5.4939,ct:"Flt",m:"2027-01-08",w:0.0048,v:0.7},
+{n:"LCM LOAN INCOME FUND I LTD",t:"LCM LOAN INCOME FUND LTD LCMLF 1A A 144A",s:"ABS",c:"KY",cr:5.1761,ct:"Flt",m:"2031-04-20",w:0.0045,v:0.7},
+{n:"TOWD POINT MORTGAGE TRUST 2019-HY3",t:"TOWD POINT MORTGAGE TRUST TPMT 2019 HY3 A1A 144A",s:"ABS",c:"US",cr:4.8462,ct:"Flt",m:"2059-10-25",w:0.0046,v:0.7},
+{n:"ENTERPRISE FLEET FINANCING LLC 2022-3",t:"ENTERPRISE FLEET FINANCING LLC EFF 2022 3 A2 144A",s:"ABS",c:"US",cr:4.38,ct:"Fix",m:"2029-07-20",w:0.0045,v:0.7},
+{n:"RELIANCE STANDARD LIFE GLOBAL FUNDING II",t:"RELIANCE STAND LIFE II SECURED 144A 02/26 5.243",s:"Corp",c:"US",cr:5.243,ct:"Fix",m:"2026-02-02",w:0.0041,v:0.6},
+{n:"GOVERNMENT NATL MTGE ASSOC 2010-H10",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 H10 FC",s:"Agency",c:"US",cr:5.1008,ct:"Flt",m:"2060-05-20",w:0.004,v:0.6},
+{n:"FREDDIE MAC REMICS 4344",t:"FREDDIE MAC FHR 4344 FA",s:"Agency",c:"US",cr:4.773,ct:"Flt",m:"2037-12-15",w:0.0043,v:0.6},
+{n:"FANNIE MAE REMICS 2014-86",t:"FANNIE MAE FNR 2014 86 PA",s:"Agency",c:"US",cr:2.0,ct:"Fix",m:"2044-12-25",w:0.0039,v:0.6},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2014-H15",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2014 H15 FA",s:"Agency",c:"US",cr:4.6141,ct:"Flt",m:"2064-07-20",w:0.0043,v:0.6},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2019-H15",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2019 H15 DF",s:"Agency",c:"US",cr:5.0141,ct:"Flt",m:"2069-09-20",w:0.0043,v:0.6},
+{n:"TESLA AUTO LEASE TRUST 2024-B",t:"TESLA AUTO LEASE TRUST TESLA 2024 B A2B 144A",s:"ABS",c:"US",cr:4.5076,ct:"Flt",m:"2027-01-20",w:0.0044,v:0.6},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2021-H08",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2021 H08 AF",s:"Agency",c:"US",cr:4.2176,ct:"Flt",m:"2068-01-20",w:0.004,v:0.6},
+{n:"AMERICAN EXPRESS COMPANY",t:"AMERICAN EXPRESS CO SR UNSECURED 02/28 VAR",s:"Corp",c:"US",cr:4.87,ct:"Flt",m:"2028-02-16",w:0.0045,v:0.6},
+{n:"FREDDIE MAC REMICS 4903",t:"FREDDIE MAC FHR 4903 F",s:"Agency",c:"US",cr:4.5483,ct:"Flt",m:"2048-09-15",w:0.0042,v:0.6},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2017-H10",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2017 H10 FB",s:"Agency",c:"US",cr:5.5918,ct:"Flt",m:"2067-04-20",w:0.0038,v:0.6},
+{n:"NATWEST MARKETS PLC",t:"NATWEST MARKETS PLC SR UNSECURED REGS 09/26 VAR",s:"Corp",c:"GB",cr:4.5191,ct:"Flt",m:"2026-09-29",w:0.0031,v:0.5},
+{n:"N/A",t:"US 2YR NOTE (CBT) MAR26 XCBT 20260331",s:"Other",c:"US",w:0.0032,v:0.5},
+{n:"AERCAP IRELAND CAPITAL DAC / AERCAP GLOBAL AVIATION TRUST",t:"AERCAP IRELAND CAP/GLOBA COMPANY GUAR 01/28 3.875",s:"Corp",c:"IE",cr:3.875,ct:"Fix",m:"2028-01-23",w:0.0035,v:0.5},
+{n:"WORLD OMNI AUTO RECEIVABLES TRUST 2024-C",t:"WORLD OMNI AUTO RECEIVABLES TR WOART 2024 C A2B",s:"ABS",c:"US",cr:4.4539,ct:"Flt",m:"2028-01-18",w:0.0033,v:0.5},
+{n:"FANNIE MAE REMICS 2008-3",t:"FANNIE MAE FNR 2008 3 FG",s:"Agency",c:"US",cr:4.7687,ct:"Flt",m:"2038-02-25",w:0.0033,v:0.5},
+{n:"ASHFORD HOSPITALITY TRUST 2018-ASHF",t:"ASHFORD HOSPITALITY TRUST AHT1 2018 ASHF A 144A",s:"ABS",c:"US",cr:4.823,ct:"Flt",m:"2035-04-15",w:0.0034,v:0.5},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2016-H26",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2016 H26 FC",s:"Agency",c:"US",cr:5.1141,ct:"Flt",m:"2066-12-20",w:0.0035,v:0.5},
+{n:"WORLD OMNI AUTO RECEIVABLES TRUST 2022-D",t:"WORLD OMNI AUTO RECEIVABLES TR WOART 2022 D A3",s:"ABS",c:"US",cr:5.61,ct:"Fix",m:"2028-02-15",w:0.0036,v:0.5},
+{n:"GOVERNMENT NATL MTGE ASSOC 2010-H10",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 H10 FB",s:"Agency",c:"US",cr:5.0302,ct:"Flt",m:"2060-05-20",w:0.0036,v:0.5},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2016-H15",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2016 H15 FA",s:"Agency",c:"US",cr:4.9141,ct:"Flt",m:"2066-07-20",w:0.0037,v:0.5},
+{n:"KEURIG DR PEPPER INC",t:"KEURIG DR PEPPER INC COMPANY GUAR 03/27 VAR",s:"Corp",c:"US",cr:4.5929,ct:"Flt",m:"2027-03-15",w:0.0032,v:0.5},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2015-H29",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2015 H29 FB",s:"Agency",c:"US",cr:4.8641,ct:"Flt",m:"2065-11-20",w:0.0028,v:0.4},
+{n:"FREDDIE MAC-3279",t:"FREDDIE MAC FHR 3279 FB",s:"Agency",c:"US",cr:4.4183,ct:"Flt",m:"2037-02-15",w:0.0025,v:0.4},
+{n:"FCCU AUTO RECEIVABLES TRUST 2024-1",t:"FCCU AUTO RECEIVABLES TRUST FCCU 2024 1A A2 144A",s:"ABS",c:"US",cr:5.76,ct:"Fix",m:"2027-11-15",w:0.0027,v:0.4},
+{n:"GOVERNMENT NATL MTGE ASSOC 2010-H20",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 H20 AF",s:"Agency",c:"US",cr:4.4441,ct:"Flt",m:"2060-10-20",w:0.0024,v:0.4},
+{n:"PENFED AUTO RECEIVABLES OWNER TRUST 2024-A",t:"PENFED AUTO RECEIVABLES OWNER PNFED 2024 A A2 144A",s:"ABS",c:"US",cr:5.04,ct:"Fix",m:"2027-09-15",w:0.0029,v:0.4},
+{n:"CHASE AUTO OWNER TRUST 2024-3A",t:"CHASE AUTO OWNER TRUST CHAOT 2024 3A A2 144A",s:"ABS",c:"US",cr:5.53,ct:"Fix",m:"2027-09-27",w:0.0027,v:0.4},
+{n:"NSLT-2021-BA",t:"NELNET STUDENT LOAN TRUST NSLT 2021 BA AFX 144A",s:"ABS",c:"US",cr:1.42,ct:"Fix",m:"2062-04-20",w:0.0025,v:0.4},
+{n:"BMW US CAPITAL LLC",t:"BMW US CAPITAL LLC COMPANY GUAR REGS 04/26 VAR",s:"Corp",c:"US",cr:4.367,ct:"Flt",m:"2026-04-02",w:0.0028,v:0.4},
+{n:"OSCAR US FUNDING XVI LLC 2024-1A",t:"OSCAR US FUNDING TRUST OSCAR 2024 1A A2 144A",s:"ABS",c:"JP",cr:5.48,ct:"Fix",m:"2027-02-10",w:0.0025,v:0.4},
+{n:"SFS AUTO RECEIVABLES SECURITIZATION TRUST 2024-3A",t:"SFS AUTO RECEIVABLES SECURITIZ SFAST 2024 3A A2 144A",s:"ABS",c:"US",cr:4.71,ct:"Fix",m:"2028-05-22",w:0.003,v:0.4},
+{n:"CREDIT AGRICOLE SA",t:"CREDIT AGRICOLE SA REGS 01/27 VAR",s:"Corp",c:"FR",cr:1.247,ct:"Flt",m:"2027-01-26",w:0.0025,v:0.4},
+{n:"FNR-2019-51",t:"FANNIE MAE FNR 2019 51 AF",s:"Agency",c:"US",cr:4.723,ct:"Flt",m:"2049-09-25",w:0.0028,v:0.4},
+{n:"MERCEDES-BENZ FINANCE NORTH AMERICA LLC",t:"MERCEDES BENZ FIN NA COMPANY GUAR REGS 01/26 VAR",s:"Corp",c:"US",cr:4.686,ct:"Flt",m:"2026-01-09",w:0.0023,v:0.3},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED REGS 09/27 VAR",s:"Corp",c:"US",cr:4.7736,ct:"Flt",m:"2027-09-24",w:0.0023,v:0.3},
+{n:"LCM 29 LTD",t:"LCM LTD PARTNERSHIP LCM 29A AR 144A",s:"ABS",c:"KY",cr:5.2362,ct:"Flt",m:"2031-04-15",w:0.0022,v:0.3},
+{n:"NAVIENT STUDENT LOAN TRUST 2018-DA",t:"NAVIENT STUDENT LOAN TRUST NAVSL 2018 DA A2A 144A",s:"ABS",c:"US",cr:4.0,ct:"Fix",m:"2059-12-15",w:0.0018,v:0.3},
+{n:"SOUND POINT CLO XVIII LTD 2017-4A",t:"SOUND POINT CLO LTD SNDPT 2017 4A A1 144A",s:"ABS",c:"KY",cr:5.266,ct:"Flt",m:"2031-01-21",w:0.0023,v:0.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2015-H32",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2015 H32 FA",s:"Agency",c:"US",cr:4.8641,ct:"Flt",m:"2065-12-20",w:0.0018,v:0.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2017-H14",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2017 H14 FD",s:"Agency",c:"US",cr:4.5841,ct:"Flt",m:"2067-06-20",w:0.0022,v:0.3},
+{n:"ONEOK INC",t:"ONEOK INC COMPANY GUAR 11/26 5.55",s:"Corp",c:"US",cr:5.55,ct:"Fix",m:"2026-11-01",w:0.0023,v:0.3},
+{n:"SOUNDS POINT CLO IV-R LTD 2013-3RA",t:"SOUND POINT CLO LTD SNDPT 2013 3RA A 144A",s:"ABS",c:"KY",cr:5.2961,ct:"Flt",m:"2031-04-18",w:0.0021,v:0.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE  ASSOCIATION GNR-2019-H11",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2019 H11 FM",s:"Agency",c:"US",cr:4.7141,ct:"Flt",m:"2069-05-20",w:0.0024,v:0.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2016 H19",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2016 H19 FA",s:"Agency",c:"US",cr:4.8941,ct:"Flt",m:"2066-09-20",w:0.0019,v:0.3},
+{n:"HCA INC",t:"HCA INC DISC COML PAPER 02/26 ZCP",s:"Corp",c:"US",m:"2026-02-02",w:0.0021,v:0.3},
+{n:"FREDDIE MAC MULTIFAMILY STRUCTURED PASS THROUGH CERTIFICATES KF60",t:"FHLMC MULTIFAMILY STRUCTURED P FHMS KF60 A",s:"Agency",c:"US",cr:4.6131,ct:"Flt",m:"2026-02-25",w:0.0022,v:0.3},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED REGS 06/26 1.5",s:"Corp",c:"US",cr:1.5,ct:"Fix",m:"2026-06-15",w:0.0024,v:0.3},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED REGS 09/26 5.95",s:"Corp",c:"US",cr:5.95,ct:"Fix",m:"2026-09-21",w:0.0018,v:0.3},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2017-H15",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2017 H15 FN",s:"Agency",c:"US",cr:4.6141,ct:"Flt",m:"2067-07-20",w:0.002,v:0.3},
+{n:"GREENSTATE AUTO RECEIVABLES TRUST 2024-1A",t:"GREENSTATE AUTO RECEIVABLES TR GRNST 2024 1A A2 144A",s:"ABS",c:"US",cr:5.53,ct:"Fix",m:"2027-08-16",w:0.0022,v:0.3},
+{n:"ATHENE GLOBAL FUNDING",t:"ATHENE GLOBAL FUNDING SECURED REGS 08/26 VAR",s:"Corp",c:"US",cr:4.87,ct:"Flt",m:"2026-08-27",w:0.0014,v:0.2},
+{n:"BEAR STEARNS ADJ RATE MTGE TR 2003-5",t:"BEAR STEARNS ADJUSTABLE RATE M BSARM 2003 5 1A2",s:"ABS",c:"US",cr:5.0145,ct:"Flt",m:"2033-08-25",w:0.0014,v:0.2},
+{n:"STANDARD CHARTERED PLC",t:"STANDARD CHARTERED PLC SR UNSECURED REGS 01/27 VAR",s:"Corp",c:"GB",cr:6.17,ct:"Flt",m:"2027-01-09",w:0.0014,v:0.2},
+{n:"NATWEST MARKETS PLC",t:"NATWEST MARKETS PLC SR UNSECURED REGS 03/28 VAR",s:"Corp",c:"GB",cr:4.6725,ct:"Flt",m:"2028-03-21",w:0.0015,v:0.2},
+{n:"FANNIE MAE REMICS 2010-89",t:"FANNIE MAE FNR 2010 89 CF",s:"Agency",c:"US",cr:4.4387,ct:"Flt",m:"2038-02-25",w:0.0012,v:0.2},
+{n:"T-MOBILE USA INC",t:"T MOBILE USA INC COMPANY GUAR 02/26 2.25",s:"Corp",c:"US",cr:2.25,ct:"Fix",m:"2026-02-15",w:0.0013,v:0.2},
+{n:"VENTURE XXVII CLO LTD 2017-27A",t:"VENTURE CDO LTD VENTR 2017 27A AR 144A",s:"ABS",c:"KY",cr:5.196,ct:"Flt",m:"2030-07-20",w:0.0013,v:0.2},
+{n:"WALMART INC",t:"WALMART INC SR UNSECURED 04/27 VAR",s:"Corp",c:"US",cr:4.3717,ct:"Flt",m:"2027-04-28",w:0.0011,v:0.2},
+{n:"AERCAP IRELAND CAPITAL DAC / AERCAP GLOBAL AVIATION TRUST",t:"AERCAP IRELAND CAP/GLOBA COMPANY GUAR 01/27 6.1",s:"Corp",c:"IE",cr:6.1,ct:"Fix",m:"2027-01-15",w:0.0012,v:0.2},
+{n:"NATIONWIDE BUILDING SOCIETY",t:"NATIONWIDE BLDG SOCIETY 144A 02/28 VAR",s:"Corp",c:"GB",cr:5.16,ct:"Flt",m:"2028-02-16",w:0.0017,v:0.2},
+{n:"THE BANK OF NOVA SCOTIA",t:"BANK OF NOVA SCOTIA SR UNSECURED 06/27 VAR",s:"Corp",c:"CA",cr:4.5616,ct:"Flt",m:"2027-06-04",w:0.0012,v:0.2},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2015-H12",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2015 H12 FB",s:"Agency",c:"US",cr:4.7141,ct:"Flt",m:"2065-05-20",w:0.0014,v:0.2},
+{n:"LAD AUTO RECEIVABLES TRUST 2024-3A",t:"LAD AUTO RECEIVABLES TRUST LADAR 2024 3A A2 144A",s:"ABS",c:"US",cr:4.64,ct:"Fix",m:"2027-11-15",w:0.0014,v:0.2},
+{n:"WELLS FARGO BANK NA",t:"WELLS FARGO BANK NA SR UNSECURED 08/26 VAR",s:"Corp",c:"US",cr:4.9424,ct:"Flt",m:"2026-08-07",w:0.0014,v:0.2},
+{n:"SCCU AUTO RECEIVABLES TRUST 2024-1A",t:"SPACE COAST CREDIT UNION SCCU 2024 1A A2 144A",s:"ABS",c:"US",cr:5.45,ct:"Fix",m:"2027-12-15",w:0.0013,v:0.2},
+{n:"SMBC AVIATION CAPITAL FINANCE DESIGNATED ACTIVITY COMPANY",t:"SMBC AVIATION CAPITAL FI COMPANY GUAR REGS 10/26 1.9",s:"Corp",c:"IE",cr:1.9,ct:"Fix",m:"2026-10-15",w:0.0014,v:0.2},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED 144A 01/28 VAR",s:"Corp",c:"US",cr:4.9258,ct:"Flt",m:"2028-01-07",w:0.0017,v:0.2},
+{n:"MILL CITY MORTGAGE LOAN TRUST 2019-GS1",t:"MILL CITY MORTGAGE TRUST MCMLT 2019 GS1 A1 144A",s:"ABS",c:"US",cr:2.75,ct:"Fix",m:"2059-07-25",w:0.0015,v:0.2},
+{n:"RENESAS ELECTRONICS CORPORATION",t:"RENESAS ELECTRONICS CORP SR UNSECURED 144A 11/26 2.17",s:"Corp",c:"JP",cr:2.17,ct:"Fix",m:"2026-11-25",w:0.0016,v:0.2},
+{n:"FREDDIE MAC 4615",t:"FREDDIE MAC FHR 4615 AF",s:"Agency",c:"US",cr:4.673,ct:"Flt",m:"2038-10-15",w:0.0014,v:0.2},
+{n:"UBS GROUP AG",t:"UBS GROUP AG SR UNSECURED REGS 02/27 VAR",s:"Corp",c:"CH",cr:1.305,ct:"Flt",m:"2027-02-02",w:0.0014,v:0.2},
+{n:"FANNIE MAE 2007-109",t:"FANNIE MAE FNR 2007 109 GF",s:"Agency",c:"US",cr:4.6687,ct:"Flt",m:"2037-12-25",w:0.0012,v:0.2},
+{n:"NATWEST GROUP PLC",t:"NATWEST GROUP PLC SR UNSECURED 11/28 VAR",s:"Corp",c:"GB",cr:5.1845,ct:"Flt",m:"2028-11-15",w:0.0013,v:0.2},
+{n:"MERCEDES-BENZ FINANCE NORTH AMERICA LLC",t:"MERCEDES BENZ FIN NA COMPANY GUAR 144A 11/27 VAR",s:"Corp",c:"US",cr:4.7225,ct:"Flt",m:"2027-11-15",w:0.0014,v:0.2},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2012-H14",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2012 H14 FK",s:"Agency",c:"US",cr:4.6941,ct:"Flt",m:"2062-07-20",w:0.0006,v:0.1},
+{n:"FREDDIE MAC 3850",t:"FREDDIE MAC FHR 3850 FC",s:"Agency",c:"US",cr:4.5183,ct:"Flt",m:"2041-04-15",w:0.0008,v:0.1},
+{n:"WOODSIDE FINANCE LIMITED",t:"WOODSIDE FINANCE LTD COMPANY GUAR 144A 09/26 3.7",s:"Corp",c:"AU",cr:3.7,ct:"Fix",m:"2026-09-15",w:0.0007,v:0.1},
+{n:"MMAF EQUIPMENT FINANCE LLC 2023-A",t:"MMAF EQUIPMENT FINANCE LLC MMAF 2023 A A2 144A",s:"ABS",c:"US",cr:5.79,ct:"Fix",m:"2026-11-13",w:0.001,v:0.1},
+{n:"DEUTSCHE BANK AG/NEW YORK BRANCH",t:"DEUTSCHE BANK NY 11/27 VAR",s:"Corp",c:"DE",cr:5.089,ct:"Flt",m:"2027-11-16",w:0.0003,v:0.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2015-H22",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2015 H22 FC",s:"Agency",c:"US",cr:4.7141,ct:"Flt",m:"2065-09-20",w:0.0005,v:0.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2011-H11",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2011 H11 FB",s:"Agency",c:"US",cr:4.6141,ct:"Flt",m:"2061-04-20",w:0.0006,v:0.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2013-H15",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2013 H15 FC",s:"Agency",c:"US",cr:4.6141,ct:"Flt",m:"2063-07-20",w:0.0005,v:0.1},
+{n:"FANNIE MAE 2007-3",t:"FANNIE MAE FNR 2007 3 FG",s:"Agency",c:"US",cr:4.4863,ct:"Flt",m:"2037-01-25",w:0.001,v:0.1},
+{n:"BANK OF AMERICA NA",t:"BANK OF AMERICA NA SR UNSECURED 08/26 VAR",s:"Corp",c:"US",cr:4.8869,ct:"Flt",m:"2026-08-18",w:0.0009,v:0.1},
+{n:"COMMONBOND STUDENT LOAN TRUST 2017-AGS",t:"COMMONBOND STUDENT LOAN TRUST CBSLT 2017 AGS A2 144A",s:"ABS",c:"US",cr:4.6962,ct:"Flt",m:"2041-05-25",w:0.0008,v:0.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2017-121",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2017 121 PE",s:"Agency",c:"US",cr:3.0,ct:"Fix",m:"2046-07-20",w:0.001,v:0.1},
+{n:"FANNIE MAE 2005-79",t:"FANNIE MAE FNR 2005 79 NF",s:"Agency",c:"US",cr:4.3987,ct:"Flt",m:"2035-09-25",w:0.0009,v:0.1},
+{n:"FANNIE MAE REMICS 2007-22",t:"FANNIE MAE FNR 2007 22 FY",s:"Agency",c:"US",cr:4.4087,ct:"Flt",m:"2037-03-25",w:0.0007,v:0.1},
+{n:"NEW YORK LIFE GLOBAL FUNDING",t:"NEW YORK LIFE GLOBAL FDG SR SECURED 144A 06/27 VAR",s:"Corp",c:"US",cr:4.2805,ct:"Flt",m:"2027-06-11",w:0.0007,v:0.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2014-H10",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2014 H10 FA",s:"Agency",c:"US",cr:4.6141,ct:"Flt",m:"2064-04-20",w:0.0006,v:0.1},
+{n:"HYUNDAI CAPITAL AMERICA",t:"HYUNDAI CAPITAL AMERICA SR UNSECURED REGS 03/26 5.5",s:"Corp",c:"US",cr:5.5,ct:"Fix",m:"2026-03-30",w:0.0008,v:0.1},
+{n:"SOUND POINT CLO LTD 2018-2A",t:"SOUND POINT CLO LTD SNDPT 2018 2A A 144A",s:"ABS",c:"KY",cr:5.2196,ct:"Flt",m:"2031-07-26",w:0.0008,v:0.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2015-H10",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2015 H10 FC",s:"Agency",c:"US",cr:4.5941,ct:"Flt",m:"2065-04-20",w:0.0004,v:0.1},
+{n:"MELLON RESIDENTIAL FUNDING CO 2001-TBC1",t:"MELLON RESIDENTIAL FUNDING COR MRFC 2001 TBC1 A1",s:"ABS",c:"US",cr:4.5646,ct:"Flt",m:"2031-11-15",w:0.0008,v:0.1},
+{n:"FANNIE MAE REMICS 2016-40",t:"FANNIE MAE FNR 2016 40 AF",s:"Agency",c:"US",cr:4.773,ct:"Flt",m:"2046-07-25",w:0.001,v:0.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2020-H13",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2020 H13 FM",s:"Agency",c:"US",cr:4.5141,ct:"Flt",m:"2070-08-20",w:0.0007,v:0.1},
+{n:"CARMAX AUTO OWNER TRUST 2024-2",t:"CARMAX AUTO OWNER TRUST CARMX 2024 2 A2A",s:"ABS",c:"US",cr:5.65,ct:"Fix",m:"2027-05-17",w:0.001,v:0.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2010-H26",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2010 H26 LF",s:"Agency",c:"US",cr:4.4641,ct:"Flt",m:"2058-08-20",w:0.0008,v:0.1},
+{n:"ATLAS SENIOR LOAN FUND XIII",t:"ATLAS SENIOR LOAN FUND LTD ATCLO 2019 13A A1NR 144A",s:"ABS",c:"KY",cr:5.199,ct:"Flt",m:"2031-04-22",w:0.0006,v:0.1},
+{n:"FNMA PASS THRU POOLS",t:"FNMA POOL AL5548 FN 05/38 FLOATING VAR",s:"Agency",c:"US",cr:6.466,ct:"Flt",m:"2038-05-01",w:0.0009,v:0.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2011-H11",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2011 H11 FA",s:"Agency",c:"US",cr:4.6141,ct:"Flt",m:"2061-03-20",w:0.001,v:0.1},
+{n:"AVOLON HOLDINGS FUNDING LIMITED",t:"AVOLON HOLDINGS FNDG LTD COMPANY GUAR 144A 02/27 3.25",s:"Corp",c:"KY",cr:3.25,ct:"Fix",m:"2027-02-15",w:0.0009,v:0.1},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2013-H24",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2013 H24 FB",s:"Agency",c:"US",cr:4.8441,ct:"Flt",m:"2063-09-20",w:0.0002,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 543868 GN 01/31 FIXED 7",s:"Agency",c:"US",cr:7.0,ct:"Fix",m:"2031-01-15",w:0.0,v:0.0},
+{n:"FANNIE MAE 2002-34",t:"FANNIE MAE FNR 2002 34 FA",s:"Agency",c:"US",cr:4.5512,ct:"Flt",m:"2032-05-18",w:0.0001,v:0.0},
+{n:"FANNIE MAE 2001-57",t:"FANNIE MAE FNR 2001 57 F",s:"Agency",c:"US",cr:4.4887,ct:"Flt",m:"2031-06-25",w:0.0002,v:0.0},
+{n:"FREDDIE MAC 3898",t:"FREDDIE MAC FHR 3898 TF",s:"Agency",c:"US",cr:4.5983,ct:"Flt",m:"2039-07-15",w:0.0001,v:0.0},
+{n:"FANNIE MAE 2008-53",t:"FANNIE MAE FNR 2008 53 LF",s:"Agency",c:"US",cr:4.8387,ct:"Flt",m:"2038-07-25",w:0.0001,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 568048 GN 08/31 FIXED 7",s:"Agency",c:"US",cr:7.0,ct:"Fix",m:"2031-08-15",w:0.0,v:0.0},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2013-H13",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2013 H13 FT",s:"Agency",c:"US",cr:4.11,ct:"Flt",m:"2063-05-20",w:0.0003,v:0.0},
+{n:"FANNIE MAE 2007-42",t:"FANNIE MAE FNR 2007 42 AF",s:"Agency",c:"US",cr:4.2387,ct:"Flt",m:"2037-05-25",w:0.0,v:0.0},
+{n:"FANNIE MAE 2002-13",t:"FANNIE MAE FNR 2002 13 FB",s:"Agency",c:"US",cr:4.8887,ct:"Flt",m:"2032-03-25",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 462512 GN 02/28 FIXED 7.5",s:"Agency",c:"US",cr:7.5,ct:"Fix",m:"2028-02-15",w:0.0,v:0.0},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2015-H19",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2015 H19 FK",s:"Agency",c:"US",cr:4.7141,ct:"Flt",m:"2065-08-20",w:0.0003,v:0.0},
+{n:"SYMPHONY CLO 36 LTD 2025-52A",t:"SYMPHONY CLO LTD SYMP 2025 52A A 144A",s:"ABS",c:"KY",cr:5.3052,ct:"Flt",m:"2031-01-16",w:0.0003,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 622628 GN 11/33 FIXED 6.5",s:"Agency",c:"US",cr:6.5,ct:"Fix",m:"2033-11-15",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 429790 GN 12/33 FIXED 6.5",s:"Agency",c:"US",cr:6.5,ct:"Fix",m:"2033-12-15",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 628408 GN 11/33 FIXED 6.5",s:"Agency",c:"US",cr:6.5,ct:"Fix",m:"2033-11-15",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 462765 GN 06/28 FIXED 7.5",s:"Agency",c:"US",cr:7.5,ct:"Fix",m:"2028-06-15",w:0.0,v:0.0},
+{n:"FANNIE MAE 2006-112",t:"FANNIE MAE FNR 2006 112 DF",s:"Agency",c:"US",cr:4.3387,ct:"Flt",m:"2036-11-25",w:0.0002,v:0.0},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2012-H29",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2012 H29 FA",s:"Agency",c:"US",cr:4.6291,ct:"Flt",m:"2062-10-20",w:0.0002,v:0.0},
+{n:"GOVERNMENT NATIONAL MORTGAGE ASSOCIATION 2018-H04",t:"GOVERNMENT NATIONAL MORTGAGE A GNR 2018 H04 FM",s:"Agency",c:"US",cr:4.4141,ct:"Flt",m:"2068-03-20",w:0.0002,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 511872 GN 01/31 FIXED 7",s:"Agency",c:"US",cr:7.0,ct:"Fix",m:"2031-01-15",w:0.0,v:0.0},
+{n:"FREDDIE MAC STRIPS 242",t:"FREDDIEMAC STRIP FHS 242 F29",s:"Agency",c:"US",cr:4.3483,ct:"Flt",m:"2036-11-15",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 455301 GN 09/27 FIXED 7.5",s:"Agency",c:"US",cr:7.5,ct:"Fix",m:"2027-09-15",w:0.0,v:0.0},
+{n:"FANNIE MAE 2001-46",t:"FANNIE MAE FNR 2001 46 F",s:"Agency",c:"US",cr:4.4512,ct:"Flt",m:"2031-09-18",w:0.0001,v:0.0},
+{n:"FANNIE MAE 2007-16",t:"FANNIE MAE FNR 2007 16 FC",s:"Agency",c:"US",cr:4.7387,ct:"Flt",m:"2037-03-25",w:0.0002,v:0.0},
+{n:"CARMAX AUTO OWNER TRUST 2024-2",t:"CARMAX AUTO OWNER TRUST CARMX 2024 2 A2B",s:"ABS",c:"US",cr:4.5639,ct:"Flt",m:"2027-05-17",w:0.0003,v:0.0},
+{n:"FANNIE MAE 1998-22",t:"FANNIE MAE FNR 1998 22 FA",s:"Agency",c:"US",cr:4.4512,ct:"Flt",m:"2028-04-18",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 551599 GN 08/31 FIXED 7",s:"Agency",c:"US",cr:7.0,ct:"Fix",m:"2031-08-15",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 508472 GN 04/31 FIXED 7",s:"Agency",c:"US",cr:7.0,ct:"Fix",m:"2031-04-15",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 621752 GN 11/33 FIXED 6.5",s:"Agency",c:"US",cr:6.5,ct:"Fix",m:"2033-11-15",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 571205 GN 09/31 FIXED 7",s:"Agency",c:"US",cr:7.0,ct:"Fix",m:"2031-09-15",w:0.0,v:0.0},
+{n:"FANNIE MAE 2010-4",t:"FANNIE MAE FNR 2010 4 AF",s:"Agency",c:"US",cr:4.7387,ct:"Flt",m:"2040-02-25",w:0.0001,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 590330 GN 07/32 FIXED 7",s:"Agency",c:"US",cr:7.0,ct:"Fix",m:"2032-07-15",w:0.0,v:0.0},
+{n:"FANNIE MAE 2008-1",t:"FANNIE MAE FNR 2008 1 LF",s:"Agency",c:"US",cr:4.6887,ct:"Flt",m:"2037-05-25",w:0.0003,v:0.0},
+{n:"FANNIE MAE 2002-65",t:"FANNIE MAE FNR 2002 65 FC",s:"Agency",c:"US",cr:4.3887,ct:"Flt",m:"2026-06-25",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 545862 GN 08/31 FIXED 7",s:"Agency",c:"US",cr:7.0,ct:"Fix",m:"2031-08-15",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 569554 GN 01/32 FIXED 7",s:"Agency",c:"US",cr:7.0,ct:"Fix",m:"2032-01-15",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 485867 GN 10/31 FIXED 7",s:"Agency",c:"US",cr:7.0,ct:"Fix",m:"2031-10-15",w:0.0,v:0.0},
+{n:"GNMA PASS THRU POOLS",t:"GNMA POOL 781690 GN 12/33 FIXED 6",s:"Agency",c:"US",cr:6.0,ct:"Fix",m:"2033-12-15",w:0.0,v:0.0},
+{n:"FANNIE MAE REMICS 2007-7",t:"FANNIE MAE FNR 2007 7 F",s:"Agency",c:"US",cr:4.3187,ct:"Flt",m:"2037-02-25",w:0.0001,v:0.0},
+{n:"FANNIE MAE 2002-39",t:"FANNIE MAE FNR 2002 39 FB",s:"Agency",c:"US",cr:4.6012,ct:"Flt",m:"2032-03-18",w:0.0003,v:0.0},
+{n:"N/A",t:"US 5YR NOTE (CBT) MAR26 XCBT 20260331",s:"Other",c:"US",w:-0.0014,v:-0.2}
+];
+const DIST_DATA=[{"d": "Mar 2026", "a": 0.34}, {"d": "Feb 2026", "a": 0.34}, {"d": "Dec 2025b", "a": 0.36}, {"d": "Dec 2025", "a": 0.37}, {"d": "Nov 2025", "a": 0.38}, {"d": "Oct 2025", "a": 0.38}, {"d": "Sep 2025", "a": 0.38}, {"d": "Aug 2025", "a": 0.38}, {"d": "Jul 2025", "a": 0.38}, {"d": "Jun 2025", "a": 0.4}, {"d": "May 2025", "a": 0.4}, {"d": "Apr 2025", "a": 0.4}, {"d": "Mar 2025", "a": 0.4}, {"d": "Feb 2025", "a": 0.42}, {"d": "Dec 2024b", "a": 0.4}, {"d": "Dec 2024", "a": 0.42}, {"d": "Nov 2024", "a": 0.43}, {"d": "Oct 2024", "a": 0.43}, {"d": "Sep 2024", "a": 0.47}, {"d": "Aug 2024", "a": 0.45}, {"d": "Jul 2024", "a": 0.44}, {"d": "Jun 2024", "a": 0.46}, {"d": "May 2024", "a": 0.425}, {"d": "Apr 2024", "a": 0.445}, {"d": "Mar 2024", "a": 0.435}, {"d": "Feb 2024", "a": 0.434}, {"d": "Dec 2023b", "a": 0.465}, {"d": "Dec 2023", "a": 0.455}, {"d": "Nov 2023", "a": 0.423}, {"d": "Oct 2023", "a": 0.451}, {"d": "Sep 2023", "a": 0.446}, {"d": "Aug 2023", "a": 0.41}, {"d": "Jul 2023", "a": 0.43}, {"d": "Jun 2023", "a": 0.41}, {"d": "May 2023", "a": 0.36}, {"d": "Apr 2023", "a": 0.39}, {"d": "Mar 2023", "a": 0.33}, {"d": "Feb 2023", "a": 0.33}, {"d": "Dec 2022b", "a": 0.33}, {"d": "Dec 2022", "a": 0.27}, {"d": "Nov 2022", "a": 0.23}, {"d": "Oct 2022", "a": 0.217}, {"d": "Sep 2022", "a": 0.19}, {"d": "Aug 2022", "a": 0.14}, {"d": "Jul 2022", "a": 0.125}, {"d": "Jun 2022", "a": 0.102}, {"d": "May 2022", "a": 0.099}, {"d": "Apr 2022", "a": 0.074}];
+const ISSUER_LABELS=["Corporates", "US GSE", "US Treasury", "Other", "Municipal"];
+const ISSUER_VALUES=[79.75, 15.16, 2.71, 2.06, 0.01];
+const ASSET_LABELS=["Debt", "ABS-MBS", "ABS-Other", "Repo/Cash", "ABS-CBDO", "STIV", "DIR"];
+const ASSET_VALUES=[65.88, 18.65, 12.74, 2.06, 0.35, 0.01, 0.0];
+const COUNTRY_LABELS=["US", "CA", "GB", "NL", "FR", "JP", "SG", "DE", "CH", "IE", "Other"];
+const COUNTRY_VALUES=[72.34, 6.34, 4.66, 3.3, 2.59, 2.04, 1.31, 1.11, 1.07, 1.06, 3.86];
+const MAT_LABELS=["0-3mo", "3-6mo", "6-12mo", "1-2yr", "2-3yr", "3-5yr", "5yr+"];
+const MAT_VALUES=[14.03, 5.37, 14.77, 29.39, 9.61, 6.46, 17.99];
+const COUPON_LABELS=["Flt (58.85%)", "Fix (34.47%)", "None (5.43%)", "Var (0.94%)"];
+const COUPON_VALUES=[58.85, 34.47, 5.43, 0.94];
+const MR_LABELS=["Oct 2025", "Nov 2025", "Dec 2025"];
+const MR_VALUES=[0.399, 0.329, 0.399];
+const AR_LABELS=["2019", "2020", "2021", "2022", "2023", "2024", "2025"];
+const AR_VALUES=[3.1, 1.7, 0.3, -0.3, 5.8, 5.6, 4.7];
+const AI_LABELS=["2022", "2023", "2024", "2025", "2026 (ann.)"];
+const AI_VALUES=[1.78, 4.9, 5.24, 4.65, 4.08];
+const YIELD_LABELS=["MINT Dist Yield", "MINT SEC Yield", "SOFR", "Fed Funds", "3M T-Bill", "Money Mkt Avg", "HY Savings"];
+const YIELD_VALUES=[4.54, 3.67, 4.3, 4.25, 4.22, 4.1, 0.45];
+const YIELD_COLORS=["#00d4aa", "#00d4aa", "#3b82f6", "#3b82f6", "#3b82f6", "#3b82f6", "#ff4757"];
+
+const CF={family:"'JetBrains Mono',monospace",size:10};
+const GC='#252d3d',TC='#6b7a90';
+const COLORS=['#3b82f6','#00d4aa','#a855f7','#ffa502','#06b6d4','#ec4899','#84cc16','#f97316','#8b5cf6','#14b8a6','#6b7a90'];
+const charts={};
+function mc(id,cfg){if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id).getContext('2d'),cfg);}
+function tt(){return{backgroundColor:'#1c2230',borderColor:'#344054',borderWidth:1,titleFont:{family:CF.family,size:11,weight:'600'},bodyFont:{family:CF.family,size:10},titleColor:'#00d4aa',bodyColor:'#e8ecf4',padding:10,cornerRadius:2,displayColors:true,boxPadding:4};}
+function sc(){return{grid:{color:GC,drawBorder:false},ticks:{color:TC,font:CF}};}
+
+function initNav(){
+  document.querySelectorAll('.nav-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('sec-'+btn.dataset.section).classList.add('active');
+    });
+  });
+}
+
+function buildOverview(){
+  mc('chart-issuer',{type:'doughnut',data:{labels:ISSUER_LABELS,datasets:[{data:ISSUER_VALUES,backgroundColor:COLORS.slice(0,ISSUER_LABELS.length),borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:TC,font:CF,padding:12,boxWidth:12}},tooltip:{...tt(),callbacks:{label:c=>c.label+': '+c.parsed+'%'}}}}});
+  mc('chart-asset',{type:'doughnut',data:{labels:ASSET_LABELS,datasets:[{data:ASSET_VALUES,backgroundColor:COLORS.slice(0,ASSET_LABELS.length),borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:TC,font:CF,padding:12,boxWidth:12}},tooltip:{...tt(),callbacks:{label:c=>c.label+': '+c.parsed+'%'}}}}});
+  mc('chart-country',{type:'pie',data:{labels:COUNTRY_LABELS,datasets:[{data:COUNTRY_VALUES,backgroundColor:COLORS.slice(0,COUNTRY_LABELS.length),borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:TC,font:CF,padding:8,boxWidth:10}},tooltip:{...tt(),callbacks:{label:c=>c.label+': '+c.parsed+'%'}}}}});
+  mc('chart-coupon',{type:'doughnut',data:{labels:COUPON_LABELS,datasets:[{data:COUPON_VALUES,backgroundColor:['#00d4aa','#3b82f6','#6b7a90','#ffa502'].slice(0,COUPON_LABELS.length),borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:TC,font:CF,padding:12,boxWidth:12}},tooltip:{...tt(),callbacks:{label:c=>c.parsed+'%'}}}}});
+  mc('chart-maturity',{type:'bar',data:{labels:MAT_LABELS,datasets:[{data:MAT_VALUES,backgroundColor:['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'].slice(0,MAT_LABELS.length),borderWidth:0,borderRadius:2,barThickness:36}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.y+'%'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
+  mc('chart-yield-comp',{type:'bar',data:{labels:YIELD_LABELS,datasets:[{data:YIELD_VALUES,backgroundColor:YIELD_COLORS,borderWidth:0,borderRadius:2,barThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.x.toFixed(2)+'%'}}},scales:{x:{...sc(),max:5.5,ticks:{...sc().ticks,callback:v=>v+'%'}},y:{...sc(),grid:{display:false}}}}});
+}
+
+function buildPerformance(){
+  mc('chart-monthly-returns',{type:'bar',data:{labels:MR_LABELS,datasets:[{label:'Monthly Return',data:MR_VALUES,backgroundColor:'#00d4aa',borderWidth:0,borderRadius:2,barThickness:48}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'+'+c.parsed.y.toFixed(3)+'%'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>v.toFixed(1)+'%'}}}}});
+  mc('chart-annual-returns',{type:'bar',data:{labels:AR_LABELS,datasets:[{label:'Annual Return',data:AR_VALUES,backgroundColor:AR_VALUES.map(d=>d>=0?'#00d4aa':'#ff4757'),borderWidth:0,borderRadius:2,barThickness:40}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(1)+'%'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'}}}}});
+}
+
+function buildIncome(){
+  const dr=[...DIST_DATA].reverse();
+  mc('chart-dist-history',{type:'bar',data:{labels:dr.map(d=>d.d),datasets:[{label:'Distribution',data:dr.map(d=>d.a),backgroundColor:dr.map(d=>d.a>=0.44?'#00d4aa':d.a>=0.35?'#3b82f6':d.a>=0.25?'#ffa502':'#ff4757'),borderWidth:0,borderRadius:1,barPercentage:0.85}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'$'+c.parsed.y.toFixed(3)}}},scales:{x:{...sc(),grid:{display:false},ticks:{...sc().ticks,maxRotation:45,autoSkip:true,maxTicksLimit:16}},y:{...sc(),ticks:{...sc().ticks,callback:v=>'$'+v.toFixed(2)}}}}});
+  mc('chart-annual-income',{type:'bar',data:{labels:AI_LABELS,datasets:[{label:'Annual Income/Share',data:AI_VALUES,backgroundColor:AI_VALUES.map((v,i,a)=>i===a.length-1?'#6b7a90':v>=a[Math.max(0,i-1)]?'#00d4aa':'#ffa502'),borderWidth:0,borderRadius:2,barThickness:48}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'$'+c.parsed.y.toFixed(2)+' / share'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>'$'+v.toFixed(2)}}}}});
+}
+
+let sortState={key:'w',dir:'desc'},filter='',pageSize=50,filteredData=[];
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function renderHoldings(){
+  const s=filter.toLowerCase();
+  filteredData=HOLDINGS.filter(h=>!s||(h.n+' '+h.t+' '+h.s+' '+h.c+' '+(h.ct||'')).toLowerCase().includes(s));
+  const{key,dir}=sortState;
+  if(key)filteredData.sort((a,b)=>{let av=a[key]!=null?a[key]:'',bv=b[key]!=null?b[key]:'';if(typeof av==='string'&&typeof bv==='string'){av=av.toLowerCase();bv=bv.toLowerCase();}return av<bv?(dir==='asc'?-1:1):av>bv?(dir==='asc'?1:-1):0;});
+  document.getElementById('holdings-count').textContent=filteredData.length+' positions';
+  pageSize=50;renderPage();
+}
+function renderPage(){
+  const show=filteredData.slice(0,pageSize);
+  document.getElementById('holdings-body').innerHTML=show.map(h=>{
+    const ms=h.m?new Date(h.m+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'short'}):'\u2014';
+    const cr=h.cr!=null&&h.cr!==0?h.cr.toFixed(2):'\u2014';
+    const n=esc(h.n),t=esc(h.t);
+    return '<tr><td class="company-cell" title="'+n+'">'+n+'</td><td class="desc-cell" title="'+t+'">'+t+'</td><td class="ctr">'+esc(h.s)+'</td><td class="ctr">'+esc(h.c)+'</td><td class="num">'+cr+'</td><td class="ctr">'+(h.ct||'\u2014')+'</td><td class="num">'+ms+'</td><td class="num">'+h.w.toFixed(2)+'</td><td class="num">'+h.v.toFixed(1)+'</td></tr>';
+  }).join('');
+  const rem=filteredData.length-pageSize;
+  if(rem>0){
+    document.getElementById('holdings-body').innerHTML+='<tr style="cursor:pointer" onclick="pageSize+=100;renderPage();"><td colspan="9" style="text-align:center;padding:12px;color:var(--accent);font-family:var(--mono);font-size:11px;letter-spacing:1px">SHOW MORE ('+rem+' remaining)</td></tr>';
+  }
+}
+function initHoldings(){
+  document.querySelector('#holdings-table thead').addEventListener('click',e=>{
+    const th=e.target.closest('th');if(!th||!th.dataset.key)return;
+    const k=th.dataset.key;
+    sortState=sortState.key===k?{key:k,dir:sortState.dir==='asc'?'desc':'asc'}:{key:k,dir:'desc'};
+    document.querySelectorAll('#holdings-table thead th').forEach(t=>t.classList.remove('sorted-asc','sorted-desc'));
+    th.classList.add(sortState.dir==='asc'?'sorted-asc':'sorted-desc');
+    renderHoldings();
+  });
+  document.getElementById('holdings-search').addEventListener('input',e=>{filter=e.target.value;renderHoldings();});
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  initNav();buildOverview();buildPerformance();buildIncome();
+  renderHoldings();initHoldings();
+  document.querySelector('#holdings-table thead th[data-key="w"]').classList.add('sorted-desc');
+  setTimeout(()=>{const lo=document.getElementById('loading');lo.classList.add('hide');setTimeout(()=>lo.remove(),400);},200);
+});
+</script>
+</body>
+</html>
