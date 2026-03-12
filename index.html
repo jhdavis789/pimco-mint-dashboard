@@ -173,6 +173,12 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 .fund-select:hover{border-color:var(--accent)}
 .fund-select:focus{outline:none;border-color:var(--accent)}
 .fund-select option{background:var(--bg-1);color:var(--text-0)}
+.share-fab{position:fixed;bottom:24px;right:24px;z-index:8000;display:flex;align-items:center;gap:0;cursor:pointer;user-select:none}
+.share-fab-btn{width:44px;height:44px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border-bright);display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:all .25s;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.share-fab-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--bg-3);transform:scale(1.08)}
+.share-fab-btn svg{width:18px;height:18px;fill:currentColor}
+.share-toast{position:fixed;bottom:80px;right:24px;z-index:8001;background:var(--accent);color:#0a0d12;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.5px;padding:8px 16px;border-radius:4px;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;white-space:nowrap}
+.share-toast.show{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
@@ -2535,6 +2541,125 @@ function toggleCommentaryView(view){
   });
 }
 
+// ─── Share View: serialize/restore dashboard state via URL hash ───
+function getViewState(){
+  const s={};
+  s.f=currentFund||'MINT';
+  const at=document.querySelector('.nav-tab.active');
+  if(at)s.t=at.dataset.section;
+  if(typeof analyticsRange!=='undefined'&&analyticsRange!==0)s.ar=analyticsRange;
+  if(typeof filter!=='undefined'&&filter)s.hs=filter;
+  if(typeof sortState!=='undefined'&&(sortState.key!=='w'||sortState.dir!=='desc'))s.sk=sortState.key+'.'+sortState.dir;
+  if(typeof compScatterPeriod!=='undefined'&&compScatterPeriod!=='SI')s.sp=compScatterPeriod;
+  if(typeof compCumRange!=='undefined'&&compCumRange!=='ALL')s.cr=compCumRange;
+  if(typeof compFactorMetric!=='undefined'&&compFactorMetric!=='duration')s.fm=compFactorMetric;
+  if(typeof compRollingWin!=='undefined'&&compRollingWin!=='3M')s.rw=compRollingWin;
+  if(typeof compRollingMet!=='undefined'&&compRollingMet!=='ret')s.rm=compRollingMet;
+  if(typeof compRollingRange!=='undefined'&&compRollingRange!=='ALL')s.rr=compRollingRange;
+  const cv=document.querySelector('#sec-commentary [data-view].active');
+  if(cv&&cv.dataset.view==='monthly')s.cv='monthly';
+  return s;
+}
+function stateToHash(s){
+  const p=[];
+  for(const[k,v]of Object.entries(s))p.push(encodeURIComponent(k)+'='+encodeURIComponent(v));
+  return p.length?'#'+p.join('&'):'';
+}
+function hashToState(){
+  const h=location.hash.slice(1);
+  if(!h)return null;
+  const s={};
+  for(const part of h.split('&')){
+    const[k,v]=part.split('=').map(decodeURIComponent);
+    if(k&&v)s[k]=v;
+  }
+  return Object.keys(s).length?s:null;
+}
+function shareView(){
+  const s=getViewState();
+  const url=location.origin+location.pathname+stateToHash(s);
+  navigator.clipboard.writeText(url).then(()=>{
+    const t=document.getElementById('share-toast');
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2000);
+  }).catch(()=>{
+    // Fallback for insecure contexts
+    const ta=document.createElement('textarea');
+    ta.value=location.origin+location.pathname+stateToHash(s);
+    ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');const t=document.getElementById('share-toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}catch(e){}
+    document.body.removeChild(ta);
+  });
+}
+function restoreFromHash(){
+  const s=hashToState();
+  if(!s)return;
+  // 1. Fund
+  if(s.f&&s.f!=='MINT'){
+    const sel=document.getElementById('fund-selector');
+    if(sel){sel.value=s.f;switchFund(s.f);}
+  }
+  // 2. Tab — click the correct nav-tab (triggers lazy init)
+  if(s.t){
+    const btn=document.querySelector('.nav-tab[data-section="'+s.t+'"]');
+    if(btn&&btn.style.display!=='none')btn.click();
+  }
+  // 3. Analytics range
+  if(s.ar){
+    const rv=parseInt(s.ar);
+    if(rv>0){
+      const rb=document.querySelector('#analytics-range [data-range="'+rv+'"]');
+      if(rb)rb.click();
+    }
+  }
+  // 4. Holdings search
+  if(s.hs){
+    const hi=document.getElementById('holdings-search');
+    if(hi){hi.value=s.hs;hi.dispatchEvent(new Event('input'));}
+  }
+  // 5. Holdings sort
+  if(s.sk){
+    const[sk,sd]=s.sk.split('.');
+    if(sk&&sd){sortState={key:sk,dir:sd};renderHoldings();}
+  }
+  // 6. Compare scatter period
+  if(s.sp){
+    const b=document.querySelector('[data-scatter="'+s.sp+'"]');
+    if(b)b.click();
+  }
+  // 7. Compare cumulative range
+  if(s.cr){
+    const b=document.querySelector('[data-cumr="'+s.cr+'"]');
+    if(b)b.click();
+  }
+  // 8. Compare factor metric
+  if(s.fm){
+    const b=document.querySelector('[data-factor="'+s.fm+'"]');
+    if(b)b.click();
+  }
+  // 9. Rolling window
+  if(s.rw){
+    const b=document.querySelector('[data-rwin="'+s.rw+'"]');
+    if(b)b.click();
+  }
+  // 10. Rolling metric
+  if(s.rm){
+    const b=document.querySelector('[data-rmet="'+s.rm+'"]');
+    if(b)b.click();
+  }
+  // 11. Rolling range
+  if(s.rr){
+    const b=document.querySelector('[data-rrange="'+s.rr+'"]');
+    if(b)b.click();
+  }
+  // 12. Commentary view
+  if(s.cv==='monthly'){
+    const b=document.querySelector('#sec-commentary [data-view="monthly"]');
+    if(b)b.click();
+  }
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   initNav();buildOverview();buildPerformance();buildIncome();
   renderHoldings();initHoldings();
@@ -2549,8 +2674,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
   setTimeout(()=>{const lo=document.getElementById('loading');lo.classList.add('hide');setTimeout(()=>lo.remove(),400);},200);
   initInfoBtns();
+  // Restore shared view state from URL hash after a brief delay to let charts init
+  setTimeout(restoreFromHash,300);
 });
 </script>
 <div class="info-modal-bg" id="info-modal-bg"><div class="info-modal"><div class="info-modal-head"><h3 id="info-title"></h3><button class="info-modal-close" id="info-close">&times;</button></div><div class="info-modal-body" id="info-body"></div></div></div>
+<div class="share-fab" onclick="shareView()" title="Copy share link"><div class="share-fab-btn"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></div></div>
+<div class="share-toast" id="share-toast">Link copied</div>
 </body>
 </html>
