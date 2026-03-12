@@ -173,11 +173,11 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 .fund-select:hover{border-color:var(--accent)}
 .fund-select:focus{outline:none;border-color:var(--accent)}
 .fund-select option{background:var(--bg-1);color:var(--text-0)}
-.share-fab{position:fixed;bottom:24px;right:24px;z-index:8000;display:flex;align-items:center;gap:0;cursor:pointer;user-select:none}
-.share-fab-btn{width:44px;height:44px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border-bright);display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:all .25s;box-shadow:0 4px 16px rgba(0,0,0,.4)}
-.share-fab-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--bg-3);transform:scale(1.08)}
-.share-fab-btn svg{width:18px;height:18px;fill:currentColor}
-.share-toast{position:fixed;bottom:80px;right:24px;z-index:8001;background:var(--accent);color:#0a0d12;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.5px;padding:8px 16px;border-radius:4px;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;white-space:nowrap}
+.share-fab{position:fixed;bottom:24px;right:24px;z-index:8000;cursor:pointer;user-select:none}
+.share-fab-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;background:var(--bg-2);border:1px solid var(--border-bright);color:var(--text-2);font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;transition:all .25s;box-shadow:0 4px 16px rgba(0,0,0,.4);white-space:nowrap}
+.share-fab-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--bg-3)}
+.share-fab-btn svg{width:14px;height:14px;fill:currentColor;flex-shrink:0}
+.share-toast{position:fixed;bottom:66px;right:24px;z-index:8001;background:var(--accent);color:#0a0d12;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.5px;padding:8px 16px;border-radius:4px;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;white-space:nowrap}
 .share-toast.show{opacity:1;transform:translateY(0)}
 </style>
 </head>
@@ -1704,6 +1704,12 @@ function switchFund(ticker){
     }
   });
 
+  // Load fund data into globals
+  if(!loadFundData(ticker))return;
+
+  // Force rebuild of switchable tabs
+  analyticsBuilt=false;activeBuilt=false;
+
   // If current active tab is hidden, switch to analytics
   const activeTab=document.querySelector('.nav-tab.active');
   const activeSec=activeTab?activeTab.dataset.section:'';
@@ -1712,12 +1718,6 @@ function switchFund(ticker){
     document.querySelector('.nav-tab[data-section="analytics"]').click();
     return; // click will trigger rebuild via lazy init
   }
-
-  // Load fund data into globals
-  if(!loadFundData(ticker))return;
-
-  // Force rebuild of switchable tabs
-  analyticsBuilt=false;activeBuilt=false;
 
   // Rebuild current visible section
   rebuildActiveSection();
@@ -2558,6 +2558,8 @@ function getViewState(){
   if(typeof compRollingRange!=='undefined'&&compRollingRange!=='ALL')s.rr=compRollingRange;
   const cv=document.querySelector('#sec-commentary [data-view].active');
   if(cv&&cv.dataset.view==='monthly')s.cv='monthly';
+  const sy=Math.round(window.scrollY);
+  if(sy>0)s.sy=sy;
   return s;
 }
 function stateToHash(s){
@@ -2658,6 +2660,11 @@ function restoreFromHash(){
     const b=document.querySelector('#sec-commentary [data-view="monthly"]');
     if(b)b.click();
   }
+  // 13. Scroll position (delay to let layout settle after tab/fund switch)
+  if(s.sy){
+    const target=parseInt(s.sy);
+    setTimeout(()=>window.scrollTo({top:target,behavior:'instant'}),150);
+  }
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
@@ -2679,7 +2686,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 <div class="info-modal-bg" id="info-modal-bg"><div class="info-modal"><div class="info-modal-head"><h3 id="info-title"></h3><button class="info-modal-close" id="info-close">&times;</button></div><div class="info-modal-body" id="info-body"></div></div></div>
-<div class="share-fab" onclick="shareView()" title="Copy share link"><div class="share-fab-btn"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></div></div>
+<div class="share-fab" onclick="shareView()" title="Copy share link"><div class="share-fab-btn"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>Share View</div></div>
 <div class="share-toast" id="share-toast">Link copied</div>
 </body>
 </html>
