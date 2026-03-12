@@ -1034,24 +1034,26 @@ function buildAnalytics(){
 
 function buildFactorChart(){
   if(typeof FACTOR_DATES==='undefined')return;
+  const fn=analyticsRange>0?Math.ceil(analyticsRange/21):0;
+  const fDates=sliceTail(FACTOR_DATES,fn);
   const ds=[
-    {label:'Duration (yr)',data:FACTOR_DUR,borderColor:'#3b82f6',yAxisID:'y',borderWidth:2,pointRadius:2,tension:.3,fill:false},
-    {label:'Bull Duration',data:FACTOR_BULL,borderColor:'#22c55e',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Bear Duration',data:FACTOR_BEAR,borderColor:'#ef4444',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Curve Duration',data:FACTOR_CURVE,borderColor:'#8b5cf6',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Avg Maturity (yr)',data:FACTOR_AVGMAT,borderColor:'#06b6d4',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'YTM (%)',data:FACTOR_YTM,borderColor:'#00d4aa',yAxisID:'y1',borderWidth:2,pointRadius:2,tension:.3,fill:false},
-    {label:'Current Yield (%)',data:FACTOR_CY,borderColor:'#84cc16',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'SEC 30d Yield (%)',data:FACTOR_SEC30,borderColor:'#eab308',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Mtg Spread (pp)',data:FACTOR_MTG,borderColor:'#f97316',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Corp Spread (pp)',data:FACTOR_CORP,borderColor:'#ec4899',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'EM Spread (pp)',data:FACTOR_EM,borderColor:'#14b8a6',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Sovg Spread (pp)',data:FACTOR_SOVG,borderColor:'#a3a3a3',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Total Spread (pp)',data:FACTOR_TSPREAD,borderColor:'#ffa502',yAxisID:'y1',borderWidth:2,pointRadius:2,tension:.3,fill:false},
-    {label:'DTS (dur-bps)',data:FACTOR_DTS,borderColor:'#ff4757',yAxisID:'y',borderWidth:2,pointRadius:2,tension:.3,fill:false},
-    {label:'NAV ($)',data:FACTOR_NAV,borderColor:'#a78bfa',yAxisID:'y2',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Duration (yr)',data:sliceTail(FACTOR_DUR,fn),borderColor:'#3b82f6',yAxisID:'y',borderWidth:2,pointRadius:2,tension:.3,fill:false},
+    {label:'Bull Duration',data:sliceTail(FACTOR_BULL,fn),borderColor:'#22c55e',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Bear Duration',data:sliceTail(FACTOR_BEAR,fn),borderColor:'#ef4444',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Curve Duration',data:sliceTail(FACTOR_CURVE,fn),borderColor:'#8b5cf6',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Avg Maturity (yr)',data:sliceTail(FACTOR_AVGMAT,fn),borderColor:'#06b6d4',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'YTM (%)',data:sliceTail(FACTOR_YTM,fn),borderColor:'#00d4aa',yAxisID:'y1',borderWidth:2,pointRadius:2,tension:.3,fill:false},
+    {label:'Current Yield (%)',data:sliceTail(FACTOR_CY,fn),borderColor:'#84cc16',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'SEC 30d Yield (%)',data:sliceTail(FACTOR_SEC30,fn),borderColor:'#eab308',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Mtg Spread (pp)',data:sliceTail(FACTOR_MTG,fn),borderColor:'#f97316',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Corp Spread (pp)',data:sliceTail(FACTOR_CORP,fn),borderColor:'#ec4899',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'EM Spread (pp)',data:sliceTail(FACTOR_EM,fn),borderColor:'#14b8a6',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Sovg Spread (pp)',data:sliceTail(FACTOR_SOVG,fn),borderColor:'#a3a3a3',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Total Spread (pp)',data:sliceTail(FACTOR_TSPREAD,fn),borderColor:'#ffa502',yAxisID:'y1',borderWidth:2,pointRadius:2,tension:.3,fill:false},
+    {label:'DTS (dur-bps)',data:sliceTail(FACTOR_DTS,fn),borderColor:'#ff4757',yAxisID:'y',borderWidth:2,pointRadius:2,tension:.3,fill:false},
+    {label:'NAV ($)',data:sliceTail(FACTOR_NAV,fn),borderColor:'#a78bfa',yAxisID:'y2',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
   ];
-  mc('chart-factors',{type:'line',data:{labels:FACTOR_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed.y;return c.dataset.label+': '+(v!=null?v.toFixed(4):'N/A');}}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),position:'left',title:{display:true,text:'Duration / DTS',color:TC,font:CF}},y1:{...sc(),position:'right',title:{display:true,text:'Yield / Spread (%)',color:TC,font:CF},grid:{drawOnChartArea:false}},y2:{display:false}}}});
+  mc('chart-factors',{type:'line',data:{labels:fDates,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed.y;return c.dataset.label+': '+(v!=null?v.toFixed(4):'N/A');}}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),position:'left',title:{display:true,text:'Duration / DTS',color:TC,font:CF}},y1:{...sc(),position:'right',title:{display:true,text:'Yield / Spread (%)',color:TC,font:CF},grid:{drawOnChartArea:false}},y2:{display:false}}}});
 }
 
 function renderSectorAnalytics(){
@@ -1081,37 +1083,42 @@ function renderSectorAnalytics(){
 
 function buildCumRetChart(){
   if(typeof CUM_DATES==='undefined')return;
+  const wn=analyticsRange>0?Math.ceil(analyticsRange/5):0;
   const allKeys=[...Object.keys(SECTOR_COLORS),'Portfolio'];
-  const ds=allKeys.map(s=>({label:s,data:CUM_RETURNS[s],borderColor:s==='Portfolio'?'#e8ecf4':(SECTOR_COLORS[s]||'#6b7a90'),borderWidth:s==='Portfolio'?2.5:1.5,pointRadius:0,tension:.3,fill:false,borderDash:s==='Portfolio'?[5,3]:[]}));
-  mc('chart-cum-ret',{type:'line',data:{labels:CUM_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(2)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'},title:{display:true,text:'Cumulative Return %',color:TC,font:CF}}}}});
+  const ds=allKeys.map(s=>({label:s,data:sliceTail(CUM_RETURNS[s],wn),borderColor:s==='Portfolio'?'#e8ecf4':(SECTOR_COLORS[s]||'#6b7a90'),borderWidth:s==='Portfolio'?2.5:1.5,pointRadius:0,tension:.3,fill:false,borderDash:s==='Portfolio'?[5,3]:[]}));
+  mc('chart-cum-ret',{type:'line',data:{labels:sliceTail(CUM_DATES,wn),datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(2)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'},title:{display:true,text:'Cumulative Return %',color:TC,font:CF}}}}});
 }
 
 function buildRollSharpeChart(){
   if(typeof ROLL_SHARPE_DATES==='undefined')return;
-  mc('chart-roll-sharpe',{type:'line',data:{labels:ROLL_SHARPE_DATES,datasets:[{label:'90d Rolling Sharpe',data:ROLL_SHARPE,borderColor:'#00d4aa',backgroundColor:'#00d4aa22',fill:true,borderWidth:2,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'Sharpe: '+c.parsed.y.toFixed(2)}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),title:{display:true,text:'Sharpe Ratio',color:TC,font:CF}}}}});
+  const wn=analyticsRange>0?Math.ceil(analyticsRange/5):0;
+  mc('chart-roll-sharpe',{type:'line',data:{labels:sliceTail(ROLL_SHARPE_DATES,wn),datasets:[{label:'90d Rolling Sharpe',data:sliceTail(ROLL_SHARPE,wn),borderColor:'#00d4aa',backgroundColor:'#00d4aa22',fill:true,borderWidth:2,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'Sharpe: '+c.parsed.y.toFixed(2)}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),title:{display:true,text:'Sharpe Ratio',color:TC,font:CF}}}}});
 }
 
 function buildRollVolChart(){
   if(typeof ROLL_VOL_DATES==='undefined')return;
+  const wn=analyticsRange>0?Math.ceil(analyticsRange/5):0;
   const allKeys=[...Object.keys(SECTOR_COLORS),'Portfolio'];
-  const ds=allKeys.map(s=>({label:s,data:ROLL_VOL[s],borderColor:s==='Portfolio'?'#e8ecf4':(SECTOR_COLORS[s]||'#6b7a90'),borderWidth:s==='Portfolio'?2:1.5,pointRadius:0,tension:.3,fill:false,hidden:s!=='Portfolio'&&s!=='Agency MBS'&&s!=='Government'}));
-  mc('chart-roll-vol',{type:'line',data:{labels:ROLL_VOL_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:4}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),title:{display:true,text:'Ann. Vol %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(1)+'%'}}}}});
+  const ds=allKeys.map(s=>({label:s,data:sliceTail(ROLL_VOL[s],wn),borderColor:s==='Portfolio'?'#e8ecf4':(SECTOR_COLORS[s]||'#6b7a90'),borderWidth:s==='Portfolio'?2:1.5,pointRadius:0,tension:.3,fill:false,hidden:s!=='Portfolio'&&s!=='Agency MBS'&&s!=='Government'}));
+  mc('chart-roll-vol',{type:'line',data:{labels:sliceTail(ROLL_VOL_DATES,wn),datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:4}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),title:{display:true,text:'Ann. Vol %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(1)+'%'}}}}});
 }
 
 function buildSpreadDecomp(){
   if(typeof FACTOR_DATES==='undefined')return;
+  const fn=analyticsRange>0?Math.ceil(analyticsRange/21):0;
   const ds=[
-    {label:'Mortgage',data:FACTOR_MTG,backgroundColor:'#3b82f688',borderColor:'#3b82f6',borderWidth:1,fill:true,pointRadius:0},
-    {label:'Corporate',data:FACTOR_CORP,backgroundColor:'#00d4aa88',borderColor:'#00d4aa',borderWidth:1,fill:true,pointRadius:0},
-    {label:'EM',data:FACTOR_EM,backgroundColor:'#ffa50288',borderColor:'#ffa502',borderWidth:1,fill:true,pointRadius:0},
-    {label:'Sovereign',data:FACTOR_SOVG,backgroundColor:'#a855f788',borderColor:'#a855f7',borderWidth:1,fill:true,pointRadius:0},
+    {label:'Mortgage',data:sliceTail(FACTOR_MTG,fn),backgroundColor:'#3b82f688',borderColor:'#3b82f6',borderWidth:1,fill:true,pointRadius:0},
+    {label:'Corporate',data:sliceTail(FACTOR_CORP,fn),backgroundColor:'#00d4aa88',borderColor:'#00d4aa',borderWidth:1,fill:true,pointRadius:0},
+    {label:'EM',data:sliceTail(FACTOR_EM,fn),backgroundColor:'#ffa50288',borderColor:'#ffa502',borderWidth:1,fill:true,pointRadius:0},
+    {label:'Sovereign',data:sliceTail(FACTOR_SOVG,fn),backgroundColor:'#a855f788',borderColor:'#a855f7',borderWidth:1,fill:true,pointRadius:0},
   ];
-  mc('chart-spread-decomp',{type:'line',data:{labels:FACTOR_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:8}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(4)+' pp'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),stacked:true,title:{display:true,text:'Spread Contribution (pp)',color:TC,font:CF}}}}});
+  mc('chart-spread-decomp',{type:'line',data:{labels:sliceTail(FACTOR_DATES,fn),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:8}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(4)+' pp'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),stacked:true,title:{display:true,text:'Spread Contribution (pp)',color:TC,font:CF}}}}});
 }
 
 function buildDrawdown(){
   if(typeof DD_DATES==='undefined')return;
-  mc('chart-drawdown',{type:'line',data:{labels:DD_DATES,datasets:[{label:'Drawdown',data:DD_VALS.map(v=>-v),borderColor:'#ff4757',backgroundColor:'#ff475733',fill:true,borderWidth:1.5,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'Drawdown: -'+Math.abs(c.parsed.y).toFixed(3)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:10,maxRotation:0}},y:{...sc(),title:{display:true,text:'Drawdown %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(2)+'%'}}}}});
+  const wn=analyticsRange>0?Math.ceil(analyticsRange/5):0;
+  mc('chart-drawdown',{type:'line',data:{labels:sliceTail(DD_DATES,wn),datasets:[{label:'Drawdown',data:sliceTail(DD_VALS,wn).map(v=>-v),borderColor:'#ff4757',backgroundColor:'#ff475733',fill:true,borderWidth:1.5,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'Drawdown: -'+Math.abs(c.parsed.y).toFixed(3)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:10,maxRotation:0}},y:{...sc(),title:{display:true,text:'Drawdown %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(2)+'%'}}}}});
 }
 
 function initAnalyticsRange(){
