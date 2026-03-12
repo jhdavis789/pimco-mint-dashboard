@@ -166,6 +166,11 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 .cm-info:hover .cm-tip{display:block}
 .cm-monthly-review{background:var(--bg-1);border:1px solid var(--border);padding:16px 20px;margin-bottom:20px}
 .cm-monthly-review .cm-month-title{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);letter-spacing:1px;margin-bottom:10px}
+.tab-insights{margin-bottom:16px}
+.tab-insights-panel{background:var(--bg-1);border:1px solid var(--border);border-left:3px solid var(--amber);padding:12px 16px;margin-bottom:16px}
+.tab-insights-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.tab-insights-label{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--amber);letter-spacing:1px}
+.tab-insights-badge{font-family:var(--mono);font-size:8px;color:var(--text-2);letter-spacing:.5px;border:1px solid var(--border);padding:1px 6px;border-radius:3px}
 .nav-tab[data-section="compare"]:hover,.nav-tab[data-section="compare"].active{color:#e879f9;border-color:#e879f9;background:color-mix(in srgb,#e879f9 12%,transparent)}
 .comp-summary-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
 .comp-summary-table thead th{background:var(--bg-2);border-bottom:1px solid var(--border-bright);padding:8px 10px;text-align:right;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-2);font-weight:600;white-space:nowrap;position:sticky;top:0;z-index:5}
@@ -237,6 +242,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
   <!-- OVERVIEW -->
   <div class="section active" id="sec-overview">
     <div class="summary-row" id="overview-cards"></div>
+    <div id="tab-insights-overview" class="tab-insights"></div>
     <!-- Generic ETF overview (hidden for MINT) -->
     <div id="etf-overview-panels" style="display:none">
       <div class="summary-row" id="etf-overview-cards"></div>
@@ -270,6 +276,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
   <!-- PERFORMANCE -->
   <div class="section" id="sec-performance">
     <div class="summary-row" id="perf-cards"></div>
+    <div id="tab-insights-performance" class="tab-insights"></div>
     <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Monthly Returns (Q4 2025)</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:280px"><canvas id="chart-monthly-returns"></canvas></div></div></div>
     <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Annual Returns</span><span class="source-tag">SCHWAB</span></div><div class="panel-body"><div class="chart-wrap" style="height:280px"><canvas id="chart-annual-returns"></canvas></div></div></div>
     <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Returns Comparison</span><span class="source-tag">SCHWAB</span></div><div class="panel-body" id="comp-table"></div></div>
@@ -278,6 +285,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
   <!-- INCOME -->
   <div class="section" id="sec-income">
     <div class="summary-row" id="income-cards"></div>
+    <div id="tab-insights-income" class="tab-insights"></div>
     <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Monthly Distribution History</span><span class="source-tag">STOCKANALYSIS</span></div><div class="panel-body"><div class="chart-wrap" style="height:340px"><canvas id="chart-dist-history"></canvas></div></div></div>
     <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Annual Income Summary</span><span class="source-tag">COMPUTED</span></div><div class="panel-body"><div class="chart-wrap" style="height:280px"><canvas id="chart-annual-income"></canvas></div></div></div>
   </div>
@@ -285,6 +293,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
   <!-- HOLDINGS -->
   <div class="section" id="sec-holdings">
     <div class="search-bar"><input type="text" id="holdings-search" placeholder="Search holdings by name, title, sector, country, coupon type..."></div>
+    <div id="tab-insights-holdings" class="tab-insights"></div>
     <div class="panel">
       <div class="panel-header"><span class="panel-title" id="holdings-panel-title"></span><span class="panel-title" id="holdings-count" style="color:var(--text-2)"></span></div>
       <div class="panel-body flush"><div class="table-scroll">
@@ -308,6 +317,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
   <!-- PORTFOLIO ANALYTICS -->
   <div class="section" id="sec-analytics">
     <div class="summary-row analytics-holdings-only" id="analytics-cards"></div>
+    <div id="tab-insights-analytics" class="tab-insights"></div>
     <!-- range selector moved to header as global-range -->
     <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Risk Factor Time Series</span><span class="info-btn" data-info="risk_factors">i</span><span class="source-tag">PIMCO API &middot; MONTHLY</span></div><div class="panel-body"><div class="chart-wrap" style="height:400px"><canvas id="chart-factors"></canvas></div></div></div>
     <div class="panel analytics-holdings-only" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Sector Analytics</span><span class="info-btn" data-info="sector_detail">i</span><span class="source-tag">DAILY HOLDINGS &middot; PRICE + COUPON RETURNS</span></div><div class="panel-body flush"><table class="data-table" id="tbl-sector-analytics"><thead><tr><th>Sector</th><th style="text-align:right">Count</th><th style="text-align:right">Weight%</th><th style="text-align:right">WAM (yr)</th><th style="text-align:right">WAC (%)</th><th style="text-align:right">Avg Price</th><th style="text-align:right">Ann. Ret%</th><th style="text-align:right">Ann. Vol%</th><th style="text-align:right">Sharpe</th><th style="text-align:right">Max DD%</th></tr></thead><tbody id="sector-analytics-body"></tbody></table></div></div>
@@ -341,6 +351,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
   <!-- ACTIVE MANAGEMENT -->
   <div class="section" id="sec-active">
     <div class="summary-row" id="active-cards"></div>
+    <div id="tab-insights-active" class="tab-insights"></div>
     <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Sector Allocation Over Time</span><span class="info-btn" data-info="sector_alloc">i</span><span class="source-tag">DAILY HOLDINGS &middot; NORMALIZED</span></div><div class="panel-body"><div class="chart-wrap" style="height:400px"><canvas id="chart-sector-evo"></canvas></div></div></div>
     <div class="grid-2">
       <div class="panel"><div class="panel-header"><span class="panel-title">New Entries (Last 60 Days)</span></div><div class="panel-body flush"><div class="table-scroll" style="max-height:400px"><table class="mini-table" id="tbl-entries"><thead><tr><th>CUSIP</th><th>Description</th><th>Sector</th><th>First Seen</th><th class="num">Weight%</th></tr></thead><tbody id="entries-body"></tbody></table></div></div></div>
@@ -361,9 +372,10 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 
   <!-- COMMENTARY -->
   <div class="section" id="sec-commentary">
-    <div style="display:flex;gap:16px;margin-bottom:20px">
+    <div style="display:flex;gap:16px;margin-bottom:20px;align-items:center">
       <button class="range-btn active" data-view="weekly" onclick="toggleCommentaryView('weekly')">Weekly</button>
       <button class="range-btn" data-view="monthly" onclick="toggleCommentaryView('monthly')">Monthly</button>
+      <span class="tab-insights-badge" style="margin-left:auto">Algorithmically derived from holdings data &mdash; not AI-generated</span>
     </div>
     <div id="commentary-weekly"></div>
     <div id="commentary-monthly" style="display:none"></div>
@@ -405,14 +417,6 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-header"><span class="panel-title">Cumulative Performance</span><span class="source-tag">DAILY HOLDINGS &middot; COMMON START DATE</span></div>
       <div class="panel-body">
-        <div class="comp-controls">
-          <div class="ctrl-group"><span class="ctrl-label">Range:</span>
-            <button class="range-btn" data-cumr="1Y" onclick="updateCumRange('1Y',this)">1Y</button>
-            <button class="range-btn" data-cumr="2Y" onclick="updateCumRange('2Y',this)">2Y</button>
-            <button class="range-btn" data-cumr="3Y" onclick="updateCumRange('3Y',this)">3Y</button>
-            <button class="range-btn active" data-cumr="ALL" onclick="updateCumRange('ALL',this)">ALL</button>
-          </div>
-        </div>
         <div class="chart-wrap" style="height:380px"><canvas id="chart-comp-cum"></canvas></div>
       </div>
     </div>
@@ -487,12 +491,6 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
             <button class="range-btn" data-rmet="vol" onclick="updateRollingComp('window','vol',this)">Vol</button>
             <button class="range-btn" data-rmet="ir" onclick="updateRollingComp('window','ir',this)">IR<span style="font-size:8px;opacity:.6"> vMINT</span></button>
           </div>
-          <div class="ctrl-group"><span class="ctrl-label">Range:</span>
-            <button class="range-btn" data-rrange="1Y" onclick="updateRollingRange('1Y',this)">1Y</button>
-            <button class="range-btn" data-rrange="2Y" onclick="updateRollingRange('2Y',this)">2Y</button>
-            <button class="range-btn" data-rrange="3Y" onclick="updateRollingRange('3Y',this)">3Y</button>
-            <button class="range-btn active" data-rrange="ALL" onclick="updateRollingRange('ALL',this)">SI</button>
-          </div>
         </div>
         <div class="chart-wrap" style="height:360px"><canvas id="chart-comp-rolling"></canvas></div>
       </div>
@@ -502,26 +500,16 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 </div>
 <script>
 // All data globals — populated by loadData()
+const FD={};
 let HOLDINGS,DIST_DATA,ISSUER_LABELS,ISSUER_VALUES,ASSET_LABELS,ASSET_VALUES,CORP_INDUSTRY;
 let COUNTRY_LABELS,COUNTRY_VALUES,MAT_LABELS,MAT_VALUES,COUPON_LABELS,COUPON_VALUES;
 let MR_LABELS,MR_VALUES,AR_LABELS,AR_VALUES,AI_LABELS,AI_VALUES;
 let YIELD_LABELS,YIELD_VALUES,YIELD_COLORS;
-let TS_DATES,TS_SECTORS,TS_COUNT,TS_TOP5,TS_TOP10,TS_TOP20,TS_FUTURE,TS_OTHER;
-let CHURN_DATES,CHURN_NEW,CHURN_EXIT,CHURN_RATE,MAT_DATES,MAT_BUCKETS;
 let MAT_BUCKET_NAMES;
-let POS_INDEX,POS_TRACK,RECENT_ENTRIES,RECENT_EXITS,BIGGEST_MOVERS,SECTOR_TABLE;
-let TS_HHI,TS_EFF_N,TS_WAM,TS_WAC;
-let JACC_DATES,JACC_1M,JACC_3M,JACC_6M,SEC_VOL_DATES,SEC_VOL;
-let AGE_LABELS,AGE_VALUES;
-let FACTOR_DATES,FACTOR_DUR,FACTOR_BULL,FACTOR_BEAR,FACTOR_CURVE,FACTOR_AVGMAT;
-let FACTOR_YTM,FACTOR_CY,FACTOR_SEC30,FACTOR_NAV,FACTOR_MTG,FACTOR_CORP;
-let FACTOR_EM,FACTOR_SOVG,FACTOR_TSPREAD,FACTOR_DTS;
-let SECTOR_ANALYTICS,CUM_DATES,CUM_RETURNS;
-let ROLL_SHARPE_DATES,ROLL_SHARPE,ROLL_VOL_DATES,ROLL_VOL,DD_DATES,DD_VALS;
 let COMMENTARY_WEEKLY,COMMENTARY_MONTHLY;
-let CORP_DUR_DATA;
 let FUND_REGISTRY,FUND_META,FUND_DATA,COMP_DATA;
-let DISPLAY_SECTORS,MINT_ORIG,FUND_STATS;
+let DISPLAY_SECTORS,MINT_ORIG;
+let TAB_INSIGHTS;
 
 async function loadData(){
   const resp=await fetch('data.json');
@@ -540,48 +528,50 @@ async function loadData(){
   DISPLAY_SECTORS=D.display_sectors;
   // Time series
   if(D.ts){
-    TS_DATES=D.ts.ts_dates;TS_SECTORS=D.ts.ts_sectors;TS_COUNT=D.ts.ts_count;
-    TS_TOP5=D.ts.ts_top5;TS_TOP10=D.ts.ts_top10;TS_TOP20=D.ts.ts_top20;
-    TS_FUTURE=D.ts.ts_future;TS_OTHER=D.ts.ts_other;
-    TS_HHI=D.ts.ts_hhi;TS_EFF_N=D.ts.ts_eff_n;TS_WAM=D.ts.ts_wam;TS_WAC=D.ts.ts_wac;
-    CHURN_DATES=D.ts.churn_dates;CHURN_NEW=D.ts.churn_new;CHURN_EXIT=D.ts.churn_exit;CHURN_RATE=D.ts.churn_rate;
-    MAT_DATES=D.ts.mat_dates;MAT_BUCKETS=D.ts.mat_buckets;
-    JACC_DATES=D.ts.jacc_dates;JACC_1M=D.ts.jacc_1m;JACC_3M=D.ts.jacc_3m;JACC_6M=D.ts.jacc_6m;
-    SEC_VOL_DATES=D.ts.sec_vol_dates;SEC_VOL=D.ts.sec_vol;
+    FD.TS_DATES=D.ts.ts_dates;FD.TS_SECTORS=D.ts.ts_sectors;FD.TS_COUNT=D.ts.ts_count;
+    FD.TS_TOP5=D.ts.ts_top5;FD.TS_TOP10=D.ts.ts_top10;FD.TS_TOP20=D.ts.ts_top20;
+    FD.TS_FUTURE=D.ts.ts_future;FD.TS_OTHER=D.ts.ts_other;
+    FD.TS_HHI=D.ts.ts_hhi;FD.TS_EFF_N=D.ts.ts_eff_n;FD.TS_WAM=D.ts.ts_wam;FD.TS_WAC=D.ts.ts_wac;
+    FD.CHURN_DATES=D.ts.churn_dates;FD.CHURN_NEW=D.ts.churn_new;FD.CHURN_EXIT=D.ts.churn_exit;FD.CHURN_RATE=D.ts.churn_rate;
+    FD.MAT_DATES=D.ts.mat_dates;FD.MAT_BUCKETS=D.ts.mat_buckets;
+    FD.JACC_DATES=D.ts.jacc_dates;FD.JACC_1M=D.ts.jacc_1m;FD.JACC_3M=D.ts.jacc_3m;FD.JACC_6M=D.ts.jacc_6m;
+    FD.SEC_VOL_DATES=D.ts.sec_vol_dates;FD.SEC_VOL=D.ts.sec_vol;
   }
   // Position data
   if(D.pos){
-    POS_INDEX=D.pos.pos_index;POS_TRACK=D.pos.pos_track;
-    RECENT_ENTRIES=D.pos.recent_entries;RECENT_EXITS=D.pos.recent_exits;
-    BIGGEST_MOVERS=D.pos.biggest_movers;SECTOR_TABLE=D.pos.sector_table;
-    AGE_LABELS=D.pos.age_labels;AGE_VALUES=D.pos.age_values;
-    FUND_STATS=D.pos.stats||null;
+    FD.POS_INDEX=D.pos.pos_index;FD.POS_TRACK=D.pos.pos_track;
+    FD.RECENT_ENTRIES=D.pos.recent_entries;FD.RECENT_EXITS=D.pos.recent_exits;
+    FD.BIGGEST_MOVERS=D.pos.biggest_movers;FD.SECTOR_TABLE=D.pos.sector_table;
+    FD.AGE_LABELS=D.pos.age_labels;FD.AGE_VALUES=D.pos.age_values;
+    FD.FUND_STATS=D.pos.stats||null;
   }
   // Factor data
   if(D.factors){
-    FACTOR_DATES=D.factors.dates;FACTOR_DUR=D.factors.dur;
-    FACTOR_BULL=D.factors.bull;FACTOR_BEAR=D.factors.bear;
-    FACTOR_CURVE=D.factors.curve;FACTOR_AVGMAT=D.factors.avgmat;
-    FACTOR_YTM=D.factors.ytm;FACTOR_CY=D.factors.cy;
-    FACTOR_SEC30=D.factors.sec30;FACTOR_NAV=D.factors.nav;
-    FACTOR_MTG=D.factors.mtg;FACTOR_CORP=D.factors.corp;
-    FACTOR_EM=D.factors.em;FACTOR_SOVG=D.factors.sovg;
-    FACTOR_TSPREAD=D.factors.tspread;FACTOR_DTS=D.factors.dts;
+    FD.FACTOR_DATES=D.factors.dates;FD.FACTOR_DUR=D.factors.dur;
+    FD.FACTOR_BULL=D.factors.bull;FD.FACTOR_BEAR=D.factors.bear;
+    FD.FACTOR_CURVE=D.factors.curve;FD.FACTOR_AVGMAT=D.factors.avgmat;
+    FD.FACTOR_YTM=D.factors.ytm;FD.FACTOR_CY=D.factors.cy;
+    FD.FACTOR_SEC30=D.factors.sec30;FD.FACTOR_NAV=D.factors.nav;
+    FD.FACTOR_MTG=D.factors.mtg;FD.FACTOR_CORP=D.factors.corp;
+    FD.FACTOR_EM=D.factors.em;FD.FACTOR_SOVG=D.factors.sovg;
+    FD.FACTOR_TSPREAD=D.factors.tspread;FD.FACTOR_DTS=D.factors.dts;
   }
   // Sector analytics
   if(D.sector_analytics){
-    SECTOR_ANALYTICS=D.sector_analytics.table;
-    CUM_DATES=D.sector_analytics.cum_dates;CUM_RETURNS=D.sector_analytics.cum_returns;
-    ROLL_SHARPE_DATES=D.sector_analytics.roll_sharpe_dates;ROLL_SHARPE=D.sector_analytics.roll_sharpe;
-    ROLL_VOL_DATES=D.sector_analytics.roll_vol_dates;ROLL_VOL=D.sector_analytics.roll_vol;
-    DD_DATES=D.sector_analytics.dd_dates;DD_VALS=D.sector_analytics.dd_vals;
+    FD.SECTOR_ANALYTICS=D.sector_analytics.table;
+    FD.CUM_DATES=D.sector_analytics.cum_dates;FD.CUM_RETURNS=D.sector_analytics.cum_returns;FD.CUM_CONTRIBUTIONS=D.sector_analytics.cum_contributions;
+    FD.ROLL_SHARPE_DATES=D.sector_analytics.roll_sharpe_dates;FD.ROLL_SHARPE=D.sector_analytics.roll_sharpe;
+    FD.ROLL_VOL_DATES=D.sector_analytics.roll_vol_dates;FD.ROLL_VOL=D.sector_analytics.roll_vol;
+    FD.DD_DATES=D.sector_analytics.dd_dates;FD.DD_VALS=D.sector_analytics.dd_vals;
   }
   // Commentary
   if(D.commentary){
     COMMENTARY_WEEKLY=D.commentary.weekly;COMMENTARY_MONTHLY=D.commentary.monthly;
   }
+  // Tab insights
+  TAB_INSIGHTS=D.tab_insights||{};
   // Corp duration by industry
-  CORP_DUR_DATA=D.corp_duration||null;
+  FD.CORP_DUR_DATA=D.corp_duration||null;
   FUND_REGISTRY=D.fund_registry||{};
   FUND_META=D.fund_meta||{};
   FUND_DATA=D.fund_data||{};
@@ -601,33 +591,7 @@ async function loadData(){
   window._MINT_FILING_DATE=D.html.filing_date;
   window._MINT_NUM_HOLDINGS=D.html.num_holdings;
   // Build MINT_ORIG for fund switching
-  MINT_ORIG=(typeof TS_DATES!=='undefined'&&TS_DATES)?{
-    TS_DATES,TS_SECTORS,TS_COUNT,TS_TOP5,TS_TOP10,TS_TOP20,
-    TS_FUTURE,TS_OTHER,TS_HHI,TS_EFF_N,TS_WAM,TS_WAC,
-    CHURN_DATES,CHURN_NEW,CHURN_EXIT,CHURN_RATE,
-    MAT_DATES,MAT_BUCKETS,
-    JACC_DATES,JACC_1M,JACC_3M,JACC_6M,
-    SEC_VOL_DATES,SEC_VOL,
-    AGE_LABELS,AGE_VALUES,
-    POS_INDEX,POS_TRACK,
-    RECENT_ENTRIES,RECENT_EXITS,
-    BIGGEST_MOVERS,SECTOR_TABLE,
-    FUND_STATS:FUND_STATS||null,
-    SECTOR_ANALYTICS:SECTOR_ANALYTICS||null,
-    CUM_DATES:CUM_DATES||null,CUM_RETURNS:CUM_RETURNS||null,
-    ROLL_SHARPE_DATES:ROLL_SHARPE_DATES||null,ROLL_SHARPE:ROLL_SHARPE||null,
-    ROLL_VOL_DATES:ROLL_VOL_DATES||null,ROLL_VOL:ROLL_VOL||null,
-    DD_DATES:DD_DATES||null,DD_VALS:DD_VALS||null,
-    FACTOR_DATES:FACTOR_DATES||null,FACTOR_DUR:FACTOR_DUR||null,
-    FACTOR_BULL:FACTOR_BULL||null,FACTOR_BEAR:FACTOR_BEAR||null,
-    FACTOR_CURVE:FACTOR_CURVE||null,FACTOR_AVGMAT:FACTOR_AVGMAT||null,
-    FACTOR_YTM:FACTOR_YTM||null,FACTOR_CY:FACTOR_CY||null,
-    FACTOR_SEC30:FACTOR_SEC30||null,FACTOR_NAV:FACTOR_NAV||null,
-    FACTOR_MTG:FACTOR_MTG||null,FACTOR_CORP:FACTOR_CORP||null,
-    FACTOR_EM:FACTOR_EM||null,FACTOR_SOVG:FACTOR_SOVG||null,
-    FACTOR_TSPREAD:FACTOR_TSPREAD||null,FACTOR_DTS:FACTOR_DTS||null,
-    CORP_DUR_DATA:CORP_DUR_DATA||null,
-  }:null;
+  MINT_ORIG=FD.TS_DATES?{...FD}:null;
 }
 
 const CF={family:"'JetBrains Mono',monospace",size:10};
@@ -639,6 +603,77 @@ function tt(){return{backgroundColor:'#1c2230',borderColor:'#344054',borderWidth
 
 function sc(){return{grid:{color:GC,drawBorder:false},ticks:{color:TC,font:CF}};}
 
+// ─── CHART TYPE TEMPLATES ──────────────────────────────
+function sR(arr,n,freq){if(!n||!arr)return arr||[];const adj=freq==='w'?Math.ceil(n/5):freq==='m'?Math.ceil(n/21):n;return arr.length>adj?arr.slice(-adj):arr;}
+let gRange=0; // 0=MAX, else daily observation count
+
+const CT={
+  line(id,labels,datasets,opts={}){
+    const o={responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},
+        tooltip:{...tt(),mode:'index',intersect:false,...(opts.ttCb?{callbacks:opts.ttCb}:{})}},
+      scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:opts.xTicks||10,maxRotation:0}},
+        y:{...sc(),...(opts.yTitle?{title:{display:true,text:opts.yTitle,color:TC,font:CF}}:{}),
+          ...(opts.yMax!=null?{max:opts.yMax}:{}),
+          ...(opts.stacked?{stacked:true}:{}),
+          ticks:{...sc().ticks,...(opts.yFmt?{callback:opts.yFmt}:{})}}}};
+    if(opts.y1){o.scales.y1={...sc(),position:'right',grid:{drawOnChartArea:false},...opts.y1};}
+    if(opts.y2){o.scales.y2={display:false};}
+    if(!opts.legend&&opts.legend!==undefined)o.plugins.legend.display=false;
+    mc(id,{type:'line',data:{labels,datasets},options:o});
+  },
+  singleLine(id,labels,data,color,opts={}){
+    CT.line(id,labels,[{label:opts.label||'',data,borderColor:color,backgroundColor:color+'22',
+      fill:opts.fill!==false,borderWidth:opts.width||1.5,pointRadius:opts.points||0,tension:.3}],
+      {legend:false,...opts});
+  },
+  multiLine(id,labels,series,opts={}){
+    const ds=series.map(s=>({label:s.label,data:s.data,borderColor:s.color,
+      borderWidth:s.width||1.5,pointRadius:s.points||0,tension:.3,fill:false,
+      hidden:!!s.hidden,borderDash:s.dash||[],spanGaps:true,
+      ...(s.yAxisID?{yAxisID:s.yAxisID}:{}),
+      ...(s.backgroundColor?{backgroundColor:s.backgroundColor,fill:true}:{})}));
+    CT.line(id,labels,ds,opts);
+  },
+  stackedArea(id,labels,series,opts={}){
+    const ds=series.map(s=>({label:s.label,data:s.data,backgroundColor:(s.color||'#6b7a90')+'66',
+      borderColor:s.color||'#6b7a90',borderWidth:1,fill:true,pointRadius:0}));
+    CT.line(id,labels,ds,{stacked:true,...opts});
+  },
+  bar(id,labels,datasets,opts={}){
+    const o={responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:opts.legend!==false&&datasets.length>1,
+        labels:{color:TC,font:CF,boxWidth:10,padding:6}},
+        tooltip:{...tt(),...(opts.ttCb?{callbacks:opts.ttCb}:{})}},
+      scales:{x:{...sc(),grid:{display:false},...(opts.stacked?{stacked:true}:{})},
+        y:{...sc(),...(opts.stacked?{stacked:true}:{}),
+          ...(opts.yTitle?{title:{display:true,text:opts.yTitle,color:TC,font:CF}}:{}),
+          ...(opts.yMax!=null?{max:opts.yMax}:{}),
+          ticks:{...sc().ticks,...(opts.yFmt?{callback:opts.yFmt}:{})}}}};
+    if(opts.horizontal)o.indexAxis='y';
+    if(opts.y1){o.scales.y1={...sc(),position:'right',grid:{drawOnChartArea:false},...opts.y1};}
+    mc(id,{type:'bar',data:{labels,datasets},options:o});
+  },
+  doughnut(id,labels,data,colors,opts={}){
+    mc(id,{type:opts.type||'doughnut',data:{labels,datasets:[{data,
+      backgroundColor:colors,borderColor:'#0f1218',borderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:opts.cutout||'55%',
+        plugins:{legend:{position:opts.legendPos||'right',labels:{color:TC,font:CF,padding:12,boxWidth:12}},
+          tooltip:{...tt(),callbacks:{label:c=>c.label+': '+c.parsed+(opts.unit||'%')}}}}});
+  },
+  scatter(id,datasets,opts={}){
+    mc(id,{type:'scatter',data:{datasets},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'top',labels:{color:TC,font:CF,boxWidth:10,padding:8,usePointStyle:true}},
+          tooltip:{...tt(),...(opts.ttCb?{callbacks:opts.ttCb}:{})}},
+        scales:{x:{...sc(),title:{display:true,text:opts.xTitle||'',color:TC,font:CF},
+          ...(opts.xFmt?{ticks:{...sc().ticks,callback:opts.xFmt}}:{})},
+          y:{...sc(),title:{display:true,text:opts.yTitle||'',color:TC,font:CF},
+          ...(opts.yFmt?{ticks:{...sc().ticks,callback:opts.yFmt}}:{})}}}});
+  }
+};
+
 // ─── FUND SWITCHING ──────────────────────────────────
 let currentFund='MINT';
 const MINT_ONLY_TABS=['performance','income','commentary'];
@@ -646,40 +681,7 @@ const HOLDINGS_TABS=['holdings','active'];  // tabs needing position/holdings da
 
 function loadFundData(ticker){
   if(ticker==='MINT'&&MINT_ORIG){
-    // Restore MINT originals
-    TS_DATES=MINT_ORIG.TS_DATES;TS_SECTORS=MINT_ORIG.TS_SECTORS;TS_COUNT=MINT_ORIG.TS_COUNT;
-    TS_TOP5=MINT_ORIG.TS_TOP5;TS_TOP10=MINT_ORIG.TS_TOP10;TS_TOP20=MINT_ORIG.TS_TOP20;
-    TS_FUTURE=MINT_ORIG.TS_FUTURE;TS_OTHER=MINT_ORIG.TS_OTHER;
-    TS_HHI=MINT_ORIG.TS_HHI;TS_EFF_N=MINT_ORIG.TS_EFF_N;TS_WAM=MINT_ORIG.TS_WAM;TS_WAC=MINT_ORIG.TS_WAC;
-    CHURN_DATES=MINT_ORIG.CHURN_DATES;CHURN_NEW=MINT_ORIG.CHURN_NEW;CHURN_EXIT=MINT_ORIG.CHURN_EXIT;CHURN_RATE=MINT_ORIG.CHURN_RATE;
-    MAT_DATES=MINT_ORIG.MAT_DATES;MAT_BUCKETS=MINT_ORIG.MAT_BUCKETS;
-    JACC_DATES=MINT_ORIG.JACC_DATES;JACC_1M=MINT_ORIG.JACC_1M;JACC_3M=MINT_ORIG.JACC_3M;JACC_6M=MINT_ORIG.JACC_6M;
-    SEC_VOL_DATES=MINT_ORIG.SEC_VOL_DATES;SEC_VOL=MINT_ORIG.SEC_VOL;
-    AGE_LABELS=MINT_ORIG.AGE_LABELS;AGE_VALUES=MINT_ORIG.AGE_VALUES;
-    POS_INDEX=MINT_ORIG.POS_INDEX;POS_TRACK=MINT_ORIG.POS_TRACK;
-    RECENT_ENTRIES=MINT_ORIG.RECENT_ENTRIES;RECENT_EXITS=MINT_ORIG.RECENT_EXITS;
-    BIGGEST_MOVERS=MINT_ORIG.BIGGEST_MOVERS;SECTOR_TABLE=MINT_ORIG.SECTOR_TABLE;
-    FUND_STATS=MINT_ORIG.FUND_STATS;
-    if(MINT_ORIG.SECTOR_ANALYTICS)SECTOR_ANALYTICS=MINT_ORIG.SECTOR_ANALYTICS;
-    if(MINT_ORIG.CUM_DATES)CUM_DATES=MINT_ORIG.CUM_DATES;
-    if(MINT_ORIG.CUM_RETURNS)CUM_RETURNS=MINT_ORIG.CUM_RETURNS;
-    if(MINT_ORIG.ROLL_SHARPE_DATES)ROLL_SHARPE_DATES=MINT_ORIG.ROLL_SHARPE_DATES;
-    if(MINT_ORIG.ROLL_SHARPE)ROLL_SHARPE=MINT_ORIG.ROLL_SHARPE;
-    if(MINT_ORIG.ROLL_VOL_DATES)ROLL_VOL_DATES=MINT_ORIG.ROLL_VOL_DATES;
-    if(MINT_ORIG.ROLL_VOL)ROLL_VOL=MINT_ORIG.ROLL_VOL;
-    if(MINT_ORIG.DD_DATES)DD_DATES=MINT_ORIG.DD_DATES;
-    if(MINT_ORIG.DD_VALS)DD_VALS=MINT_ORIG.DD_VALS;
-    if(MINT_ORIG.FACTOR_DATES){
-      FACTOR_DATES=MINT_ORIG.FACTOR_DATES;FACTOR_DUR=MINT_ORIG.FACTOR_DUR;
-      FACTOR_BULL=MINT_ORIG.FACTOR_BULL;FACTOR_BEAR=MINT_ORIG.FACTOR_BEAR;
-      FACTOR_CURVE=MINT_ORIG.FACTOR_CURVE;FACTOR_AVGMAT=MINT_ORIG.FACTOR_AVGMAT;
-      FACTOR_YTM=MINT_ORIG.FACTOR_YTM;FACTOR_CY=MINT_ORIG.FACTOR_CY;
-      FACTOR_SEC30=MINT_ORIG.FACTOR_SEC30;FACTOR_NAV=MINT_ORIG.FACTOR_NAV;
-      FACTOR_MTG=MINT_ORIG.FACTOR_MTG;FACTOR_CORP=MINT_ORIG.FACTOR_CORP;
-      FACTOR_EM=MINT_ORIG.FACTOR_EM;FACTOR_SOVG=MINT_ORIG.FACTOR_SOVG;
-      FACTOR_TSPREAD=MINT_ORIG.FACTOR_TSPREAD;FACTOR_DTS=MINT_ORIG.FACTOR_DTS;
-    }
-    CORP_DUR_DATA=MINT_ORIG.CORP_DUR_DATA||null;
+    Object.assign(FD,MINT_ORIG);
     return true;
   }
   const fd=typeof FUND_DATA!=='undefined'?FUND_DATA[ticker]:null;
@@ -687,50 +689,50 @@ function loadFundData(ticker){
   const isMF=fd.is_mutual_fund||false;
   // Load time series (null for mutual funds)
   if(fd.ts_dates){
-    TS_DATES=fd.ts_dates;TS_SECTORS=fd.ts_sectors;TS_COUNT=fd.ts_count;
-    TS_TOP5=fd.ts_top5;TS_TOP10=fd.ts_top10;TS_TOP20=fd.ts_top20;
-    TS_FUTURE=fd.ts_future;TS_OTHER=fd.ts_other;
-    TS_HHI=fd.ts_hhi;TS_EFF_N=fd.ts_eff_n;TS_WAM=fd.ts_wam;TS_WAC=fd.ts_wac;
-    CHURN_DATES=fd.churn_dates;CHURN_NEW=fd.churn_new;CHURN_EXIT=fd.churn_exit;CHURN_RATE=fd.churn_rate;
-    MAT_DATES=fd.mat_dates;MAT_BUCKETS=fd.mat_buckets;
-    JACC_DATES=fd.jacc_dates;JACC_1M=fd.jacc_1m;JACC_3M=fd.jacc_3m;JACC_6M=fd.jacc_6m;
-    SEC_VOL_DATES=fd.sec_vol_dates;SEC_VOL=fd.sec_vol;
+    FD.TS_DATES=fd.ts_dates;FD.TS_SECTORS=fd.ts_sectors;FD.TS_COUNT=fd.ts_count;
+    FD.TS_TOP5=fd.ts_top5;FD.TS_TOP10=fd.ts_top10;FD.TS_TOP20=fd.ts_top20;
+    FD.TS_FUTURE=fd.ts_future;FD.TS_OTHER=fd.ts_other;
+    FD.TS_HHI=fd.ts_hhi;FD.TS_EFF_N=fd.ts_eff_n;FD.TS_WAM=fd.ts_wam;FD.TS_WAC=fd.ts_wac;
+    FD.CHURN_DATES=fd.churn_dates;FD.CHURN_NEW=fd.churn_new;FD.CHURN_EXIT=fd.churn_exit;FD.CHURN_RATE=fd.churn_rate;
+    FD.MAT_DATES=fd.mat_dates;FD.MAT_BUCKETS=fd.mat_buckets;
+    FD.JACC_DATES=fd.jacc_dates;FD.JACC_1M=fd.jacc_1m;FD.JACC_3M=fd.jacc_3m;FD.JACC_6M=fd.jacc_6m;
+    FD.SEC_VOL_DATES=fd.sec_vol_dates;FD.SEC_VOL=fd.sec_vol;
   }else if(isMF){
-    TS_DATES=[];TS_SECTORS={};TS_COUNT=[];TS_TOP5=[];TS_TOP10=[];TS_TOP20=[];
-    TS_FUTURE=[];TS_OTHER=[];TS_HHI=[];TS_EFF_N=[];TS_WAM=[];TS_WAC=[];
-    CHURN_DATES=[];CHURN_NEW=[];CHURN_EXIT=[];CHURN_RATE=[];
-    MAT_DATES=[];MAT_BUCKETS={};JACC_DATES=[];JACC_1M=[];JACC_3M=[];JACC_6M=[];
-    SEC_VOL_DATES=[];SEC_VOL={};
+    FD.TS_DATES=[];FD.TS_SECTORS={};FD.TS_COUNT=[];FD.TS_TOP5=[];FD.TS_TOP10=[];FD.TS_TOP20=[];
+    FD.TS_FUTURE=[];FD.TS_OTHER=[];FD.TS_HHI=[];FD.TS_EFF_N=[];FD.TS_WAM=[];FD.TS_WAC=[];
+    FD.CHURN_DATES=[];FD.CHURN_NEW=[];FD.CHURN_EXIT=[];FD.CHURN_RATE=[];
+    FD.MAT_DATES=[];FD.MAT_BUCKETS={};FD.JACC_DATES=[];FD.JACC_1M=[];FD.JACC_3M=[];FD.JACC_6M=[];
+    FD.SEC_VOL_DATES=[];FD.SEC_VOL={};
   }
   // Load position data (null for mutual funds)
   if(fd.pos_index){
-    POS_INDEX=fd.pos_index;POS_TRACK=fd.pos_track;
-    RECENT_ENTRIES=fd.recent_entries;RECENT_EXITS=fd.recent_exits;
-    BIGGEST_MOVERS=fd.biggest_movers;SECTOR_TABLE=fd.sector_table;
-    AGE_LABELS=fd.age_labels;AGE_VALUES=fd.age_values;
-    FUND_STATS=fd.stats||null;
+    FD.POS_INDEX=fd.pos_index;FD.POS_TRACK=fd.pos_track;
+    FD.RECENT_ENTRIES=fd.recent_entries;FD.RECENT_EXITS=fd.recent_exits;
+    FD.BIGGEST_MOVERS=fd.biggest_movers;FD.SECTOR_TABLE=fd.sector_table;
+    FD.AGE_LABELS=fd.age_labels;FD.AGE_VALUES=fd.age_values;
+    FD.FUND_STATS=fd.stats||null;
   }else if(isMF){
-    POS_INDEX=[];POS_TRACK=[];RECENT_ENTRIES=[];RECENT_EXITS=[];
-    BIGGEST_MOVERS=[];SECTOR_TABLE=[];AGE_LABELS=[];AGE_VALUES=[];
-    FUND_STATS=null;
+    FD.POS_INDEX=[];FD.POS_TRACK=[];FD.RECENT_ENTRIES=[];FD.RECENT_EXITS=[];
+    FD.BIGGEST_MOVERS=[];FD.SECTOR_TABLE=[];FD.AGE_LABELS=[];FD.AGE_VALUES=[];
+    FD.FUND_STATS=null;
   }
   // Load sector analytics
   if(fd.sector_analytics){
-    SECTOR_ANALYTICS=fd.sector_analytics;CUM_DATES=fd.cum_dates;CUM_RETURNS=fd.cum_returns;
-    ROLL_SHARPE_DATES=fd.roll_sharpe_dates;ROLL_SHARPE=fd.roll_sharpe;
-    ROLL_VOL_DATES=fd.roll_vol_dates;ROLL_VOL=fd.roll_vol;
-    DD_DATES=fd.dd_dates;DD_VALS=fd.dd_vals;
+    FD.SECTOR_ANALYTICS=fd.sector_analytics;FD.CUM_DATES=fd.cum_dates;FD.CUM_RETURNS=fd.cum_returns;FD.CUM_CONTRIBUTIONS=fd.cum_contributions;
+    FD.ROLL_SHARPE_DATES=fd.roll_sharpe_dates;FD.ROLL_SHARPE=fd.roll_sharpe;
+    FD.ROLL_VOL_DATES=fd.roll_vol_dates;FD.ROLL_VOL=fd.roll_vol;
+    FD.DD_DATES=fd.dd_dates;FD.DD_VALS=fd.dd_vals;
   }
   // Load factor data
   if(fd.factor_dates){
-    FACTOR_DATES=fd.factor_dates;FACTOR_DUR=fd.factor_dur;
-    FACTOR_YTM=fd.factor_ytm;FACTOR_TSPREAD=fd.factor_total_spread;FACTOR_DTS=fd.factor_dts;
-    FACTOR_BULL=fd.factor_bull;FACTOR_BEAR=fd.factor_bear;FACTOR_CURVE=fd.factor_curve;
-    FACTOR_AVGMAT=fd.factor_avgmat;FACTOR_CY=fd.factor_cy;FACTOR_SEC30=fd.factor_sec30;
-    FACTOR_NAV=fd.factor_nav;FACTOR_MTG=fd.factor_mtg;FACTOR_CORP=fd.factor_corp;
-    FACTOR_EM=fd.factor_em;FACTOR_SOVG=fd.factor_sovg;
+    FD.FACTOR_DATES=fd.factor_dates;FD.FACTOR_DUR=fd.factor_dur;
+    FD.FACTOR_YTM=fd.factor_ytm;FD.FACTOR_TSPREAD=fd.factor_total_spread;FD.FACTOR_DTS=fd.factor_dts;
+    FD.FACTOR_BULL=fd.factor_bull;FD.FACTOR_BEAR=fd.factor_bear;FD.FACTOR_CURVE=fd.factor_curve;
+    FD.FACTOR_AVGMAT=fd.factor_avgmat;FD.FACTOR_CY=fd.factor_cy;FD.FACTOR_SEC30=fd.factor_sec30;
+    FD.FACTOR_NAV=fd.factor_nav;FD.FACTOR_MTG=fd.factor_mtg;FD.FACTOR_CORP=fd.factor_corp;
+    FD.FACTOR_EM=fd.factor_em;FD.FACTOR_SOVG=fd.factor_sovg;
   }
-  CORP_DUR_DATA=fd.corp_duration||null;
+  FD.CORP_DUR_DATA=fd.corp_duration||null;
   return true;
 }
 
@@ -794,6 +796,9 @@ function switchFund(ticker){
     }
   });
 
+  // Show/hide tab insights (MINT only)
+  document.querySelectorAll('.tab-insights').forEach(el=>{el.style.display=ticker==='MINT'?'':'none';});
+
   // Load fund data into globals
   if(!loadFundData(ticker))return;
 
@@ -825,11 +830,11 @@ function initNav(){
 }
 
 function buildOverview(){
-  mc('chart-issuer',{type:'doughnut',data:{labels:ISSUER_LABELS,datasets:[{data:ISSUER_VALUES,backgroundColor:COLORS.slice(0,ISSUER_LABELS.length),borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:TC,font:CF,padding:12,boxWidth:12}},tooltip:{...tt(),callbacks:{label:c=>c.label+': '+c.parsed+'%'}}}}});
-  mc('chart-asset',{type:'doughnut',data:{labels:ASSET_LABELS,datasets:[{data:ASSET_VALUES,backgroundColor:COLORS.slice(0,ASSET_LABELS.length),borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:TC,font:CF,padding:12,boxWidth:12}},tooltip:{...tt(),callbacks:{label:c=>c.label+': '+c.parsed+'%'}}}}});
-  mc('chart-country',{type:'pie',data:{labels:COUNTRY_LABELS,datasets:[{data:COUNTRY_VALUES,backgroundColor:COLORS.slice(0,COUNTRY_LABELS.length),borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:TC,font:CF,padding:8,boxWidth:10}},tooltip:{...tt(),callbacks:{label:c=>c.label+': '+c.parsed+'%'}}}}});
-  mc('chart-coupon',{type:'doughnut',data:{labels:COUPON_LABELS,datasets:[{data:COUPON_VALUES,backgroundColor:['#00d4aa','#3b82f6','#6b7a90','#ffa502'].slice(0,COUPON_LABELS.length),borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:TC,font:CF,padding:12,boxWidth:12}},tooltip:{...tt(),callbacks:{label:c=>c.parsed+'%'}}}}});
-  mc('chart-maturity',{type:'bar',data:{labels:MAT_LABELS,datasets:[{data:MAT_VALUES,backgroundColor:['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'].slice(0,MAT_LABELS.length),borderWidth:0,borderRadius:2,barThickness:36}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.y+'%'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
+  CT.doughnut('chart-issuer', ISSUER_LABELS, ISSUER_VALUES, COLORS.slice(0,ISSUER_LABELS.length));
+  CT.doughnut('chart-asset', ASSET_LABELS, ASSET_VALUES, COLORS.slice(0,ASSET_LABELS.length));
+  CT.doughnut('chart-country', COUNTRY_LABELS, COUNTRY_VALUES, COLORS.slice(0,COUNTRY_LABELS.length), {type:'pie', cutout:'0%'});
+  CT.doughnut('chart-coupon', COUPON_LABELS, COUPON_VALUES, ['#00d4aa','#3b82f6','#6b7a90','#ffa502'].slice(0,COUPON_LABELS.length));
+  CT.bar('chart-maturity', MAT_LABELS, [{data:MAT_VALUES,backgroundColor:['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'].slice(0,MAT_LABELS.length),borderWidth:0,borderRadius:2,barThickness:36}], {yFmt:v=>v+'%',ttCb:{label:c=>c.parsed.y+'%'}});
   mc('chart-yield-comp',{type:'bar',data:{labels:YIELD_LABELS,datasets:[{data:YIELD_VALUES,backgroundColor:YIELD_COLORS,borderWidth:0,borderRadius:2,barThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.x.toFixed(2)+'%'}}},scales:{x:{...sc(),max:5.5,ticks:{...sc().ticks,callback:v=>v+'%'}},y:{...sc(),grid:{display:false}}}}});
 }
 
@@ -842,14 +847,14 @@ function buildOverviewForFund(){
   if(isMINT||isMF)return;
   const fd=typeof FUND_DATA!=='undefined'?FUND_DATA[currentFund]:null;
   const reg=FUND_REGISTRY[currentFund]||{};
-  const st=FUND_STATS||{};
+  const st=FD.FUND_STATS||{};
   let durStr='N/A',ytmStr='N/A',navStr='N/A',spreadStr='N/A';
-  if(typeof FACTOR_DATES!=='undefined'&&FACTOR_DATES&&FACTOR_DATES.length){
-    const li=FACTOR_DATES.length-1;
-    if(FACTOR_DUR&&FACTOR_DUR[li]!=null)durStr=FACTOR_DUR[li].toFixed(3)+'yr';
-    if(FACTOR_YTM&&FACTOR_YTM[li]!=null)ytmStr=FACTOR_YTM[li].toFixed(2)+'%';
-    if(FACTOR_NAV&&FACTOR_NAV[li]!=null)navStr='$'+FACTOR_NAV[li].toFixed(2);
-    if(FACTOR_TSPREAD&&FACTOR_TSPREAD[li]!=null)spreadStr=FACTOR_TSPREAD[li].toFixed(3)+'pp';
+  if(typeof FD.FACTOR_DATES!=='undefined'&&FD.FACTOR_DATES&&FD.FACTOR_DATES.length){
+    const li=FD.FACTOR_DATES.length-1;
+    if(FD.FACTOR_DUR&&FD.FACTOR_DUR[li]!=null)durStr=FD.FACTOR_DUR[li].toFixed(3)+'yr';
+    if(FD.FACTOR_YTM&&FD.FACTOR_YTM[li]!=null)ytmStr=FD.FACTOR_YTM[li].toFixed(2)+'%';
+    if(FD.FACTOR_NAV&&FD.FACTOR_NAV[li]!=null)navStr='$'+FD.FACTOR_NAV[li].toFixed(2);
+    if(FD.FACTOR_TSPREAD&&FD.FACTOR_TSPREAD[li]!=null)spreadStr=FD.FACTOR_TSPREAD[li].toFixed(3)+'pp';
   }
   const holdN=st.count_now||'N/A';
   const lSec=st.largest_sector||'N/A';
@@ -863,19 +868,19 @@ function buildOverviewForFund(){
     '<div class="stat-card purple"><div class="stat-label">WAM / WAC</div><div class="stat-value">'+wam+'</div><div class="stat-sub">WAC: '+wac+'</div></div>'+
     '<div class="stat-card cyan"><div class="stat-label">Largest Sector</div><div class="stat-value">'+esc(lSec)+'</div><div class="stat-sub">'+lSecW+'% of portfolio</div></div>'+
     '<div class="stat-card green"><div class="stat-label">Concentration</div><div class="stat-value">HHI '+(st.hhi_now||'N/A')+'</div><div class="stat-sub">Eff N: '+(st.eff_n_now||'N/A')+'</div></div>';
-  if(typeof TS_SECTORS!=='undefined'&&TS_SECTORS&&typeof TS_DATES!=='undefined'&&TS_DATES&&TS_DATES.length){
-    const li=TS_DATES.length-1;
+  if(typeof FD.TS_SECTORS!=='undefined'&&FD.TS_SECTORS&&typeof FD.TS_DATES!=='undefined'&&FD.TS_DATES&&FD.TS_DATES.length){
+    const li=FD.TS_DATES.length-1;
     const sLabels=[];const sVals=[];
-    DISPLAY_SECTORS.forEach(s=>{const v=TS_SECTORS[s]?TS_SECTORS[s][li]:0;if(v>0.1){sLabels.push(s);sVals.push(Math.round(v*10)/10);}});
-    mc('chart-etf-sector',{type:'doughnut',data:{labels:sLabels,datasets:[{data:sVals,backgroundColor:COLORS.slice(0,sLabels.length),borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:TC,font:CF,padding:12,boxWidth:12}},tooltip:{...tt(),callbacks:{label:c=>c.label+': '+c.parsed.toFixed(1)+'%'}}}}});
-    const corpW=TS_SECTORS['Corporate']?TS_SECTORS['Corporate'][li]:0;
+    DISPLAY_SECTORS.forEach(s=>{const v=FD.TS_SECTORS[s]?FD.TS_SECTORS[s][li]:0;if(v>0.1){sLabels.push(s);sVals.push(Math.round(v*10)/10);}});
+    CT.doughnut('chart-etf-sector', sLabels, sVals, COLORS.slice(0,sLabels.length));
+    const corpW=FD.TS_SECTORS['Corporate']?FD.TS_SECTORS['Corporate'][li]:0;
     document.getElementById('etf-corp-btn').style.display=corpW>10?'':'none';
   }
-  if(typeof MAT_BUCKETS!=='undefined'&&MAT_BUCKETS&&typeof MAT_DATES!=='undefined'&&MAT_DATES&&MAT_DATES.length){
-    const li=MAT_DATES.length-1;const mLabels=[];const mVals=[];
-    MAT_BUCKET_NAMES.forEach(b=>{const v=MAT_BUCKETS[b]?MAT_BUCKETS[b][li]:0;if(v>0.1){mLabels.push(b);mVals.push(Math.round(v*10)/10);}});
+  if(typeof FD.MAT_BUCKETS!=='undefined'&&FD.MAT_BUCKETS&&typeof FD.MAT_DATES!=='undefined'&&FD.MAT_DATES&&FD.MAT_DATES.length){
+    const li=FD.MAT_DATES.length-1;const mLabels=[];const mVals=[];
+    MAT_BUCKET_NAMES.forEach(b=>{const v=FD.MAT_BUCKETS[b]?FD.MAT_BUCKETS[b][li]:0;if(v>0.1){mLabels.push(b);mVals.push(Math.round(v*10)/10);}});
     const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'];
-    mc('chart-etf-maturity',{type:'bar',data:{labels:mLabels,datasets:[{data:mVals,backgroundColor:matColors.slice(0,mLabels.length),borderWidth:0,borderRadius:2,barThickness:36}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.y.toFixed(1)+'%'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
+    CT.bar('chart-etf-maturity', mLabels, [{data:mVals,backgroundColor:matColors.slice(0,mLabels.length),borderWidth:0,borderRadius:2,barThickness:36}], {yFmt:v=>v+'%',ttCb:{label:c=>c.parsed.y.toFixed(1)+'%'}});
   }
   // Country/State + Coupon charts (snapshot funds)
   const geoRow=document.getElementById('etf-geo-row');
@@ -900,7 +905,7 @@ function buildOverviewForFund(){
     document.getElementById('etf-top-holdings-body').innerHTML=sorted.map(h=>
       '<tr><td class="company-cell" title="'+esc(h.n)+'">'+esc(h.n)+'</td><td class="ctr">'+esc(h.s)+'</td><td class="num">'+h.w.toFixed(2)+'</td></tr>'
     ).join('');
-  }else if(typeof POS_INDEX!=='undefined'&&POS_INDEX&&POS_INDEX.length){
+  }else if(typeof FD.POS_INDEX!=='undefined'&&FD.POS_INDEX&&FD.POS_INDEX.length){
     const sorted=[...POS_INDEX].filter(p=>p.cur&&p.cur>0).sort((a,b)=>b.cur-a.cur).slice(0,30);
     document.getElementById('etf-top-holdings-body').innerHTML=sorted.map(p=>
       '<tr><td class="company-cell" title="'+esc(p.d)+'">'+esc(p.d)+'</td><td class="ctr">'+esc(p.s)+'</td><td class="num">'+p.cur.toFixed(2)+'</td></tr>'
@@ -909,8 +914,8 @@ function buildOverviewForFund(){
 }
 
 function buildPerformance(){
-  mc('chart-monthly-returns',{type:'bar',data:{labels:MR_LABELS,datasets:[{label:'Monthly Return',data:MR_VALUES,backgroundColor:'#00d4aa',borderWidth:0,borderRadius:2,barThickness:48}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'+'+c.parsed.y.toFixed(3)+'%'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>v.toFixed(1)+'%'}}}}});
-  mc('chart-annual-returns',{type:'bar',data:{labels:AR_LABELS,datasets:[{label:'Annual Return',data:AR_VALUES,backgroundColor:AR_VALUES.map(d=>d>=0?'#00d4aa':'#ff4757'),borderWidth:0,borderRadius:2,barThickness:40}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(1)+'%'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'}}}}});
+  CT.bar('chart-monthly-returns', MR_LABELS, [{label:'Monthly Return',data:MR_VALUES,backgroundColor:'#00d4aa',borderWidth:0,borderRadius:2,barThickness:48}], {ttCb:{label:c=>'+'+c.parsed.y.toFixed(3)+'%'},yFmt:v=>v.toFixed(1)+'%'});
+  CT.bar('chart-annual-returns', AR_LABELS, [{label:'Annual Return',data:AR_VALUES,backgroundColor:AR_VALUES.map(d=>d>=0?'#00d4aa':'#ff4757'),borderWidth:0,borderRadius:2,barThickness:40}], {ttCb:{label:c=>(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(1)+'%'},yFmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%'});
 }
 
 function buildIncome(){
@@ -926,8 +931,8 @@ function getHoldingsSource(){
   if(currentFund==='MINT')return HOLDINGS;
   const fd=typeof FUND_DATA!=='undefined'?FUND_DATA[currentFund]:null;
   if(fd&&fd.holdings&&fd.holdings.length)return fd.holdings;
-  if(typeof POS_INDEX==='undefined'||!POS_INDEX.length)return[];
-  return POS_INDEX.filter(p=>p.cur&&p.cur!==0).map(p=>({n:p.d,t:p.c,s:p.s,c:'',cr:0,ct:'',m:'',w:Math.abs(p.cur),v:0}));
+  if(typeof FD.POS_INDEX==='undefined'||!FD.POS_INDEX.length)return[];
+  return FD.POS_INDEX.filter(p=>p.cur&&p.cur!==0).map(p=>({n:p.d,t:p.c,s:p.s,c:'',cr:0,ct:'',m:'',w:Math.abs(p.cur),v:0}));
 }
 function renderHoldings(){
   const source=getHoldingsSource();
@@ -1056,10 +1061,11 @@ sector_detail:{title:'Sector Analytics & Sharpe Ratios',sections:[
 {label:'Sharpe Ratio',formula:'Sharpe = (Annualized Return - SOFR) / Annualized Volatility\nAnn. Return = mean(daily returns) \u00d7 252 \u00d7 100\nAnn. Vol = stdev(daily returns) \u00d7 \u221a252 \u00d7 100\nRisk-free rate: SOFR 4.30% annual'},
 {label:'Max Drawdown',text:'Maximum peak-to-trough decline in cumulative total return over the full observation period (823 daily snapshots, Jan 2023 to Mar 2026).'},
 {label:'Source',text:'price, coupon, pctMarketValue from PIMCO daily holdings API.'}]},
-cum_ret:{title:'Cumulative Sector Returns',sections:[
-{label:'Method',text:'For each sector, starting at 0%, compound daily total returns (price change + coupon accrual) to show cumulative performance. Portfolio line is the weighted aggregate.'},
-{label:'Sampling',text:'Plotted weekly (~every 5 business days) to keep chart responsive. All 823 daily observations are used in the computation.'},
-{label:'Source',text:'Daily total returns computed from price and coupon fields in PIMCO daily holdings.'}]},
+cum_ret:{title:'Sector Return Contribution',sections:[
+{label:'Method',text:'For each sector, shows the cumulative contribution to portfolio return in percentage points. Computed as the running sum of daily (sector_weight x sector_return). Sectors with tiny weights contribute proportionally tiny amounts, regardless of their standalone return.'},
+{label:'Interpretation',text:'The sum of all sector contribution lines equals the Portfolio line. A sector with 0.1% weight and -77% standalone return contributes only -0.08 ppts to the portfolio.'},
+{label:'Sampling',text:'Plotted weekly (~every 5 business days) to keep chart responsive. All daily observations are used in the computation.'},
+{label:'Source',text:'Daily total returns and portfolio weights from PIMCO daily holdings API.'}]},
 roll_sharpe:{title:'Rolling 90-Day Sharpe Ratio',sections:[
 {label:'Formula',formula:'Sharpe_t = (mean(r_{t-90..t}) - rfr) / stdev(r_{t-90..t}) \u00d7 \u221a252\nwhere rfr = SOFR/252 (daily risk-free rate)'},
 {label:'Interpretation',text:'Shows how risk-adjusted performance evolves over time. Values > 2 are excellent for fixed income. Dips below 0 indicate the portfolio underperformed the risk-free rate on a risk-adjusted basis over that 90-day window.'},
@@ -1103,18 +1109,18 @@ function initInfoBtns(){
 function updateAnalyticsCards(){
   const el=document.getElementById('analytics-cards');
   if(!el)return;
-  const st=FUND_STATS;
+  const st=FD.FUND_STATS;
   let fDur='N/A',fYtm='N/A',fDts='N/A',fTspread='N/A';
-  if(typeof FACTOR_DATES!=='undefined'&&FACTOR_DATES&&FACTOR_DATES.length){
-    const n=FACTOR_DATES.length-1;
-    if(FACTOR_DUR&&FACTOR_DUR[n]!=null)fDur=FACTOR_DUR[n].toFixed(4)+'yr';
-    if(FACTOR_YTM&&FACTOR_YTM[n]!=null)fYtm=FACTOR_YTM[n].toFixed(2)+'%';
-    if(FACTOR_DTS&&FACTOR_DTS[n]!=null)fDts=FACTOR_DTS[n].toFixed(1)+'bps';
-    if(FACTOR_TSPREAD&&FACTOR_TSPREAD[n]!=null)fTspread=FACTOR_TSPREAD[n].toFixed(3)+'pp';
+  if(typeof FD.FACTOR_DATES!=='undefined'&&FD.FACTOR_DATES&&FD.FACTOR_DATES.length){
+    const n=FD.FACTOR_DATES.length-1;
+    if(FD.FACTOR_DUR&&FD.FACTOR_DUR[n]!=null)fDur=FD.FACTOR_DUR[n].toFixed(4)+'yr';
+    if(FD.FACTOR_YTM&&FD.FACTOR_YTM[n]!=null)fYtm=FD.FACTOR_YTM[n].toFixed(2)+'%';
+    if(FD.FACTOR_DTS&&FD.FACTOR_DTS[n]!=null)fDts=FD.FACTOR_DTS[n].toFixed(1)+'bps';
+    if(FD.FACTOR_TSPREAD&&FD.FACTOR_TSPREAD[n]!=null)fTspread=FD.FACTOR_TSPREAD[n].toFixed(3)+'pp';
   }
   let pSharpe='N/A',pAnnRet='N/A';
-  if(typeof SECTOR_ANALYTICS!=='undefined'&&SECTOR_ANALYTICS){
-    for(const sa of SECTOR_ANALYTICS){if(sa.s==='Portfolio'){pSharpe=sa.sharpe.toFixed(2);pAnnRet=(sa.ann_ret>=0?'+':'')+sa.ann_ret.toFixed(2)+'%';break;}}
+  if(typeof FD.SECTOR_ANALYTICS!=='undefined'&&FD.SECTOR_ANALYTICS){
+    for(const sa of FD.SECTOR_ANALYTICS){if(sa.s==='Portfolio'){pSharpe=sa.sharpe.toFixed(2);pAnnRet=(sa.ann_ret>=0?'+':'')+sa.ann_ret.toFixed(2)+'%';break;}}
   }
   let hhi='N/A',effN='N/A',futNow='N/A',wam='N/A',wac='N/A',medAge='N/A',wavgAge='N/A',turnover='N/A',uniqCusips='N/A';
   if(st){hhi=st.hhi_now;effN=st.eff_n_now;futNow=st.future_now;wam=st.wam_now;wac=st.wac_now;medAge=st.median_age;wavgAge=st.wavg_age;turnover=st.monthly_turnover;uniqCusips=st.unique_cusips!=null?st.unique_cusips.toLocaleString():'N/A';}
@@ -1131,7 +1137,7 @@ function updateAnalyticsCards(){
 function updateActiveCards(){
   const el=document.getElementById('active-cards');
   if(!el)return;
-  const st=FUND_STATS;
+  const st=FD.FUND_STATS;
   if(!st){el.innerHTML='';return;}
   const shiftSign=st.max_shift_val>=0?'+':'';
   const bigNew=st.biggest_new_name||'N/A';
@@ -1151,7 +1157,7 @@ function sliceTail(arr,n){return n>0&&arr.length>n?arr.slice(-n):arr;}
 
 function buildAnalytics(){
   updateAnalyticsCards();
-  const hasTS=typeof TS_DATES!=='undefined'&&TS_DATES.length>0;
+  const hasTS=typeof FD.TS_DATES!=='undefined'&&FD.TS_DATES.length>0;
   const isMF=FUND_REGISTRY[currentFund]&&FUND_REGISTRY[currentFund].is_mutual_fund;
 
   // Hide holdings-specific chart panels for mutual funds
@@ -1160,64 +1166,64 @@ function buildAnalytics(){
   });
 
   if(!hasTS&&!isMF)return;  // no data at all
-  const n=hasTS&&analyticsRange>0?Math.min(analyticsRange,TS_DATES.length):0;
-  const dates=hasTS?sliceTail(TS_DATES,n):[];
+  const n=hasTS&&gRange>0?Math.min(gRange,FD.TS_DATES.length):0;
+  const dates=hasTS?sliceTail(FD.TS_DATES,n):[];
 
   if(hasTS){
   // HHI
-  mc('chart-hhi',{type:'line',data:{labels:dates,datasets:[{label:'HHI',data:sliceTail(TS_HHI,n),borderColor:'#a855f7',backgroundColor:'#a855f722',fill:true,borderWidth:1.5,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'HHI: '+c.parsed.y.toFixed(1)+' (lower = more diversified)'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),title:{display:true,text:'HHI (0-10,000)',color:TC,font:CF}}}}});
+  CT.singleLine('chart-hhi', dates, sliceTail(FD.TS_HHI,n), '#a855f7', {yTitle:'HHI (0-10,000)', ttCb:{label:c=>'HHI: '+c.parsed.y.toFixed(1)+' (lower = more diversified)'}});
 
   // Effective N
-  mc('chart-eff-n',{type:'line',data:{labels:dates,datasets:[{label:'Effective N',data:sliceTail(TS_EFF_N,n),borderColor:'#06b6d4',backgroundColor:'#06b6d422',fill:true,borderWidth:1.5,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'Effective positions: '+c.parsed.y.toFixed(0)}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),title:{display:true,text:'Effective Positions',color:TC,font:CF}}}}});
+  CT.singleLine('chart-eff-n', dates, sliceTail(FD.TS_EFF_N,n), '#06b6d4', {yTitle:'Effective Positions', ttCb:{label:c=>'Effective positions: '+c.parsed.y.toFixed(0)}});
 
   // WAM
-  mc('chart-wam',{type:'line',data:{labels:dates,datasets:[{label:'WAM (Years)',data:sliceTail(TS_WAM,n),borderColor:'#ffa502',backgroundColor:'#ffa50222',fill:true,borderWidth:1.5,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.y.toFixed(3)+' years'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),title:{display:true,text:'Years',color:TC,font:CF}}}}});
+  CT.singleLine('chart-wam', dates, sliceTail(FD.TS_WAM,n), '#ffa502', {yTitle:'Years', ttCb:{label:c=>c.parsed.y.toFixed(3)+' years'}});
 
   // WAC
-  mc('chart-wac',{type:'line',data:{labels:dates,datasets:[{label:'WAC (%)',data:sliceTail(TS_WAC,n),borderColor:'#00d4aa',backgroundColor:'#00d4aa22',fill:true,borderWidth:1.5,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.y.toFixed(3)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),title:{display:true,text:'Coupon %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(1)+'%'}}}}});
+  CT.singleLine('chart-wac', dates, sliceTail(FD.TS_WAC,n), '#00d4aa', {yTitle:'Coupon %', yFmt:v=>v.toFixed(1)+'%', ttCb:{label:c=>c.parsed.y.toFixed(3)+'%'}});
 
   // Maturity evolution (monthly)
-  const mn=analyticsRange>0?Math.ceil(n/21):0;
-  const mDates=sliceTail(MAT_DATES,mn);
+  const mn=gRange>0?Math.ceil(n/21):0;
+  const mDates=sliceTail(FD.MAT_DATES,mn);
   const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'];
-  const matDS=MAT_BUCKET_NAMES.map((b,i)=>({label:b,data:sliceTail(MAT_BUCKETS[b],mn),backgroundColor:matColors[i]+'99',borderColor:matColors[i],borderWidth:1,fill:true,pointRadius:0}));
-  mc('chart-mat-evo',{type:'line',data:{labels:mDates,datasets:matDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:TC,font:CF,boxWidth:10,padding:8}},tooltip:{...tt(),mode:'index',intersect:false}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12}},y:{...sc(),stacked:true,max:100,ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
+  const matDS=MAT_BUCKET_NAMES.map((b,i)=>({label:b,data:sliceTail(FD.MAT_BUCKETS[b],mn),backgroundColor:matColors[i]+'99',borderColor:matColors[i],borderWidth:1,fill:true,pointRadius:0}));
+  CT.line('chart-mat-evo',mDates,matDS,{stacked:true,yMax:100,yFmt:v=>v+'%',xTicks:12});
 
   // Concentration
-  mc('chart-concentration',{type:'line',data:{labels:dates,datasets:[
-    {label:'Top 5',data:sliceTail(TS_TOP5,n),borderColor:'#ff4757',backgroundColor:'#ff475722',fill:true,borderWidth:1.5,pointRadius:0,tension:.3},
-    {label:'Top 10',data:sliceTail(TS_TOP10,n),borderColor:'#ffa502',backgroundColor:'#ffa50222',fill:true,borderWidth:1.5,pointRadius:0,tension:.3},
-    {label:'Top 20',data:sliceTail(TS_TOP20,n),borderColor:'#00d4aa',backgroundColor:'#00d4aa22',fill:true,borderWidth:1.5,pointRadius:0,tension:.3}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:TC,font:CF,boxWidth:10}},tooltip:{...tt(),mode:'index',intersect:false}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
+  CT.multiLine('chart-concentration', dates, [
+    {label:'Top 5',data:sliceTail(FD.TS_TOP5,n),color:'#ff4757',backgroundColor:'#ff475722'},
+    {label:'Top 10',data:sliceTail(FD.TS_TOP10,n),color:'#ffa502',backgroundColor:'#ffa50222'},
+    {label:'Top 20',data:sliceTail(FD.TS_TOP20,n),color:'#00d4aa',backgroundColor:'#00d4aa22'}
+  ], {yFmt:v=>v+'%'});
 
   // Holdings count
-  mc('chart-count',{type:'line',data:{labels:dates,datasets:[{label:'Holdings',data:sliceTail(TS_COUNT,n),borderColor:'#00d4aa',backgroundColor:'#00d4aa22',fill:true,borderWidth:1.5,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt()}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),beginAtZero:false}}}});
+  CT.singleLine('chart-count', dates, sliceTail(FD.TS_COUNT,n), '#00d4aa', {label:'Holdings'});
 
   // Derivatives overlay
-  mc('chart-deriv',{type:'line',data:{labels:dates,datasets:[
-    {label:'Other Net Assets %',data:sliceTail(TS_OTHER,n),borderColor:'#3b82f6',backgroundColor:'#3b82f622',fill:true,borderWidth:1.5,pointRadius:0,tension:.3,yAxisID:'y'},
-    {label:'Future Position %',data:sliceTail(TS_FUTURE,n),borderColor:'#ff4757',backgroundColor:'#ff475722',fill:true,borderWidth:1.5,pointRadius:0,tension:.3,yAxisID:'y1'}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:TC,font:CF,boxWidth:10}},tooltip:{...tt(),mode:'index',intersect:false}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:10,maxRotation:0}},y:{...sc(),position:'left',title:{display:true,text:'Other Net Assets %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v+'%'}},y1:{...sc(),position:'right',title:{display:true,text:'Future Position %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v+'%'},grid:{drawOnChartArea:false}}}}});
+  CT.multiLine('chart-deriv', dates, [
+    {label:'Other Net Assets %',data:sliceTail(FD.TS_OTHER,n),color:'#3b82f6',backgroundColor:'#3b82f622',yAxisID:'y'},
+    {label:'Future Position %',data:sliceTail(FD.TS_FUTURE,n),color:'#ff4757',backgroundColor:'#ff475722',yAxisID:'y1'}
+  ], {yTitle:'Other Net Assets %',yFmt:v=>v+'%',y1:{title:{display:true,text:'Future Position %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v+'%'}}});
 
   // Churn
-  const cn=analyticsRange>0?Math.ceil(n/5):0;
-  const cDates=sliceTail(CHURN_DATES,cn);
+  const cn=gRange>0?Math.ceil(n/5):0;
+  const cDates=sliceTail(FD.CHURN_DATES,cn);
   mc('chart-churn',{type:'bar',data:{labels:cDates,datasets:[
-    {label:'New Positions',data:sliceTail(CHURN_NEW,cn),backgroundColor:'#00d4aa88',borderWidth:0,order:2},
-    {label:'Exited Positions',data:sliceTail(CHURN_EXIT,cn).map(v=>-v),backgroundColor:'#ff475788',borderWidth:0,order:2},
-    {label:'Turnover Rate %',data:sliceTail(CHURN_RATE,cn),type:'line',borderColor:'#ffa502',borderWidth:2,pointRadius:0,tension:.3,yAxisID:'y1',order:1}
+    {label:'New Positions',data:sliceTail(FD.CHURN_NEW,cn),backgroundColor:'#00d4aa88',borderWidth:0,order:2},
+    {label:'Exited Positions',data:sliceTail(FD.CHURN_EXIT,cn).map(v=>-v),backgroundColor:'#ff475788',borderWidth:0,order:2},
+    {label:'Turnover Rate %',data:sliceTail(FD.CHURN_RATE,cn),type:'line',borderColor:'#ffa502',borderWidth:2,pointRadius:0,tension:.3,yAxisID:'y1',order:1}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:TC,font:CF,boxWidth:10}},tooltip:{...tt(),mode:'index',intersect:false}},scales:{x:{...sc(),stacked:true,ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),stacked:true,title:{display:true,text:'Positions',color:TC,font:CF}},y1:{...sc(),position:'right',title:{display:true,text:'Turnover %',color:TC,font:CF},grid:{drawOnChartArea:false}}}}});
 
   // Jaccard similarity
-  const jn=analyticsRange>0?Math.ceil(n/21):0;
-  mc('chart-jaccard',{type:'line',data:{labels:sliceTail(JACC_DATES,jn),datasets:[
-    {label:'vs 1 Month Ago',data:sliceTail(JACC_1M,jn),borderColor:'#00d4aa',borderWidth:1.5,pointRadius:0,tension:.3},
-    {label:'vs 3 Months Ago',data:sliceTail(JACC_3M,jn),borderColor:'#ffa502',borderWidth:1.5,pointRadius:0,tension:.3},
-    {label:'vs 6 Months Ago',data:sliceTail(JACC_6M,jn),borderColor:'#ff4757',borderWidth:1.5,pointRadius:0,tension:.3}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:TC,font:CF,boxWidth:10}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'% overlap'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12}},y:{...sc(),max:100,ticks:{...sc().ticks,callback:v=>v+'%'},title:{display:true,text:'CUSIP Overlap %',color:TC,font:CF}}}}});
+  const jn=gRange>0?Math.ceil(n/21):0;
+  CT.multiLine('chart-jaccard', sliceTail(FD.JACC_DATES,jn), [
+    {label:'vs 1 Month Ago',data:sliceTail(FD.JACC_1M,jn),color:'#00d4aa'},
+    {label:'vs 3 Months Ago',data:sliceTail(FD.JACC_3M,jn),color:'#ffa502'},
+    {label:'vs 6 Months Ago',data:sliceTail(FD.JACC_6M,jn),color:'#ff4757'}
+  ], {yMax:100,yFmt:v=>v+'%',yTitle:'CUSIP Overlap %',xTicks:12,ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'% overlap'}});
 
   // Position age distribution
-  mc('chart-age',{type:'bar',data:{labels:AGE_LABELS,datasets:[{data:AGE_VALUES,backgroundColor:['#ff4757','#ffa502','#eab308','#84cc16','#22c55e','#00d4aa'],borderWidth:0,borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.y+' positions'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),title:{display:true,text:'# Positions',color:TC,font:CF}}}}});
+  CT.bar('chart-age', FD.AGE_LABELS, [{data:FD.AGE_VALUES,backgroundColor:['#ff4757','#ffa502','#eab308','#84cc16','#22c55e','#00d4aa'],borderWidth:0,borderRadius:2}], {yTitle:'# Positions',ttCb:{label:c=>c.parsed.y+' positions'}});
   } // end if(hasTS)
 
   // Risk factor chart and sector analytics (shown for all fund types including mutual funds)
@@ -1228,34 +1234,61 @@ function buildAnalytics(){
   buildRollVolChart();
   buildSpreadDecomp();
   buildDrawdown();
+  buildCorpDuration();
+}
+
+function buildCorpDuration(){
+  const durPanel=document.getElementById('panel-corp-dur');
+  if(!durPanel)return;
+  if(FD.CORP_DUR_DATA&&FD.CORP_DUR_DATA.dur_industries&&Object.keys(FD.CORP_DUR_DATA.dur_industries).length>0){
+    durPanel.style.display='';
+    const durDates=FD.CORP_DUR_DATA.dur_dates;
+    const durInds=FD.CORP_DUR_DATA.dur_industries;
+    const durPort=FD.CORP_DUR_DATA.dur_portfolio;
+    // Sort industries by average duration (descending) for legend order
+    const indKeys=Object.keys(durInds).sort((a,b)=>{
+      const avgA=durInds[a].filter(v=>v!=null).reduce((s,v)=>s+v,0)/Math.max(1,durInds[a].filter(v=>v!=null).length);
+      const avgB=durInds[b].filter(v=>v!=null).reduce((s,v)=>s+v,0)/Math.max(1,durInds[b].filter(v=>v!=null).length);
+      return avgB-avgA;
+    });
+    const durColors=['#3b82f6','#00d4aa','#a855f7','#ffa502','#ff4757','#06b6d4','#ec4899','#84cc16','#f97316','#8b5cf6','#14b8a6','#6366f1','#22c55e','#eab308','#f43f5e','#0ea5e9','#d946ef','#10b981'];
+    const durDS=indKeys.map((ind,i)=>({
+      label:ind,data:durInds[ind],borderColor:durColors[i%durColors.length],borderWidth:1.5,pointRadius:0,tension:.3,spanGaps:true
+    }));
+    // Add portfolio aggregate line
+    durDS.push({label:'All Corp (wt-avg)',data:durPort,borderColor:'#e8ecf4',borderWidth:2.5,borderDash:[6,3],pointRadius:0,tension:.3,spanGaps:true});
+    mc('chart-corp-dur',{type:'line',data:{labels:durDates,datasets:durDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed.y;return v!=null?c.dataset.label+': '+v.toFixed(3)+'yr':null;}}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),title:{display:true,text:'Modified Duration (years)',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(2)}}}}});
+  }else{
+    durPanel.style.display='none';
+  }
 }
 
 function buildFactorChart(){
-  if(typeof FACTOR_DATES==='undefined')return;
+  if(typeof FD.FACTOR_DATES==='undefined')return;
   const ds=[
-    {label:'Duration (yr)',data:FACTOR_DUR,borderColor:'#3b82f6',yAxisID:'y',borderWidth:2,pointRadius:2,tension:.3,fill:false},
-    {label:'Bull Duration',data:FACTOR_BULL,borderColor:'#22c55e',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Bear Duration',data:FACTOR_BEAR,borderColor:'#ef4444',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Curve Duration',data:FACTOR_CURVE,borderColor:'#8b5cf6',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Avg Maturity (yr)',data:FACTOR_AVGMAT,borderColor:'#06b6d4',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'YTM (%)',data:FACTOR_YTM,borderColor:'#00d4aa',yAxisID:'y1',borderWidth:2,pointRadius:2,tension:.3,fill:false},
-    {label:'Current Yield (%)',data:FACTOR_CY,borderColor:'#84cc16',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'SEC 30d Yield (%)',data:FACTOR_SEC30,borderColor:'#eab308',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Mtg Spread (pp)',data:FACTOR_MTG,borderColor:'#f97316',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Corp Spread (pp)',data:FACTOR_CORP,borderColor:'#ec4899',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'EM Spread (pp)',data:FACTOR_EM,borderColor:'#14b8a6',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Sovg Spread (pp)',data:FACTOR_SOVG,borderColor:'#a3a3a3',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Total Spread (pp)',data:FACTOR_TSPREAD,borderColor:'#ffa502',yAxisID:'y1',borderWidth:2,pointRadius:2,tension:.3,fill:false},
-    {label:'DTS (dur-bps)',data:FACTOR_DTS,borderColor:'#ff4757',yAxisID:'y',borderWidth:2,pointRadius:2,tension:.3,fill:false},
-    {label:'NAV ($)',data:FACTOR_NAV,borderColor:'#a78bfa',yAxisID:'y2',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Duration (yr)',data:FD.FACTOR_DUR,borderColor:'#3b82f6',yAxisID:'y',borderWidth:2,pointRadius:2,tension:.3,fill:false},
+    {label:'Bull Duration',data:FD.FACTOR_BULL,borderColor:'#22c55e',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Bear Duration',data:FD.FACTOR_BEAR,borderColor:'#ef4444',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Curve Duration',data:FD.FACTOR_CURVE,borderColor:'#8b5cf6',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Avg Maturity (yr)',data:FD.FACTOR_AVGMAT,borderColor:'#06b6d4',yAxisID:'y',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'YTM (%)',data:FD.FACTOR_YTM,borderColor:'#00d4aa',yAxisID:'y1',borderWidth:2,pointRadius:2,tension:.3,fill:false},
+    {label:'Current Yield (%)',data:FD.FACTOR_CY,borderColor:'#84cc16',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'SEC 30d Yield (%)',data:FD.FACTOR_SEC30,borderColor:'#eab308',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Mtg Spread (pp)',data:FD.FACTOR_MTG,borderColor:'#f97316',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Corp Spread (pp)',data:FD.FACTOR_CORP,borderColor:'#ec4899',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'EM Spread (pp)',data:FD.FACTOR_EM,borderColor:'#14b8a6',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Sovg Spread (pp)',data:FD.FACTOR_SOVG,borderColor:'#a3a3a3',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
+    {label:'Total Spread (pp)',data:FD.FACTOR_TSPREAD,borderColor:'#ffa502',yAxisID:'y1',borderWidth:2,pointRadius:2,tension:.3,fill:false},
+    {label:'DTS (dur-bps)',data:FD.FACTOR_DTS,borderColor:'#ff4757',yAxisID:'y',borderWidth:2,pointRadius:2,tension:.3,fill:false},
+    {label:'NAV ($)',data:FD.FACTOR_NAV,borderColor:'#a78bfa',yAxisID:'y2',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
   ];
-  mc('chart-factors',{type:'line',data:{labels:FACTOR_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed.y;return c.dataset.label+': '+(v!=null?v.toFixed(4):'N/A');}}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),position:'left',title:{display:true,text:'Duration / DTS',color:TC,font:CF}},y1:{...sc(),position:'right',title:{display:true,text:'Yield / Spread (%)',color:TC,font:CF},grid:{drawOnChartArea:false}},y2:{display:false}}}});
+  mc('chart-factors',{type:'line',data:{labels:FD.FACTOR_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed.y;return c.dataset.label+': '+(v!=null?v.toFixed(4):'N/A');}}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),position:'left',title:{display:true,text:'Duration / DTS',color:TC,font:CF}},y1:{...sc(),position:'right',title:{display:true,text:'Yield / Spread (%)',color:TC,font:CF},grid:{drawOnChartArea:false}},y2:{display:false}}}});
 }
 
 function renderSectorAnalytics(){
-  if(typeof SECTOR_ANALYTICS==='undefined')return;
+  if(typeof FD.SECTOR_ANALYTICS==='undefined')return;
   let h='';
-  SECTOR_ANALYTICS.forEach(r=>{
+  FD.SECTOR_ANALYTICS.forEach(r=>{
     const isTot=r.s==='Portfolio';
     const rs=isTot?'border-top:2px solid var(--border-bright);font-weight:600':'';
     const nc=isTot?'var(--accent)':'var(--text-0)';
@@ -1279,47 +1312,48 @@ function renderSectorAnalytics(){
 }
 
 function buildCumRetChart(){
-  if(typeof CUM_DATES==='undefined')return;
+  if(typeof FD.CUM_DATES==='undefined'||!FD.CUM_CONTRIBUTIONS)return;
+  const src=FD.CUM_CONTRIBUTIONS;
   const allKeys=[...Object.keys(SECTOR_COLORS),'Portfolio'];
-  const ds=allKeys.map(s=>({label:s,data:CUM_RETURNS[s],borderColor:s==='Portfolio'?'#e8ecf4':(SECTOR_COLORS[s]||'#6b7a90'),borderWidth:s==='Portfolio'?2.5:1.5,pointRadius:0,tension:.3,fill:false,borderDash:s==='Portfolio'?[5,3]:[]}));
-  mc('chart-cum-ret',{type:'line',data:{labels:CUM_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(2)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'},title:{display:true,text:'Cumulative Return %',color:TC,font:CF}}}}});
+  const ds=allKeys.map(s=>({label:s,data:src[s]||[],borderColor:s==='Portfolio'?'#e8ecf4':(SECTOR_COLORS[s]||'#6b7a90'),borderWidth:s==='Portfolio'?2.5:1.5,pointRadius:0,tension:.3,fill:false,borderDash:s==='Portfolio'?[5,3]:[]}));
+  mc('chart-cum-ret',{type:'line',data:{labels:FD.CUM_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(2)+' ppts'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+' ppts'},title:{display:true,text:'Portfolio Contribution (ppts)',color:TC,font:CF}}}}});
 }
 
 function buildRollSharpeChart(){
-  if(typeof ROLL_SHARPE_DATES==='undefined')return;
-  mc('chart-roll-sharpe',{type:'line',data:{labels:ROLL_SHARPE_DATES,datasets:[{label:'90d Rolling Sharpe',data:ROLL_SHARPE,borderColor:'#00d4aa',backgroundColor:'#00d4aa22',fill:true,borderWidth:2,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'Sharpe: '+c.parsed.y.toFixed(2)}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),title:{display:true,text:'Sharpe Ratio',color:TC,font:CF}}}}});
+  if(typeof FD.ROLL_SHARPE_DATES==='undefined')return;
+  CT.singleLine('chart-roll-sharpe', FD.ROLL_SHARPE_DATES, FD.ROLL_SHARPE, '#00d4aa', {yTitle:'Sharpe Ratio', ttCb:{label:c=>'Sharpe: '+c.parsed.y.toFixed(2)}});
 }
 
 function buildRollVolChart(){
-  if(typeof ROLL_VOL_DATES==='undefined')return;
+  if(typeof FD.ROLL_VOL_DATES==='undefined')return;
   const allKeys=[...Object.keys(SECTOR_COLORS),'Portfolio'];
-  const ds=allKeys.map(s=>({label:s,data:ROLL_VOL[s],borderColor:s==='Portfolio'?'#e8ecf4':(SECTOR_COLORS[s]||'#6b7a90'),borderWidth:s==='Portfolio'?2:1.5,pointRadius:0,tension:.3,fill:false,hidden:s!=='Portfolio'&&s!=='Agency MBS'&&s!=='Government'}));
-  mc('chart-roll-vol',{type:'line',data:{labels:ROLL_VOL_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:4}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),title:{display:true,text:'Ann. Vol %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(1)+'%'}}}}});
+  const series=allKeys.map(s=>({label:s,data:FD.ROLL_VOL[s],color:s==='Portfolio'?'#e8ecf4':(SECTOR_COLORS[s]||'#6b7a90'),width:s==='Portfolio'?2:1.5,hidden:s!=='Portfolio'&&s!=='Agency MBS'&&s!=='Government'}));
+  CT.multiLine('chart-roll-vol', FD.ROLL_VOL_DATES, series, {yTitle:'Ann. Vol %',yFmt:v=>v.toFixed(1)+'%',ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}});
 }
 
 function buildSpreadDecomp(){
-  if(typeof FACTOR_DATES==='undefined')return;
-  const ds=[
-    {label:'Mortgage',data:FACTOR_MTG,backgroundColor:'#3b82f688',borderColor:'#3b82f6',borderWidth:1,fill:true,pointRadius:0},
-    {label:'Corporate',data:FACTOR_CORP,backgroundColor:'#00d4aa88',borderColor:'#00d4aa',borderWidth:1,fill:true,pointRadius:0},
-    {label:'EM',data:FACTOR_EM,backgroundColor:'#ffa50288',borderColor:'#ffa502',borderWidth:1,fill:true,pointRadius:0},
-    {label:'Sovereign',data:FACTOR_SOVG,backgroundColor:'#a855f788',borderColor:'#a855f7',borderWidth:1,fill:true,pointRadius:0},
-  ];
-  mc('chart-spread-decomp',{type:'line',data:{labels:FACTOR_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:8}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(4)+' pp'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),stacked:true,title:{display:true,text:'Spread Contribution (pp)',color:TC,font:CF}}}}});
+  if(typeof FD.FACTOR_DATES==='undefined')return;
+  CT.stackedArea('chart-spread-decomp', FD.FACTOR_DATES, [
+    {label:'Mortgage',data:FD.FACTOR_MTG,color:'#3b82f6'},
+    {label:'Corporate',data:FD.FACTOR_CORP,color:'#00d4aa'},
+    {label:'EM',data:FD.FACTOR_EM,color:'#ffa502'},
+    {label:'Sovereign',data:FD.FACTOR_SOVG,color:'#a855f7'}
+  ], {yTitle:'Spread Contribution (pp)',xTicks:12,ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(4)+' pp'}});
 }
 
 function buildDrawdown(){
-  if(typeof DD_DATES==='undefined')return;
-  mc('chart-drawdown',{type:'line',data:{labels:DD_DATES,datasets:[{label:'Drawdown',data:DD_VALS.map(v=>-v),borderColor:'#ff4757',backgroundColor:'#ff475733',fill:true,borderWidth:1.5,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'Drawdown: -'+Math.abs(c.parsed.y).toFixed(3)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:10,maxRotation:0}},y:{...sc(),title:{display:true,text:'Drawdown %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(2)+'%'}}}}});
+  if(typeof FD.DD_DATES==='undefined')return;
+  CT.singleLine('chart-drawdown', FD.DD_DATES, FD.DD_VALS.map(v=>-v), '#ff4757', {yTitle:'Drawdown %', yFmt:v=>v.toFixed(2)+'%', ttCb:{label:c=>'Drawdown: -'+Math.abs(c.parsed.y).toFixed(3)+'%'}});
 }
 
-function initAnalyticsRange(){
-  document.querySelectorAll('#analytics-range .range-btn').forEach(btn=>{
+function initGlobalRange(){
+  document.querySelectorAll('#global-range .range-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      document.querySelectorAll('#analytics-range .range-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('#global-range .range-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
-      analyticsRange=parseInt(btn.dataset.range)||0;
-      buildAnalytics();
+      gRange=parseInt(btn.dataset.range)||0;
+      analyticsRange=gRange;
+      rebuildActiveSection();
     });
   });
 }
@@ -1327,28 +1361,27 @@ function initAnalyticsRange(){
 // ─── ACTIVE MANAGEMENT TAB ──────────────────────────
 function buildActiveManagement(){
   updateActiveCards();
-  if(typeof TS_DATES==='undefined')return;
+  if(typeof FD.TS_DATES==='undefined')return;
   // Sector allocation stacked area
-  const secDS=Object.keys(SECTOR_COLORS).map(s=>({label:s,data:TS_SECTORS[s],backgroundColor:SECTOR_COLORS[s]+'66',borderColor:SECTOR_COLORS[s],borderWidth:1,fill:true,pointRadius:0}));
-  mc('chart-sector-evo',{type:'line',data:{labels:TS_DATES,datasets:secDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:CF,boxWidth:12,padding:10}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),stacked:true,ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
+  CT.stackedArea('chart-sector-evo', FD.TS_DATES, Object.keys(SECTOR_COLORS).map(s=>({label:s,data:FD.TS_SECTORS[s],color:SECTOR_COLORS[s]})), {yFmt:v=>v+'%',xTicks:12,ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}});
 
   // Entries table
   let ehtml='';
-  RECENT_ENTRIES.forEach(e=>{ehtml+='<tr><td>'+esc(e.c)+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">'+esc(e.d)+'</td><td>'+esc(e.s)+'</td><td>'+e.f+'</td><td class="num">'+e.w.toFixed(3)+'</td></tr>';});
+  FD.RECENT_ENTRIES.forEach(e=>{ehtml+='<tr><td>'+esc(e.c)+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">'+esc(e.d)+'</td><td>'+esc(e.s)+'</td><td>'+e.f+'</td><td class="num">'+e.w.toFixed(3)+'</td></tr>';});
   document.getElementById('entries-body').innerHTML=ehtml||'<tr><td colspan="5" style="color:var(--text-2);text-align:center;padding:12px">No new entries in last 60 days</td></tr>';
 
   // Exits table
   let xhtml='';
-  RECENT_EXITS.forEach(e=>{xhtml+='<tr><td>'+esc(e.c)+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">'+esc(e.d)+'</td><td>'+esc(e.s)+'</td><td>'+e.l+'</td><td class="num">'+e.p.toFixed(3)+'</td></tr>';});
+  FD.RECENT_EXITS.forEach(e=>{xhtml+='<tr><td>'+esc(e.c)+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">'+esc(e.d)+'</td><td>'+esc(e.s)+'</td><td>'+e.l+'</td><td class="num">'+e.p.toFixed(3)+'</td></tr>';});
   document.getElementById('exits-body').innerHTML=xhtml||'<tr><td colspan="5" style="color:var(--text-2);text-align:center;padding:12px">No exits in last 60 days</td></tr>';
 
   // Biggest movers butterfly chart
-  const bm=BIGGEST_MOVERS.sort((a,b)=>b.delta-a.delta);
+  const bm=FD.BIGGEST_MOVERS.sort((a,b)=>b.delta-a.delta);
   mc('chart-movers',{type:'bar',data:{labels:bm.map(m=>{const d=m.d;return d.length>30?d.slice(0,28)+'..':d}),datasets:[{label:'Weight Change (90d)',data:bm.map(m=>m.delta),backgroundColor:bm.map(m=>m.delta>=0?'#00d4aa88':'#ff475788'),borderWidth:0,borderRadius:2}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>(c.parsed.x>=0?'+':'')+c.parsed.x.toFixed(3)+'% | Current: '+bm[c.dataIndex].cur.toFixed(3)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'}},y:{...sc(),grid:{display:false},ticks:{...sc().ticks,font:{...CF,size:9}}}}}});
 
   // Sector history table
   let shtml='';
-  SECTOR_TABLE.forEach(r=>{
+  FD.SECTOR_TABLE.forEach(r=>{
     const d3=r.cur-r.m3,d6=r.cur-r.m6,d1=r.cur-r.y1;
     const dc=v=>v>=0?'delta-pos':'delta-neg';
     const fmt=v=>(v>=0?'+':'')+v.toFixed(1);
@@ -1357,33 +1390,8 @@ function buildActiveManagement(){
   document.getElementById('sector-hist-body').innerHTML=shtml;
 
   // Sector volatility
-  if(typeof SEC_VOL_DATES!=='undefined'){
-    const svDS=Object.keys(SECTOR_COLORS).map(s=>({label:s,data:SEC_VOL[s]||[],borderColor:SECTOR_COLORS[s],borderWidth:1.5,pointRadius:0,tension:.3}));
-    mc('chart-sec-vol',{type:'line',data:{labels:SEC_VOL_DATES,datasets:svDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:CF,boxWidth:10,padding:8}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': \u03c3='+c.parsed.y.toFixed(2)+'pp'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),title:{display:true,text:'30d Rolling Std Dev (pp)',color:TC,font:CF}}}}});
-  }
-
-  // Corporate Duration by Industry
-  const durPanel=document.getElementById('panel-corp-dur');
-  if(CORP_DUR_DATA&&CORP_DUR_DATA.dur_industries&&Object.keys(CORP_DUR_DATA.dur_industries).length>0){
-    durPanel.style.display='';
-    const durDates=CORP_DUR_DATA.dur_dates;
-    const durInds=CORP_DUR_DATA.dur_industries;
-    const durPort=CORP_DUR_DATA.dur_portfolio;
-    // Sort industries by average duration (descending) for legend order
-    const indKeys=Object.keys(durInds).sort((a,b)=>{
-      const avgA=durInds[a].filter(v=>v!=null).reduce((s,v)=>s+v,0)/Math.max(1,durInds[a].filter(v=>v!=null).length);
-      const avgB=durInds[b].filter(v=>v!=null).reduce((s,v)=>s+v,0)/Math.max(1,durInds[b].filter(v=>v!=null).length);
-      return avgB-avgA;
-    });
-    const durColors=['#3b82f6','#00d4aa','#a855f7','#ffa502','#ff4757','#06b6d4','#ec4899','#84cc16','#f97316','#8b5cf6','#14b8a6','#6366f1','#22c55e','#eab308','#f43f5e','#0ea5e9','#d946ef','#10b981'];
-    const durDS=indKeys.map((ind,i)=>({
-      label:ind,data:durInds[ind],borderColor:durColors[i%durColors.length],borderWidth:1.5,pointRadius:0,tension:.3,spanGaps:true
-    }));
-    // Add portfolio aggregate line
-    durDS.push({label:'All Corp (wt-avg)',data:durPort,borderColor:'#e8ecf4',borderWidth:2.5,borderDash:[6,3],pointRadius:0,tension:.3,spanGaps:true});
-    mc('chart-corp-dur',{type:'line',data:{labels:durDates,datasets:durDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed.y;return v!=null?c.dataset.label+': '+v.toFixed(3)+'yr':null;}}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),title:{display:true,text:'Modified Duration (years)',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(2)}}}}});
-  }else{
-    durPanel.style.display='none';
+  if(typeof FD.SEC_VOL_DATES!=='undefined'){
+    CT.multiLine('chart-sec-vol', FD.SEC_VOL_DATES, Object.keys(SECTOR_COLORS).map(s=>({label:s,data:FD.SEC_VOL[s]||[],color:SECTOR_COLORS[s]})), {yTitle:'30d Rolling Std Dev (pp)',xTicks:12,ttCb:{label:c=>c.dataset.label+': \u03c3='+c.parsed.y.toFixed(2)+'pp'}});
   }
 
   initPositionTracker();
@@ -1396,14 +1404,14 @@ function initPositionTracker(){
   input.addEventListener('input',()=>{
     const q=input.value.toLowerCase().trim();
     if(q.length<2){results.innerHTML='';return;}
-    const matches=POS_INDEX.filter(p=>(p.c+' '+p.d+' '+p.s).toLowerCase().includes(q)).slice(0,20);
+    const matches=FD.POS_INDEX.filter(p=>(p.c+' '+p.d+' '+p.s).toLowerCase().includes(q)).slice(0,20);
     results.innerHTML=matches.map(m=>'<div class="pos-row" data-cusip="'+esc(m.c)+'"><span class="cusip">'+esc(m.c)+'</span><span class="desc">'+esc(m.d)+'</span><span class="sector">'+esc(m.s)+'</span><span class="weight">'+(m.cur?m.cur.toFixed(2):'exited')+'</span></div>').join('');
     results.querySelectorAll('.pos-row').forEach(row=>{
       row.addEventListener('click',()=>{
         const cusip=row.dataset.cusip;
-        const track=POS_TRACK.find(p=>p.c===cusip);
+        const track=FD.POS_TRACK.find(p=>p.c===cusip);
         if(!track)return;
-        const labels=track.w.map(p=>TS_DATES[p[0]]);
+        const labels=track.w.map(p=>FD.TS_DATES[p[0]]);
         const data=track.w.map(p=>p[1]);
         if(posChart)posChart.destroy();
         posChart=new Chart(document.getElementById('chart-pos-track').getContext('2d'),{type:'line',data:{labels:labels,datasets:[{label:track.d.slice(0,40),data:data,borderColor:'#00d4aa',backgroundColor:'#00d4aa22',fill:true,borderWidth:2,pointRadius:2,tension:.2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:TC,font:CF}},tooltip:{...tt(),callbacks:{label:c=>c.parsed.y.toFixed(3)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:8,maxRotation:0}},y:{...sc(),ticks:{...sc().ticks,callback:v=>v.toFixed(2)+'%'}}}}});
@@ -1491,7 +1499,11 @@ function buildScatter(period){
     pointRadius:8,pointHoverRadius:11,
     pointStyle:'circle',
   }));
-  mc('chart-comp-scatter',{type:'scatter',data:{datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:CF,boxWidth:10,padding:8,usePointStyle:true}},tooltip:{...tt(),callbacks:{label:c=>{const p=pts.find(x=>x.t===c.dataset.label);return p?p.t+': Ret='+p.ret.toFixed(2)+'%, Vol='+p.vol.toFixed(2)+'%, Sharpe='+p.sharpe.toFixed(2):'';}}}},scales:{x:{...sc(),title:{display:true,text:'Annualized Volatility (%)',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(1)+'%'}},y:{...sc(),title:{display:true,text:'Annualized Return (%)',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'}}}}});
+  CT.scatter('chart-comp-scatter',ds,{
+    xTitle:'Annualized Volatility (%)',yTitle:'Annualized Return (%)',
+    xFmt:v=>v.toFixed(1)+'%',yFmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%',
+    ttCb:{label:c=>{const p=pts.find(x=>x.t===c.dataset.label);return p?p.t+': Ret='+p.ret.toFixed(2)+'%, Vol='+p.vol.toFixed(2)+'%, Sharpe='+p.sharpe.toFixed(2):'';}}
+  });
 }
 
 function updateScatter(period,btn){
@@ -1542,12 +1554,15 @@ function buildRelPerf(){
   if(!COMP_DATA||!COMP_DATA.rel_perf)return;
   const rp=COMP_DATA.rel_perf;
   if(!rp.dates||!rp.dates.length)return;
-  const ds=Object.keys(rp.funds).map(t=>({
-    label:t+' vs MINT',data:rp.funds[t],
-    borderColor:FUND_REGISTRY[t].color,borderWidth:1.5,
-    pointRadius:0,tension:.3,fill:false
+  const dates=sR(rp.dates,gRange,'d');
+  const series=Object.keys(rp.funds).map(t=>({
+    label:t+' vs MINT',data:sR(rp.funds[t],gRange,'d'),color:FUND_REGISTRY[t].color
   }));
-  mc('chart-comp-rel-perf',{type:'line',data:{labels:rp.dates,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(3)+'%'}},annotation:{annotations:{zero:{type:'line',yMin:0,yMax:0,borderColor:'rgba(255,255,255,0.15)',borderWidth:1,borderDash:[4,4]}}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),title:{display:true,text:'Cumulative Excess Return vs MINT (%)',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'}}}}});
+  CT.multiLine('chart-comp-rel-perf',dates,series,{
+    yTitle:'Cumulative Excess Return vs MINT (%)',xTicks:12,
+    yFmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%',
+    ttCb:{label:c=>c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(3)+'%'}
+  });
 }
 
 function buildDurYieldScatter(){
@@ -1561,35 +1576,30 @@ function buildDurYieldScatter(){
     borderColor:FUND_REGISTRY[p.t].color,
     pointRadius:9,pointHoverRadius:12,pointStyle:'circle',
   }));
-  mc('chart-comp-dur-yield',{type:'scatter',data:{datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:CF,boxWidth:10,padding:8,usePointStyle:true}},tooltip:{...tt(),callbacks:{label:c=>{const p=pts.find(x=>x.t===c.dataset.label);return p?p.t+': Dur='+p.duration.toFixed(3)+'yr, YTM='+p.ytm.toFixed(2)+'%, Spread='+p.total_spread.toFixed(3)+'pp':'';}}}},scales:{x:{...sc(),title:{display:true,text:'Effective Duration (yr)',color:TC,font:CF}},y:{...sc(),title:{display:true,text:'YTM (%)',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(1)+'%'}}}}});
+  CT.scatter('chart-comp-dur-yield',ds,{
+    xTitle:'Effective Duration (yr)',yTitle:'YTM (%)',
+    yFmt:v=>v.toFixed(1)+'%',
+    ttCb:{label:c=>{const p=pts.find(x=>x.t===c.dataset.label);return p?p.t+': Dur='+p.duration.toFixed(3)+'yr, YTM='+p.ytm.toFixed(2)+'%, Spread='+p.total_spread.toFixed(3)+'pp':'';}}
+  });
 }
 
-let compCumRange='ALL';
 function buildCompCum(){
   if(!COMP_DATA||!COMP_DATA.cum_perf)return;
   const cp=COMP_DATA.cum_perf;
   if(!cp.dates.length)return;
-  // Apply range filter
-  const rangeMap={'1Y':52,'2Y':104,'3Y':156,'ALL':0};
-  const n=rangeMap[compCumRange]||0;
-  const total=cp.dates.length;
-  const startIdx=n>0&&total>n?total-n:0;
-  const dates=cp.dates.slice(startIdx);
+  const dates=sR(cp.dates,gRange,'w');
   // Rebase cumulative returns to start at 0 from the filtered start
-  const ds=Object.keys(cp.funds).map(t=>{
-    const raw=cp.funds[t].slice(startIdx);
-    // Find first non-null value as base
+  const series=Object.keys(cp.funds).map(t=>{
+    const raw=sR(cp.funds[t],gRange,'w');
     const base=raw.find(v=>v!==null)||0;
     const rebased=raw.map(v=>v===null?null:Math.round((v-base)*1000)/1000);
-    return {label:t,data:rebased,borderColor:FUND_REGISTRY[t].color,borderWidth:2,pointRadius:0,tension:.3,fill:false,spanGaps:true};
+    return {label:t,data:rebased,color:FUND_REGISTRY[t].color,width:2};
   });
-  mc('chart-comp-cum',{type:'line',data:{labels:dates,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(2)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'},title:{display:true,text:'Cumulative Return %',color:TC,font:CF}}}}});
-}
-function updateCumRange(range,btn){
-  compCumRange=range;
-  btn.parentElement.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  buildCompCum();
+  CT.multiLine('chart-comp-cum',dates,series,{
+    yTitle:'Cumulative Return %',xTicks:12,
+    yFmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%',
+    ttCb:{label:c=>c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(2)+'%'}
+  });
 }
 
 function buildCompSectors(){
@@ -1602,7 +1612,10 @@ function buildCompSectors(){
     label:s,data:tickers.map(t=>sc2[t][s]||0),
     backgroundColor:sColors[i]+'aa',borderColor:sColors[i],borderWidth:1
   }));
-  mc('chart-comp-sectors',{type:'bar',data:{labels:tickers,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}}},scales:{x:{...sc(),stacked:true,grid:{display:false}},y:{...sc(),stacked:true,ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
+  CT.bar('chart-comp-sectors',tickers,ds,{
+    stacked:true,yFmt:v=>v+'%',
+    ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}
+  });
 }
 
 function buildCompMaturity(){
@@ -1615,7 +1628,10 @@ function buildCompMaturity(){
     label:b,data:tickers.map(t=>mc2[t][i]||0),
     backgroundColor:matColors[i]+'aa',borderColor:matColors[i],borderWidth:1
   }));
-  mc('chart-comp-maturity',{type:'bar',data:{labels:tickers,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}}},scales:{x:{...sc(),stacked:true,grid:{display:false}},y:{...sc(),stacked:true,max:100,ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
+  CT.bar('chart-comp-maturity',tickers,ds,{
+    stacked:true,yMax:100,yFmt:v=>v+'%',
+    ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}
+  });
 }
 
 function buildFactorCompChart(metric){
@@ -1624,12 +1640,14 @@ function buildFactorCompChart(metric){
   if(!fc.dates.length)return;
   const mData=fc[metric]||{};
   const labels={'duration':'Duration (yr)','ytm':'YTM (%)','total_spread':'Total Spread (pp)','dts':'DTS (dur-bps)'};
-  const ds=Object.keys(mData).map(t=>({
-    label:t,data:mData[t],
-    borderColor:FUND_REGISTRY[t].color,borderWidth:2,
-    pointRadius:1,tension:.3,fill:false,spanGaps:true
+  const dates=sR(fc.dates,gRange,'w');
+  const series=Object.keys(mData).map(t=>({
+    label:t,data:sR(mData[t],gRange,'w'),color:FUND_REGISTRY[t].color,width:2,points:1
   }));
-  mc('chart-comp-factors',{type:'line',data:{labels:fc.dates,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.parsed.y!=null?c.dataset.label+': '+c.parsed.y.toFixed(4):''}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),title:{display:true,text:labels[metric]||metric,color:TC,font:CF}}}}});
+  CT.multiLine('chart-comp-factors',dates,series,{
+    yTitle:labels[metric]||metric,xTicks:12,
+    ttCb:{label:c=>c.parsed.y!=null?c.dataset.label+': '+c.parsed.y.toFixed(4):''}
+  });
 }
 
 function updateFactorComp(metric,btn){
@@ -1668,7 +1686,10 @@ function buildCompSpreadDecomp(){
     {label:'EM',data:s.map(f=>f.em_spread||0),backgroundColor:'#ffa502aa',borderColor:'#ffa502',borderWidth:1},
     {label:'Sovereign',data:s.map(f=>f.sovg_spread||0),backgroundColor:'#a855f7aa',borderColor:'#a855f7',borderWidth:1},
   ];
-  mc('chart-comp-spread-decomp',{type:'bar',data:{labels:tickers,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(4)+' pp'}}},scales:{x:{...sc(),stacked:true,grid:{display:false}},y:{...sc(),stacked:true,title:{display:true,text:'Spread Contribution (pp)',color:TC,font:CF}}}}});
+  CT.bar('chart-comp-spread-decomp',tickers,ds,{
+    stacked:true,yTitle:'Spread Contribution (pp)',
+    ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(4)+' pp'}
+  });
 }
 
 function buildCorrMatrix(){
@@ -1694,32 +1715,33 @@ function buildCompDD(){
   if(!COMP_DATA||!COMP_DATA.dd_comp)return;
   const dd=COMP_DATA.dd_comp;
   if(!dd.dates.length)return;
-  const ds=Object.keys(dd.funds).map(t=>({
-    label:t,data:dd.funds[t].map(v=>v===null?null:-v),
-    borderColor:FUND_REGISTRY[t].color,borderWidth:1.5,
-    pointRadius:0,tension:.3,fill:false,spanGaps:true
+  const dates=sR(dd.dates,gRange,'w');
+  const series=Object.keys(dd.funds).map(t=>({
+    label:t,data:sR(dd.funds[t],gRange,'w').map(v=>v===null?null:-v),
+    color:FUND_REGISTRY[t].color
   }));
-  mc('chart-comp-dd',{type:'line',data:{labels:dd.dates,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': -'+Math.abs(c.parsed.y).toFixed(3)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:10,maxRotation:0}},y:{...sc(),title:{display:true,text:'Drawdown %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(2)+'%'}}}}});
+  CT.multiLine('chart-comp-dd',dates,series,{
+    yTitle:'Drawdown %',
+    yFmt:v=>v.toFixed(2)+'%',
+    ttCb:{label:c=>c.dataset.label+': -'+Math.abs(c.parsed.y).toFixed(3)+'%'}
+  });
 }
 
-let compRollingRange='ALL';
 function buildRollingCompChart(win,met){
   if(!COMP_DATA||!COMP_DATA.rolling)return;
   const r=COMP_DATA.rolling[win];
   if(!r||!r.dates.length)return;
   const labels={'ret':'Ann. Return (%)','sharpe':'Sharpe Ratio','vol':'Ann. Volatility (%)','ir':'Information Ratio (vs MINT)'};
   const tickers=met==='ir'?Object.keys(r.funds).filter(t=>t!=='MINT'):Object.keys(r.funds);
-  // Apply range filter
-  const rMap={'1Y':52,'2Y':104,'3Y':156,'ALL':0};
-  const rn=rMap[compRollingRange]||0;
-  const total=r.dates.length;
-  const si=rn>0&&total>rn?total-rn:0;
-  const dates=r.dates.slice(si);
-  const ds=tickers.map(t=>{
+  const dates=sR(r.dates,gRange,'w');
+  const series=tickers.map(t=>{
     const d=r.funds[t][met];
-    return {label:t,data:d?d.slice(si):[],borderColor:FUND_REGISTRY[t].color,borderWidth:1.5,pointRadius:0,tension:.3,fill:false};
+    return {label:t,data:d?sR(d,gRange,'w'):[],color:FUND_REGISTRY[t].color};
   });
-  mc('chart-comp-rolling',{type:'line',data:{labels:dates,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:10,maxRotation:0}},y:{...sc(),title:{display:true,text:labels[met]||met,color:TC,font:CF}}}}});
+  CT.multiLine('chart-comp-rolling',dates,series,{
+    yTitle:labels[met]||met,
+    ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)}
+  });
 }
 
 function updateRollingComp(winOrKey,metOrVal,btn){
@@ -1735,13 +1757,6 @@ function updateRollingComp(winOrKey,metOrVal,btn){
   }
   buildRollingCompChart(compRollingWin,compRollingMet);
 }
-function updateRollingRange(range,btn){
-  compRollingRange=range;
-  btn.parentElement.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  buildRollingCompChart(compRollingWin,compRollingMet);
-}
-
 function buildCommentary(){
   if(typeof COMMENTARY_WEEKLY==='undefined')return;
   const we=document.getElementById('commentary-weekly');
@@ -1799,15 +1814,13 @@ function getViewState(){
   s.f=currentFund||'MINT';
   const at=document.querySelector('.nav-tab.active');
   if(at)s.t=at.dataset.section;
-  if(typeof analyticsRange!=='undefined'&&analyticsRange!==0)s.ar=analyticsRange;
+  if(gRange!==0)s.ar=gRange;
   if(typeof filter!=='undefined'&&filter)s.hs=filter;
   if(typeof sortState!=='undefined'&&(sortState.key!=='w'||sortState.dir!=='desc'))s.sk=sortState.key+'.'+sortState.dir;
   if(typeof compScatterPeriod!=='undefined'&&compScatterPeriod!=='SI')s.sp=compScatterPeriod;
-  if(typeof compCumRange!=='undefined'&&compCumRange!=='ALL')s.cr=compCumRange;
   if(typeof compFactorMetric!=='undefined'&&compFactorMetric!=='duration')s.fm=compFactorMetric;
   if(typeof compRollingWin!=='undefined'&&compRollingWin!=='3M')s.rw=compRollingWin;
   if(typeof compRollingMet!=='undefined'&&compRollingMet!=='ret')s.rm=compRollingMet;
-  if(typeof compRollingRange!=='undefined'&&compRollingRange!=='ALL')s.rr=compRollingRange;
   const cv=document.querySelector('#sec-commentary [data-view].active');
   if(cv&&cv.dataset.view==='monthly')s.cv='monthly';
   const sy=Math.round(window.scrollY);
@@ -1863,7 +1876,7 @@ function restoreFromHash(){
   if(s.ar){
     const rv=parseInt(s.ar);
     if(rv>0){
-      const rb=document.querySelector('#analytics-range [data-range="'+rv+'"]');
+      const rb=document.querySelector('#global-range [data-range="'+rv+'"]');
       if(rb)rb.click();
     }
   }
@@ -1882,32 +1895,22 @@ function restoreFromHash(){
     const b=document.querySelector('[data-scatter="'+s.sp+'"]');
     if(b)b.click();
   }
-  // 7. Compare cumulative range
-  if(s.cr){
-    const b=document.querySelector('[data-cumr="'+s.cr+'"]');
-    if(b)b.click();
-  }
-  // 8. Compare factor metric
+  // 7. Compare factor metric
   if(s.fm){
     const b=document.querySelector('[data-factor="'+s.fm+'"]');
     if(b)b.click();
   }
-  // 9. Rolling window
+  // 8. Rolling window
   if(s.rw){
     const b=document.querySelector('[data-rwin="'+s.rw+'"]');
     if(b)b.click();
   }
-  // 10. Rolling metric
+  // 9. Rolling metric
   if(s.rm){
     const b=document.querySelector('[data-rmet="'+s.rm+'"]');
     if(b)b.click();
   }
-  // 11. Rolling range
-  if(s.rr){
-    const b=document.querySelector('[data-rrange="'+s.rr+'"]');
-    if(b)b.click();
-  }
-  // 12. Commentary view
+  // 10. Commentary view
   if(s.cv==='monthly'){
     const b=document.querySelector('#sec-commentary [data-view="monthly"]');
     if(b)b.click();
@@ -1947,15 +1950,35 @@ function closeCorpIndustryModal(){
   document.getElementById('corp-ind-modal-bg').classList.remove('show');
 }
 
+function buildTabInsights(){
+  if(!TAB_INSIGHTS)return;
+  const tabs={overview:'tab-insights-overview',performance:'tab-insights-performance',income:'tab-insights-income',holdings:'tab-insights-holdings',analytics:'tab-insights-analytics',active:'tab-insights-active'};
+  for(const[key,id]of Object.entries(tabs)){
+    const el=document.getElementById(id);
+    if(!el)continue;
+    const bullets=TAB_INSIGHTS[key];
+    if(!bullets||!bullets.length){el.innerHTML='';continue;}
+    let html='<div class="tab-insights-panel"><div class="tab-insights-header"><span class="tab-insights-label">SYSTEMATIC ANALYSIS</span><span class="tab-insights-badge">Algorithmically derived from holdings data &mdash; not AI-generated</span></div>';
+    for(const b of bullets){
+      html+='<div class="cm-bullet">'+esc(b.t);
+      if(b.d)html+='<span class="cm-info">i<span class="cm-tip">'+esc(b.d)+'</span></span>';
+      html+='</div>';
+    }
+    html+='</div>';
+    el.innerHTML=html;
+  }
+}
+
 document.addEventListener('DOMContentLoaded',async()=>{
   await loadData();
-  initNav();buildOverview();buildPerformance();buildIncome();
+  initNav();initGlobalRange();buildOverview();buildPerformance();buildIncome();
+  buildTabInsights();
   renderHoldings();initHoldings();
   document.querySelector('#holdings-table thead th[data-key="w"]').classList.add('sorted-desc');
   document.querySelectorAll('.nav-tab').forEach(btn=>{
     btn.addEventListener('click',()=>{
       if(btn.dataset.section==='overview'&&currentFund!=='MINT'){buildOverviewForFund();}
-      if(btn.dataset.section==='analytics'&&!analyticsBuilt){analyticsBuilt=true;buildAnalytics();initAnalyticsRange();}
+      if(btn.dataset.section==='analytics'&&!analyticsBuilt){analyticsBuilt=true;buildAnalytics();}
       if(btn.dataset.section==='active'&&!activeBuilt){activeBuilt=true;buildActiveManagement();}
       if(btn.dataset.section==='commentary'&&!commentaryBuilt){commentaryBuilt=true;buildCommentary();}
       if(btn.dataset.section==='compare'&&!compareBuilt){compareBuilt=true;buildCompare();}
