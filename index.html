@@ -318,6 +318,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
     </div>
     <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Spread Decomposition</span><span class="info-btn" data-info="spread_decomp">i</span><span class="source-tag">PIMCO API &middot; MONTHLY</span></div><div class="panel-body"><div class="chart-wrap" style="height:300px"><canvas id="chart-spread-decomp"></canvas></div></div></div>
     <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Portfolio Drawdown</span><span class="info-btn" data-info="drawdown">i</span><span class="source-tag">NAV RETURNS</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-drawdown"></canvas></div></div></div>
+    <div class="panel analytics-holdings-only" id="panel-corp-dur" style="margin-bottom:16px;display:none"><div class="panel-header"><span class="panel-title">Corporate Duration by Industry</span><span class="source-tag">DAILY HOLDINGS &middot; MODIFIED DURATION</span></div><div class="panel-body"><div class="chart-wrap" style="height:380px"><canvas id="chart-corp-dur"></canvas></div></div></div>
     <div class="grid-2 analytics-holdings-only">
       <div class="panel"><div class="panel-header"><span class="panel-title">HHI Concentration Index</span><span class="info-btn" data-info="hhi">i</span><span class="source-tag">DAILY HOLDINGS</span></div><div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="chart-hhi"></canvas></div></div></div>
       <div class="panel"><div class="panel-header"><span class="panel-title">Effective Number of Positions</span><span class="info-btn" data-info="eff_n">i</span><span class="source-tag">DAILY HOLDINGS</span></div><div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="chart-eff-n"></canvas></div></div></div>
@@ -518,6 +519,7 @@ let FACTOR_EM,FACTOR_SOVG,FACTOR_TSPREAD,FACTOR_DTS;
 let SECTOR_ANALYTICS,CUM_DATES,CUM_RETURNS;
 let ROLL_SHARPE_DATES,ROLL_SHARPE,ROLL_VOL_DATES,ROLL_VOL,DD_DATES,DD_VALS;
 let COMMENTARY_WEEKLY,COMMENTARY_MONTHLY;
+let CORP_DUR_DATA;
 let FUND_REGISTRY,FUND_META,FUND_DATA,COMP_DATA;
 let DISPLAY_SECTORS,MINT_ORIG,FUND_STATS;
 
@@ -578,6 +580,8 @@ async function loadData(){
   if(D.commentary){
     COMMENTARY_WEEKLY=D.commentary.weekly;COMMENTARY_MONTHLY=D.commentary.monthly;
   }
+  // Corp duration by industry
+  CORP_DUR_DATA=D.corp_duration||null;
   FUND_REGISTRY=D.fund_registry||{};
   FUND_META=D.fund_meta||{};
   FUND_DATA=D.fund_data||{};
@@ -622,6 +626,7 @@ async function loadData(){
     FACTOR_MTG:FACTOR_MTG||null,FACTOR_CORP:FACTOR_CORP||null,
     FACTOR_EM:FACTOR_EM||null,FACTOR_SOVG:FACTOR_SOVG||null,
     FACTOR_TSPREAD:FACTOR_TSPREAD||null,FACTOR_DTS:FACTOR_DTS||null,
+    CORP_DUR_DATA:CORP_DUR_DATA||null,
   }:null;
 }
 
@@ -674,6 +679,7 @@ function loadFundData(ticker){
       FACTOR_EM=MINT_ORIG.FACTOR_EM;FACTOR_SOVG=MINT_ORIG.FACTOR_SOVG;
       FACTOR_TSPREAD=MINT_ORIG.FACTOR_TSPREAD;FACTOR_DTS=MINT_ORIG.FACTOR_DTS;
     }
+    CORP_DUR_DATA=MINT_ORIG.CORP_DUR_DATA||null;
     return true;
   }
   const fd=typeof FUND_DATA!=='undefined'?FUND_DATA[ticker]:null;
@@ -724,6 +730,7 @@ function loadFundData(ticker){
     FACTOR_NAV=fd.factor_nav;FACTOR_MTG=fd.factor_mtg;FACTOR_CORP=fd.factor_corp;
     FACTOR_EM=fd.factor_em;FACTOR_SOVG=fd.factor_sovg;
   }
+  CORP_DUR_DATA=fd.corp_duration||null;
   return true;
 }
 
@@ -1353,6 +1360,30 @@ function buildActiveManagement(){
   if(typeof SEC_VOL_DATES!=='undefined'){
     const svDS=Object.keys(SECTOR_COLORS).map(s=>({label:s,data:SEC_VOL[s]||[],borderColor:SECTOR_COLORS[s],borderWidth:1.5,pointRadius:0,tension:.3}));
     mc('chart-sec-vol',{type:'line',data:{labels:SEC_VOL_DATES,datasets:svDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:CF,boxWidth:10,padding:8}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': \u03c3='+c.parsed.y.toFixed(2)+'pp'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),title:{display:true,text:'30d Rolling Std Dev (pp)',color:TC,font:CF}}}}});
+  }
+
+  // Corporate Duration by Industry
+  const durPanel=document.getElementById('panel-corp-dur');
+  if(CORP_DUR_DATA&&CORP_DUR_DATA.dur_industries&&Object.keys(CORP_DUR_DATA.dur_industries).length>0){
+    durPanel.style.display='';
+    const durDates=CORP_DUR_DATA.dur_dates;
+    const durInds=CORP_DUR_DATA.dur_industries;
+    const durPort=CORP_DUR_DATA.dur_portfolio;
+    // Sort industries by average duration (descending) for legend order
+    const indKeys=Object.keys(durInds).sort((a,b)=>{
+      const avgA=durInds[a].filter(v=>v!=null).reduce((s,v)=>s+v,0)/Math.max(1,durInds[a].filter(v=>v!=null).length);
+      const avgB=durInds[b].filter(v=>v!=null).reduce((s,v)=>s+v,0)/Math.max(1,durInds[b].filter(v=>v!=null).length);
+      return avgB-avgA;
+    });
+    const durColors=['#3b82f6','#00d4aa','#a855f7','#ffa502','#ff4757','#06b6d4','#ec4899','#84cc16','#f97316','#8b5cf6','#14b8a6','#6366f1','#22c55e','#eab308','#f43f5e','#0ea5e9','#d946ef','#10b981'];
+    const durDS=indKeys.map((ind,i)=>({
+      label:ind,data:durInds[ind],borderColor:durColors[i%durColors.length],borderWidth:1.5,pointRadius:0,tension:.3,spanGaps:true
+    }));
+    // Add portfolio aggregate line
+    durDS.push({label:'All Corp (wt-avg)',data:durPort,borderColor:'#e8ecf4',borderWidth:2.5,borderDash:[6,3],pointRadius:0,tension:.3,spanGaps:true});
+    mc('chart-corp-dur',{type:'line',data:{labels:durDates,datasets:durDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed.y;return v!=null?c.dataset.label+': '+v.toFixed(3)+'yr':null;}}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),title:{display:true,text:'Modified Duration (years)',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(2)}}}}});
+  }else{
+    durPanel.style.display='none';
   }
 
   initPositionTracker();
