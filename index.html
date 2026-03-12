@@ -674,6 +674,163 @@ const CT={
   }
 };
 
+// ─── CHART REGISTRY ──────────────────────────────
+const CR={};
+function rc(id,tab,freq,fn){CR[id]={tab,freq,builder:fn};}
+function buildTabCharts(tab){for(const c of Object.values(CR))if(c.tab===tab)c.builder();}
+
+// --- Overview MINT (tab: 'overview-mint', static snapshots) ---
+rc('chart-issuer','overview-mint',null,()=>{CT.doughnut('chart-issuer',ISSUER_LABELS,ISSUER_VALUES,COLORS.slice(0,ISSUER_LABELS.length));});
+rc('chart-asset','overview-mint',null,()=>{CT.doughnut('chart-asset',ASSET_LABELS,ASSET_VALUES,COLORS.slice(0,ASSET_LABELS.length));});
+rc('chart-country','overview-mint',null,()=>{CT.doughnut('chart-country',COUNTRY_LABELS,COUNTRY_VALUES,COLORS.slice(0,COUNTRY_LABELS.length),{type:'pie',cutout:'0%'});});
+rc('chart-coupon','overview-mint',null,()=>{CT.doughnut('chart-coupon',COUPON_LABELS,COUPON_VALUES,['#00d4aa','#3b82f6','#6b7a90','#ffa502'].slice(0,COUPON_LABELS.length));});
+rc('chart-maturity','overview-mint',null,()=>{CT.bar('chart-maturity',MAT_LABELS,[{data:MAT_VALUES,backgroundColor:['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'].slice(0,MAT_LABELS.length),borderWidth:0,borderRadius:2,barThickness:36}],{yFmt:v=>v+'%',ttCb:{label:c=>c.parsed.y+'%'}});});
+rc('chart-yield-comp','overview-mint',null,()=>{mc('chart-yield-comp',{type:'bar',data:{labels:YIELD_LABELS,datasets:[{data:YIELD_VALUES,backgroundColor:YIELD_COLORS,borderWidth:0,borderRadius:2,barThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.x.toFixed(2)+'%'}}},scales:{x:{...sc(),max:5.5,ticks:{...sc().ticks,callback:v=>v+'%'}},y:{...sc(),grid:{display:false}}}}});});
+
+// --- Overview ETF (tab: 'overview-etf') ---
+rc('chart-etf-sector','overview-etf',null,()=>{
+  if(!FD.TS_SECTORS||!FD.TS_DATES||!FD.TS_DATES.length)return;
+  const li=FD.TS_DATES.length-1;
+  const sLabels=[],sVals=[];
+  DISPLAY_SECTORS.forEach(s=>{const v=FD.TS_SECTORS[s]?FD.TS_SECTORS[s][li]:0;if(v>0.1){sLabels.push(s);sVals.push(Math.round(v*10)/10);}});
+  CT.doughnut('chart-etf-sector',sLabels,sVals,COLORS.slice(0,sLabels.length));
+  const corpW=FD.TS_SECTORS['Corporate']?FD.TS_SECTORS['Corporate'][li]:0;
+  document.getElementById('etf-corp-btn').style.display=corpW>10?'':'none';
+});
+rc('chart-etf-maturity','overview-etf',null,()=>{
+  if(!FD.MAT_BUCKETS||!FD.MAT_DATES||!FD.MAT_DATES.length)return;
+  const li=FD.MAT_DATES.length-1;const mLabels=[],mVals=[];
+  MAT_BUCKET_NAMES.forEach(b=>{const v=FD.MAT_BUCKETS[b]?FD.MAT_BUCKETS[b][li]:0;if(v>0.1){mLabels.push(b);mVals.push(Math.round(v*10)/10);}});
+  const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'];
+  CT.bar('chart-etf-maturity',mLabels,[{data:mVals,backgroundColor:matColors.slice(0,mLabels.length),borderWidth:0,borderRadius:2,barThickness:36}],{yFmt:v=>v+'%',ttCb:{label:c=>c.parsed.y.toFixed(1)+'%'}});
+});
+
+// --- Performance (tab: 'performance') ---
+rc('chart-monthly-returns','performance','m',()=>{CT.bar('chart-monthly-returns',MR_LABELS,[{label:'Monthly Return',data:MR_VALUES,backgroundColor:'#00d4aa',borderWidth:0,borderRadius:2,barThickness:48}],{ttCb:{label:c=>'+'+c.parsed.y.toFixed(3)+'%'},yFmt:v=>v.toFixed(1)+'%'});});
+rc('chart-annual-returns','performance',null,()=>{CT.bar('chart-annual-returns',AR_LABELS,[{label:'Annual Return',data:AR_VALUES,backgroundColor:AR_VALUES.map(d=>d>=0?'#00d4aa':'#ff4757'),borderWidth:0,borderRadius:2,barThickness:40}],{ttCb:{label:c=>(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(1)+'%'},yFmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%'});});
+
+// --- Income (tab: 'income') ---
+rc('chart-dist-history','income','m',()=>{
+  const dr=[...DIST_DATA].reverse();
+  mc('chart-dist-history',{type:'bar',data:{labels:dr.map(d=>d.d),datasets:[{label:'Distribution',data:dr.map(d=>d.a),backgroundColor:dr.map(d=>d.a>=0.44?'#00d4aa':d.a>=0.35?'#3b82f6':d.a>=0.25?'#ffa502':'#ff4757'),borderWidth:0,borderRadius:1,barPercentage:0.85}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'$'+c.parsed.y.toFixed(3)}}},scales:{x:{...sc(),grid:{display:false},ticks:{...sc().ticks,maxRotation:45,autoSkip:true,maxTicksLimit:16}},y:{...sc(),ticks:{...sc().ticks,callback:v=>'$'+v.toFixed(2)}}}}});
+});
+rc('chart-annual-income','income',null,()=>{
+  mc('chart-annual-income',{type:'bar',data:{labels:AI_LABELS,datasets:[{label:'Annual Income/Share',data:AI_VALUES,backgroundColor:AI_VALUES.map((v,i,a)=>i===a.length-1?'#6b7a90':v>=a[Math.max(0,i-1)]?'#00d4aa':'#ffa502'),borderWidth:0,borderRadius:2,barThickness:48}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'$'+c.parsed.y.toFixed(2)+' / share'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>'$'+v.toFixed(2)}}}}});
+});
+
+// --- Analytics (tab: 'analytics') ---
+rc('chart-hhi','analytics','d',()=>{
+  if(!FD.TS_DATES||!FD.TS_DATES.length)return;
+  const n=gRange>0?Math.min(gRange,FD.TS_DATES.length):0;
+  CT.singleLine('chart-hhi',sliceTail(FD.TS_DATES,n),sliceTail(FD.TS_HHI,n),'#a855f7',{yTitle:'HHI (0-10,000)',ttCb:{label:c=>'HHI: '+c.parsed.y.toFixed(1)+' (lower = more diversified)'}});
+});
+rc('chart-eff-n','analytics','d',()=>{
+  if(!FD.TS_DATES||!FD.TS_DATES.length)return;
+  const n=gRange>0?Math.min(gRange,FD.TS_DATES.length):0;
+  CT.singleLine('chart-eff-n',sliceTail(FD.TS_DATES,n),sliceTail(FD.TS_EFF_N,n),'#06b6d4',{yTitle:'Effective Positions',ttCb:{label:c=>'Effective positions: '+c.parsed.y.toFixed(0)}});
+});
+rc('chart-wam','analytics','d',()=>{
+  if(!FD.TS_DATES||!FD.TS_DATES.length)return;
+  const n=gRange>0?Math.min(gRange,FD.TS_DATES.length):0;
+  CT.singleLine('chart-wam',sliceTail(FD.TS_DATES,n),sliceTail(FD.TS_WAM,n),'#ffa502',{yTitle:'Years',ttCb:{label:c=>c.parsed.y.toFixed(3)+' years'}});
+});
+rc('chart-wac','analytics','d',()=>{
+  if(!FD.TS_DATES||!FD.TS_DATES.length)return;
+  const n=gRange>0?Math.min(gRange,FD.TS_DATES.length):0;
+  CT.singleLine('chart-wac',sliceTail(FD.TS_DATES,n),sliceTail(FD.TS_WAC,n),'#00d4aa',{yTitle:'Coupon %',yFmt:v=>v.toFixed(1)+'%',ttCb:{label:c=>c.parsed.y.toFixed(3)+'%'}});
+});
+rc('chart-mat-evo','analytics','m',()=>{
+  if(!FD.MAT_DATES||!FD.MAT_DATES.length)return;
+  const n=gRange>0?Math.min(gRange,FD.TS_DATES?FD.TS_DATES.length:0):0;
+  const mn=gRange>0?Math.ceil(n/21):0;
+  const mDates=sliceTail(FD.MAT_DATES,mn);
+  const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'];
+  const matDS=MAT_BUCKET_NAMES.map((b,i)=>({label:b,data:sliceTail(FD.MAT_BUCKETS[b],mn),backgroundColor:matColors[i]+'99',borderColor:matColors[i],borderWidth:1,fill:true,pointRadius:0}));
+  CT.line('chart-mat-evo',mDates,matDS,{stacked:true,yMax:100,yFmt:v=>v+'%',xTicks:12});
+});
+rc('chart-concentration','analytics','d',()=>{
+  if(!FD.TS_DATES||!FD.TS_DATES.length)return;
+  const n=gRange>0?Math.min(gRange,FD.TS_DATES.length):0;
+  CT.multiLine('chart-concentration',sliceTail(FD.TS_DATES,n),[
+    {label:'Top 5',data:sliceTail(FD.TS_TOP5,n),color:'#ff4757',backgroundColor:'#ff475722'},
+    {label:'Top 10',data:sliceTail(FD.TS_TOP10,n),color:'#ffa502',backgroundColor:'#ffa50222'},
+    {label:'Top 20',data:sliceTail(FD.TS_TOP20,n),color:'#00d4aa',backgroundColor:'#00d4aa22'}
+  ],{yFmt:v=>v+'%'});
+});
+rc('chart-count','analytics','d',()=>{
+  if(!FD.TS_DATES||!FD.TS_DATES.length)return;
+  const n=gRange>0?Math.min(gRange,FD.TS_DATES.length):0;
+  CT.singleLine('chart-count',sliceTail(FD.TS_DATES,n),sliceTail(FD.TS_COUNT,n),'#00d4aa',{label:'Holdings'});
+});
+rc('chart-deriv','analytics','d',()=>{
+  if(!FD.TS_DATES||!FD.TS_DATES.length)return;
+  const n=gRange>0?Math.min(gRange,FD.TS_DATES.length):0;
+  const dates=sliceTail(FD.TS_DATES,n);
+  CT.multiLine('chart-deriv',dates,[
+    {label:'Other Net Assets %',data:sliceTail(FD.TS_OTHER,n),color:'#3b82f6',backgroundColor:'#3b82f622',yAxisID:'y'},
+    {label:'Future Position %',data:sliceTail(FD.TS_FUTURE,n),color:'#ff4757',backgroundColor:'#ff475722',yAxisID:'y1'}
+  ],{yTitle:'Other Net Assets %',yFmt:v=>v+'%',y1:{title:{display:true,text:'Future Position %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v+'%'}}});
+});
+rc('chart-churn','analytics','w',()=>{
+  if(!FD.CHURN_DATES||!FD.CHURN_DATES.length)return;
+  const n=gRange>0?Math.min(gRange,FD.TS_DATES?FD.TS_DATES.length:0):0;
+  const cn=gRange>0?Math.ceil(n/5):0;
+  const cDates=sliceTail(FD.CHURN_DATES,cn);
+  mc('chart-churn',{type:'bar',data:{labels:cDates,datasets:[
+    {label:'New Positions',data:sliceTail(FD.CHURN_NEW,cn),backgroundColor:'#00d4aa88',borderWidth:0,order:2},
+    {label:'Exited Positions',data:sliceTail(FD.CHURN_EXIT,cn).map(v=>-v),backgroundColor:'#ff475788',borderWidth:0,order:2},
+    {label:'Turnover Rate %',data:sliceTail(FD.CHURN_RATE,cn),type:'line',borderColor:'#ffa502',borderWidth:2,pointRadius:0,tension:.3,yAxisID:'y1',order:1}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:TC,font:CF,boxWidth:10}},tooltip:{...tt(),mode:'index',intersect:false}},scales:{x:{...sc(),stacked:true,ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),stacked:true,title:{display:true,text:'Positions',color:TC,font:CF}},y1:{...sc(),position:'right',title:{display:true,text:'Turnover %',color:TC,font:CF},grid:{drawOnChartArea:false}}}}});
+});
+rc('chart-jaccard','analytics','m',()=>{
+  if(!FD.JACC_DATES||!FD.JACC_DATES.length)return;
+  const n=gRange>0?Math.min(gRange,FD.TS_DATES?FD.TS_DATES.length:0):0;
+  const jn=gRange>0?Math.ceil(n/21):0;
+  CT.multiLine('chart-jaccard',sliceTail(FD.JACC_DATES,jn),[
+    {label:'vs 1 Month Ago',data:sliceTail(FD.JACC_1M,jn),color:'#00d4aa'},
+    {label:'vs 3 Months Ago',data:sliceTail(FD.JACC_3M,jn),color:'#ffa502'},
+    {label:'vs 6 Months Ago',data:sliceTail(FD.JACC_6M,jn),color:'#ff4757'}
+  ],{yMax:100,yFmt:v=>v+'%',yTitle:'CUSIP Overlap %',xTicks:12,ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'% overlap'}});
+});
+rc('chart-age','analytics',null,()=>{
+  if(!FD.AGE_LABELS||!FD.AGE_LABELS.length)return;
+  CT.bar('chart-age',FD.AGE_LABELS,[{data:FD.AGE_VALUES,backgroundColor:['#ff4757','#ffa502','#eab308','#84cc16','#22c55e','#00d4aa'],borderWidth:0,borderRadius:2}],{yTitle:'# Positions',ttCb:{label:c=>c.parsed.y+' positions'}});
+});
+rc('chart-factors','analytics','d',buildFactorChart);
+rc('chart-cum-ret','analytics','d',buildCumRetChart);
+rc('chart-roll-sharpe','analytics','d',buildRollSharpeChart);
+rc('chart-roll-vol','analytics','d',buildRollVolChart);
+rc('chart-spread-decomp','analytics','d',buildSpreadDecomp);
+rc('chart-drawdown','analytics','d',buildDrawdown);
+rc('chart-corp-dur','analytics','d',buildCorpDuration);
+
+// --- Active Management (tab: 'active') ---
+rc('chart-sector-evo','active','d',()=>{
+  if(!FD.TS_DATES||!FD.TS_DATES.length)return;
+  CT.stackedArea('chart-sector-evo',FD.TS_DATES,Object.keys(SECTOR_COLORS).map(s=>({label:s,data:FD.TS_SECTORS[s],color:SECTOR_COLORS[s]})),{yFmt:v=>v+'%',xTicks:12,ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}});
+});
+rc('chart-movers','active',null,()=>{
+  if(!FD.BIGGEST_MOVERS||!FD.BIGGEST_MOVERS.length)return;
+  const bm=FD.BIGGEST_MOVERS.sort((a,b)=>b.delta-a.delta);
+  mc('chart-movers',{type:'bar',data:{labels:bm.map(m=>{const d=m.d;return d.length>30?d.slice(0,28)+'..':d}),datasets:[{label:'Weight Change (90d)',data:bm.map(m=>m.delta),backgroundColor:bm.map(m=>m.delta>=0?'#00d4aa88':'#ff475788'),borderWidth:0,borderRadius:2}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>(c.parsed.x>=0?'+':'')+c.parsed.x.toFixed(3)+'% | Current: '+bm[c.dataIndex].cur.toFixed(3)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'}},y:{...sc(),grid:{display:false},ticks:{...sc().ticks,font:{...CF,size:9}}}}}});
+});
+rc('chart-sec-vol','active','d',()=>{
+  if(!FD.SEC_VOL_DATES)return;
+  CT.multiLine('chart-sec-vol',FD.SEC_VOL_DATES,Object.keys(SECTOR_COLORS).map(s=>({label:s,data:FD.SEC_VOL[s]||[],color:SECTOR_COLORS[s]})),{yTitle:'30d Rolling Std Dev (pp)',xTicks:12,ttCb:{label:c=>c.dataset.label+': \u03c3='+c.parsed.y.toFixed(2)+'pp'}});
+});
+
+// --- Compare (tab: 'compare') ---
+rc('chart-comp-scatter','compare',null,()=>buildScatter(compScatterPeriod));
+rc('chart-comp-dur-yield','compare',null,buildDurYieldScatter);
+rc('chart-comp-cum','compare','w',buildCompCum);
+rc('chart-comp-rel-perf','compare','d',buildRelPerf);
+rc('chart-comp-sectors','compare',null,buildCompSectors);
+rc('chart-comp-maturity','compare',null,buildCompMaturity);
+rc('chart-comp-factors','compare','w',()=>buildFactorCompChart(compFactorMetric));
+rc('chart-comp-spread-decomp','compare',null,buildCompSpreadDecomp);
+rc('chart-comp-dd','compare','w',buildCompDD);
+rc('chart-comp-rolling','compare','w',()=>buildRollingCompChart(compRollingWin,compRollingMet));
+
 // ─── FUND SWITCHING ──────────────────────────────────
 let currentFund='MINT';
 const MINT_ONLY_TABS=['performance','income','commentary'];
@@ -829,14 +986,7 @@ function initNav(){
   });
 }
 
-function buildOverview(){
-  CT.doughnut('chart-issuer', ISSUER_LABELS, ISSUER_VALUES, COLORS.slice(0,ISSUER_LABELS.length));
-  CT.doughnut('chart-asset', ASSET_LABELS, ASSET_VALUES, COLORS.slice(0,ASSET_LABELS.length));
-  CT.doughnut('chart-country', COUNTRY_LABELS, COUNTRY_VALUES, COLORS.slice(0,COUNTRY_LABELS.length), {type:'pie', cutout:'0%'});
-  CT.doughnut('chart-coupon', COUPON_LABELS, COUPON_VALUES, ['#00d4aa','#3b82f6','#6b7a90','#ffa502'].slice(0,COUPON_LABELS.length));
-  CT.bar('chart-maturity', MAT_LABELS, [{data:MAT_VALUES,backgroundColor:['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'].slice(0,MAT_LABELS.length),borderWidth:0,borderRadius:2,barThickness:36}], {yFmt:v=>v+'%',ttCb:{label:c=>c.parsed.y+'%'}});
-  mc('chart-yield-comp',{type:'bar',data:{labels:YIELD_LABELS,datasets:[{data:YIELD_VALUES,backgroundColor:YIELD_COLORS,borderWidth:0,borderRadius:2,barThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.x.toFixed(2)+'%'}}},scales:{x:{...sc(),max:5.5,ticks:{...sc().ticks,callback:v=>v+'%'}},y:{...sc(),grid:{display:false}}}}});
-}
+function buildOverview(){buildTabCharts('overview-mint');}
 
 function buildOverviewForFund(){
   const isMINT=currentFund==='MINT';
@@ -868,20 +1018,7 @@ function buildOverviewForFund(){
     '<div class="stat-card purple"><div class="stat-label">WAM / WAC</div><div class="stat-value">'+wam+'</div><div class="stat-sub">WAC: '+wac+'</div></div>'+
     '<div class="stat-card cyan"><div class="stat-label">Largest Sector</div><div class="stat-value">'+esc(lSec)+'</div><div class="stat-sub">'+lSecW+'% of portfolio</div></div>'+
     '<div class="stat-card green"><div class="stat-label">Concentration</div><div class="stat-value">HHI '+(st.hhi_now||'N/A')+'</div><div class="stat-sub">Eff N: '+(st.eff_n_now||'N/A')+'</div></div>';
-  if(typeof FD.TS_SECTORS!=='undefined'&&FD.TS_SECTORS&&typeof FD.TS_DATES!=='undefined'&&FD.TS_DATES&&FD.TS_DATES.length){
-    const li=FD.TS_DATES.length-1;
-    const sLabels=[];const sVals=[];
-    DISPLAY_SECTORS.forEach(s=>{const v=FD.TS_SECTORS[s]?FD.TS_SECTORS[s][li]:0;if(v>0.1){sLabels.push(s);sVals.push(Math.round(v*10)/10);}});
-    CT.doughnut('chart-etf-sector', sLabels, sVals, COLORS.slice(0,sLabels.length));
-    const corpW=FD.TS_SECTORS['Corporate']?FD.TS_SECTORS['Corporate'][li]:0;
-    document.getElementById('etf-corp-btn').style.display=corpW>10?'':'none';
-  }
-  if(typeof FD.MAT_BUCKETS!=='undefined'&&FD.MAT_BUCKETS&&typeof FD.MAT_DATES!=='undefined'&&FD.MAT_DATES&&FD.MAT_DATES.length){
-    const li=FD.MAT_DATES.length-1;const mLabels=[];const mVals=[];
-    MAT_BUCKET_NAMES.forEach(b=>{const v=FD.MAT_BUCKETS[b]?FD.MAT_BUCKETS[b][li]:0;if(v>0.1){mLabels.push(b);mVals.push(Math.round(v*10)/10);}});
-    const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'];
-    CT.bar('chart-etf-maturity', mLabels, [{data:mVals,backgroundColor:matColors.slice(0,mLabels.length),borderWidth:0,borderRadius:2,barThickness:36}], {yFmt:v=>v+'%',ttCb:{label:c=>c.parsed.y.toFixed(1)+'%'}});
-  }
+  buildTabCharts('overview-etf');
   // Country/State + Coupon charts (snapshot funds)
   const geoRow=document.getElementById('etf-geo-row');
   if(fd&&(fd.country_breakdown||fd.state_breakdown)){
@@ -913,16 +1050,9 @@ function buildOverviewForFund(){
   }
 }
 
-function buildPerformance(){
-  CT.bar('chart-monthly-returns', MR_LABELS, [{label:'Monthly Return',data:MR_VALUES,backgroundColor:'#00d4aa',borderWidth:0,borderRadius:2,barThickness:48}], {ttCb:{label:c=>'+'+c.parsed.y.toFixed(3)+'%'},yFmt:v=>v.toFixed(1)+'%'});
-  CT.bar('chart-annual-returns', AR_LABELS, [{label:'Annual Return',data:AR_VALUES,backgroundColor:AR_VALUES.map(d=>d>=0?'#00d4aa':'#ff4757'),borderWidth:0,borderRadius:2,barThickness:40}], {ttCb:{label:c=>(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(1)+'%'},yFmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%'});
-}
+function buildPerformance(){buildTabCharts('performance');}
 
-function buildIncome(){
-  const dr=[...DIST_DATA].reverse();
-  mc('chart-dist-history',{type:'bar',data:{labels:dr.map(d=>d.d),datasets:[{label:'Distribution',data:dr.map(d=>d.a),backgroundColor:dr.map(d=>d.a>=0.44?'#00d4aa':d.a>=0.35?'#3b82f6':d.a>=0.25?'#ffa502':'#ff4757'),borderWidth:0,borderRadius:1,barPercentage:0.85}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'$'+c.parsed.y.toFixed(3)}}},scales:{x:{...sc(),grid:{display:false},ticks:{...sc().ticks,maxRotation:45,autoSkip:true,maxTicksLimit:16}},y:{...sc(),ticks:{...sc().ticks,callback:v=>'$'+v.toFixed(2)}}}}});
-  mc('chart-annual-income',{type:'bar',data:{labels:AI_LABELS,datasets:[{label:'Annual Income/Share',data:AI_VALUES,backgroundColor:AI_VALUES.map((v,i,a)=>i===a.length-1?'#6b7a90':v>=a[Math.max(0,i-1)]?'#00d4aa':'#ffa502'),borderWidth:0,borderRadius:2,barThickness:48}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'$'+c.parsed.y.toFixed(2)+' / share'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>'$'+v.toFixed(2)}}}}});
-}
+function buildIncome(){buildTabCharts('income');}
 
 let sortState={key:'w',dir:'desc'},filter='',pageSize=50,filteredData=[];
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -1157,84 +1287,10 @@ function sliceTail(arr,n){return n>0&&arr.length>n?arr.slice(-n):arr;}
 
 function buildAnalytics(){
   updateAnalyticsCards();
-  const hasTS=typeof FD.TS_DATES!=='undefined'&&FD.TS_DATES.length>0;
   const isMF=FUND_REGISTRY[currentFund]&&FUND_REGISTRY[currentFund].is_mutual_fund;
-
-  // Hide holdings-specific chart panels for mutual funds
-  document.querySelectorAll('.analytics-holdings-only').forEach(el=>{
-    el.style.display=isMF?'none':'';
-  });
-
-  if(!hasTS&&!isMF)return;  // no data at all
-  const n=hasTS&&gRange>0?Math.min(gRange,FD.TS_DATES.length):0;
-  const dates=hasTS?sliceTail(FD.TS_DATES,n):[];
-
-  if(hasTS){
-  // HHI
-  CT.singleLine('chart-hhi', dates, sliceTail(FD.TS_HHI,n), '#a855f7', {yTitle:'HHI (0-10,000)', ttCb:{label:c=>'HHI: '+c.parsed.y.toFixed(1)+' (lower = more diversified)'}});
-
-  // Effective N
-  CT.singleLine('chart-eff-n', dates, sliceTail(FD.TS_EFF_N,n), '#06b6d4', {yTitle:'Effective Positions', ttCb:{label:c=>'Effective positions: '+c.parsed.y.toFixed(0)}});
-
-  // WAM
-  CT.singleLine('chart-wam', dates, sliceTail(FD.TS_WAM,n), '#ffa502', {yTitle:'Years', ttCb:{label:c=>c.parsed.y.toFixed(3)+' years'}});
-
-  // WAC
-  CT.singleLine('chart-wac', dates, sliceTail(FD.TS_WAC,n), '#00d4aa', {yTitle:'Coupon %', yFmt:v=>v.toFixed(1)+'%', ttCb:{label:c=>c.parsed.y.toFixed(3)+'%'}});
-
-  // Maturity evolution (monthly)
-  const mn=gRange>0?Math.ceil(n/21):0;
-  const mDates=sliceTail(FD.MAT_DATES,mn);
-  const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'];
-  const matDS=MAT_BUCKET_NAMES.map((b,i)=>({label:b,data:sliceTail(FD.MAT_BUCKETS[b],mn),backgroundColor:matColors[i]+'99',borderColor:matColors[i],borderWidth:1,fill:true,pointRadius:0}));
-  CT.line('chart-mat-evo',mDates,matDS,{stacked:true,yMax:100,yFmt:v=>v+'%',xTicks:12});
-
-  // Concentration
-  CT.multiLine('chart-concentration', dates, [
-    {label:'Top 5',data:sliceTail(FD.TS_TOP5,n),color:'#ff4757',backgroundColor:'#ff475722'},
-    {label:'Top 10',data:sliceTail(FD.TS_TOP10,n),color:'#ffa502',backgroundColor:'#ffa50222'},
-    {label:'Top 20',data:sliceTail(FD.TS_TOP20,n),color:'#00d4aa',backgroundColor:'#00d4aa22'}
-  ], {yFmt:v=>v+'%'});
-
-  // Holdings count
-  CT.singleLine('chart-count', dates, sliceTail(FD.TS_COUNT,n), '#00d4aa', {label:'Holdings'});
-
-  // Derivatives overlay
-  CT.multiLine('chart-deriv', dates, [
-    {label:'Other Net Assets %',data:sliceTail(FD.TS_OTHER,n),color:'#3b82f6',backgroundColor:'#3b82f622',yAxisID:'y'},
-    {label:'Future Position %',data:sliceTail(FD.TS_FUTURE,n),color:'#ff4757',backgroundColor:'#ff475722',yAxisID:'y1'}
-  ], {yTitle:'Other Net Assets %',yFmt:v=>v+'%',y1:{title:{display:true,text:'Future Position %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v+'%'}}});
-
-  // Churn
-  const cn=gRange>0?Math.ceil(n/5):0;
-  const cDates=sliceTail(FD.CHURN_DATES,cn);
-  mc('chart-churn',{type:'bar',data:{labels:cDates,datasets:[
-    {label:'New Positions',data:sliceTail(FD.CHURN_NEW,cn),backgroundColor:'#00d4aa88',borderWidth:0,order:2},
-    {label:'Exited Positions',data:sliceTail(FD.CHURN_EXIT,cn).map(v=>-v),backgroundColor:'#ff475788',borderWidth:0,order:2},
-    {label:'Turnover Rate %',data:sliceTail(FD.CHURN_RATE,cn),type:'line',borderColor:'#ffa502',borderWidth:2,pointRadius:0,tension:.3,yAxisID:'y1',order:1}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:TC,font:CF,boxWidth:10}},tooltip:{...tt(),mode:'index',intersect:false}},scales:{x:{...sc(),stacked:true,ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),stacked:true,title:{display:true,text:'Positions',color:TC,font:CF}},y1:{...sc(),position:'right',title:{display:true,text:'Turnover %',color:TC,font:CF},grid:{drawOnChartArea:false}}}}});
-
-  // Jaccard similarity
-  const jn=gRange>0?Math.ceil(n/21):0;
-  CT.multiLine('chart-jaccard', sliceTail(FD.JACC_DATES,jn), [
-    {label:'vs 1 Month Ago',data:sliceTail(FD.JACC_1M,jn),color:'#00d4aa'},
-    {label:'vs 3 Months Ago',data:sliceTail(FD.JACC_3M,jn),color:'#ffa502'},
-    {label:'vs 6 Months Ago',data:sliceTail(FD.JACC_6M,jn),color:'#ff4757'}
-  ], {yMax:100,yFmt:v=>v+'%',yTitle:'CUSIP Overlap %',xTicks:12,ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'% overlap'}});
-
-  // Position age distribution
-  CT.bar('chart-age', FD.AGE_LABELS, [{data:FD.AGE_VALUES,backgroundColor:['#ff4757','#ffa502','#eab308','#84cc16','#22c55e','#00d4aa'],borderWidth:0,borderRadius:2}], {yTitle:'# Positions',ttCb:{label:c=>c.parsed.y+' positions'}});
-  } // end if(hasTS)
-
-  // Risk factor chart and sector analytics (shown for all fund types including mutual funds)
-  buildFactorChart();
+  document.querySelectorAll('.analytics-holdings-only').forEach(el=>{el.style.display=isMF?'none':'';});
   renderSectorAnalytics();
-  buildCumRetChart();
-  buildRollSharpeChart();
-  buildRollVolChart();
-  buildSpreadDecomp();
-  buildDrawdown();
-  buildCorpDuration();
+  buildTabCharts('analytics');
 }
 
 function buildCorpDuration(){
@@ -1362,8 +1418,7 @@ function initGlobalRange(){
 function buildActiveManagement(){
   updateActiveCards();
   if(typeof FD.TS_DATES==='undefined')return;
-  // Sector allocation stacked area
-  CT.stackedArea('chart-sector-evo', FD.TS_DATES, Object.keys(SECTOR_COLORS).map(s=>({label:s,data:FD.TS_SECTORS[s],color:SECTOR_COLORS[s]})), {yFmt:v=>v+'%',xTicks:12,ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}});
+  buildTabCharts('active');
 
   // Entries table
   let ehtml='';
@@ -1375,10 +1430,6 @@ function buildActiveManagement(){
   FD.RECENT_EXITS.forEach(e=>{xhtml+='<tr><td>'+esc(e.c)+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">'+esc(e.d)+'</td><td>'+esc(e.s)+'</td><td>'+e.l+'</td><td class="num">'+e.p.toFixed(3)+'</td></tr>';});
   document.getElementById('exits-body').innerHTML=xhtml||'<tr><td colspan="5" style="color:var(--text-2);text-align:center;padding:12px">No exits in last 60 days</td></tr>';
 
-  // Biggest movers butterfly chart
-  const bm=FD.BIGGEST_MOVERS.sort((a,b)=>b.delta-a.delta);
-  mc('chart-movers',{type:'bar',data:{labels:bm.map(m=>{const d=m.d;return d.length>30?d.slice(0,28)+'..':d}),datasets:[{label:'Weight Change (90d)',data:bm.map(m=>m.delta),backgroundColor:bm.map(m=>m.delta>=0?'#00d4aa88':'#ff475788'),borderWidth:0,borderRadius:2}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>(c.parsed.x>=0?'+':'')+c.parsed.x.toFixed(3)+'% | Current: '+bm[c.dataIndex].cur.toFixed(3)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'}},y:{...sc(),grid:{display:false},ticks:{...sc().ticks,font:{...CF,size:9}}}}}});
-
   // Sector history table
   let shtml='';
   FD.SECTOR_TABLE.forEach(r=>{
@@ -1388,11 +1439,6 @@ function buildActiveManagement(){
     shtml+='<tr><td style="color:var(--text-0);font-weight:500">'+esc(r.s)+'</td><td class="num" style="color:var(--accent)">'+r.cur.toFixed(1)+'</td><td class="num">'+r.m3.toFixed(1)+'</td><td class="num '+dc(d3)+'">'+fmt(d3)+'</td><td class="num">'+r.m6.toFixed(1)+'</td><td class="num '+dc(d6)+'">'+fmt(d6)+'</td><td class="num">'+r.y1.toFixed(1)+'</td><td class="num '+dc(d1)+'">'+fmt(d1)+'</td></tr>';
   });
   document.getElementById('sector-hist-body').innerHTML=shtml;
-
-  // Sector volatility
-  if(typeof FD.SEC_VOL_DATES!=='undefined'){
-    CT.multiLine('chart-sec-vol', FD.SEC_VOL_DATES, Object.keys(SECTOR_COLORS).map(s=>({label:s,data:FD.SEC_VOL[s]||[],color:SECTOR_COLORS[s]})), {yTitle:'30d Rolling Std Dev (pp)',xTicks:12,ttCb:{label:c=>c.dataset.label+': \u03c3='+c.parsed.y.toFixed(2)+'pp'}});
-  }
 
   initPositionTracker();
 }
@@ -1456,35 +1502,12 @@ function buildCompare(){
   // Data coverage timeline
   buildCoverage();
 
-  // Scatter plots
-  buildScatter(compScatterPeriod);
-  buildDurYieldScatter();
-
-  // Cumulative & relative performance
-  buildCompCum();
-  buildRelPerf();
-
-  // Sector comparison
-  buildCompSectors();
-
-  // Maturity comparison
-  buildCompMaturity();
-
-  // Factor comparison
-  buildFactorCompChart(compFactorMetric);
-
-  // Spread decomposition
-  buildCompSpreadDecomp();
+  // All charts
+  buildTabCharts('compare');
 
   // Overlap & correlation matrices
   buildOverlapMatrix();
   buildCorrMatrix();
-
-  // Drawdown comparison
-  buildCompDD();
-
-  // Rolling metrics
-  buildRollingCompChart(compRollingWin, compRollingMet);
 }
 
 function buildScatter(period){
