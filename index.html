@@ -229,17 +229,29 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
   <!-- OVERVIEW -->
   <div class="section active" id="sec-overview">
     <div class="summary-row" id="overview-cards"></div>
-    <div class="grid-2">
-      <div class="panel"><div class="panel-header"><span class="panel-title">Issuer Category</span><button class="corp-ind-btn" onclick="openCorpIndustryModal()">Corp Breakdown</button><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-issuer"></canvas></div></div></div>
-      <div class="panel"><div class="panel-header"><span class="panel-title">Asset Category</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-asset"></canvas></div></div></div>
+    <!-- Generic ETF overview (hidden for MINT) -->
+    <div id="etf-overview-panels" style="display:none">
+      <div class="summary-row" id="etf-overview-cards"></div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-header"><span class="panel-title">Sector Allocation</span><button class="corp-ind-btn" id="etf-corp-btn" onclick="openCorpIndustryModal()" style="display:none">Corp Breakdown</button><span class="source-tag">DAILY HOLDINGS</span></div><div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="chart-etf-sector"></canvas></div></div></div>
+        <div class="panel"><div class="panel-header"><span class="panel-title">Maturity Profile</span><span class="source-tag">DAILY HOLDINGS</span></div><div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="chart-etf-maturity"></canvas></div></div></div>
+      </div>
+      <div class="panel" style="margin-bottom:16px"><div class="panel-header"><span class="panel-title">Top Holdings</span><span class="source-tag">DAILY HOLDINGS</span></div><div class="panel-body flush"><div class="table-scroll" style="max-height:400px"><table class="data-table" id="etf-top-holdings"><thead><tr><th>Name</th><th style="text-align:center">Sector</th><th style="text-align:right">Weight %</th></tr></thead><tbody id="etf-top-holdings-body"></tbody></table></div></div></div>
     </div>
-    <div class="grid-2">
-      <div class="panel"><div class="panel-header"><span class="panel-title">Country Allocation</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-country"></canvas></div></div></div>
-      <div class="panel"><div class="panel-header"><span class="panel-title">Coupon Type</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-coupon"></canvas></div></div></div>
-    </div>
-    <div class="grid-2">
-      <div class="panel"><div class="panel-header"><span class="panel-title">Maturity Profile</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="chart-maturity"></canvas></div></div></div>
-      <div class="panel"><div class="panel-header"><span class="panel-title">Yield Comparison</span><span class="source-tag">SCHWAB / FRED</span></div><div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="chart-yield-comp"></canvas></div></div></div>
+    <!-- MINT-specific overview panels -->
+    <div id="mint-overview-panels">
+      <div class="grid-2">
+        <div class="panel"><div class="panel-header"><span class="panel-title">Issuer Category</span><button class="corp-ind-btn" onclick="openCorpIndustryModal()">Corp Breakdown</button><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-issuer"></canvas></div></div></div>
+        <div class="panel"><div class="panel-header"><span class="panel-title">Asset Category</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-asset"></canvas></div></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-header"><span class="panel-title">Country Allocation</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-country"></canvas></div></div></div>
+        <div class="panel"><div class="panel-header"><span class="panel-title">Coupon Type</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="chart-coupon"></canvas></div></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-header"><span class="panel-title">Maturity Profile</span><span class="source-tag">N-PORT</span></div><div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="chart-maturity"></canvas></div></div></div>
+        <div class="panel"><div class="panel-header"><span class="panel-title">Yield Comparison</span><span class="source-tag">SCHWAB / FRED</span></div><div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="chart-yield-comp"></canvas></div></div></div>
+      </div>
     </div>
   </div>
 
@@ -611,12 +623,13 @@ const GC='#252d3d',TC='#6b7a90';
 const COLORS=['#3b82f6','#00d4aa','#a855f7','#ffa502','#06b6d4','#ec4899','#84cc16','#f97316','#8b5cf6','#14b8a6','#6b7a90'];
 const charts={};
 function mc(id,cfg){if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id).getContext('2d'),cfg);}
-function tt(){return{backgroundColor:'#1c2230',borderColor:'#344054',borderWidth:1,titleFont:{family:CF.family,size:11,weight:'600'},bodyFont:{family:CF.family,size:10},titleColor:'#00d4aa',bodyColor:'#e8ecf4',padding:10,cornerRadius:2,displayColors:true,boxPadding:4};}
+function tt(){return{backgroundColor:'#1c2230',borderColor:'#344054',borderWidth:1,titleFont:{family:CF.family,size:11,weight:'600'},bodyFont:{family:CF.family,size:10},titleColor:'#00d4aa',bodyColor:'#e8ecf4',padding:10,cornerRadius:2,displayColors:true,boxPadding:4,itemSort:(a,b)=>{const av=a.parsed&&a.parsed.y!=null?a.parsed.y:a.parsed;const bv=b.parsed&&b.parsed.y!=null?b.parsed.y:b.parsed;return(bv||0)-(av||0);}};}
+
 function sc(){return{grid:{color:GC,drawBorder:false},ticks:{color:TC,font:CF}};}
 
 // ─── FUND SWITCHING ──────────────────────────────────
 let currentFund='MINT';
-const MINT_ONLY_TABS=['overview','performance','income','commentary'];
+const MINT_ONLY_TABS=['performance','income','commentary'];
 const HOLDINGS_TABS=['holdings','active'];  // tabs needing position/holdings data
 
 function loadFundData(ticker){
@@ -711,7 +724,8 @@ function rebuildActiveSection(){
   const activeSection=document.querySelector('.section.active');
   if(!activeSection)return;
   const id=activeSection.id;
-  if(id==='sec-analytics'){analyticsBuilt=true;buildAnalytics();}
+  if(id==='sec-overview'){buildOverviewForFund();}
+  else if(id==='sec-analytics'){analyticsBuilt=true;buildAnalytics();}
   else if(id==='sec-active'){activeBuilt=true;buildActiveManagement();}
   else if(id==='sec-holdings'){renderHoldings();}
   else if(id==='sec-compare'){compareBuilt=true;buildCompare();}
@@ -756,6 +770,10 @@ function switchFund(ticker){
     if(HOLDINGS_TABS.includes(sec)){
       btn.style.display=isMF?'none':'';
     }
+    // Overview: show for all ETFs, hide for mutual funds
+    if(sec==='overview'){
+      btn.style.display=isMF?'none':'';
+    }
   });
 
   // Load fund data into globals
@@ -767,7 +785,7 @@ function switchFund(ticker){
   // If current active tab is hidden, switch to analytics
   const activeTab=document.querySelector('.nav-tab.active');
   const activeSec=activeTab?activeTab.dataset.section:'';
-  const isHidden=(MINT_ONLY_TABS.includes(activeSec)&&ticker!=='MINT')||(HOLDINGS_TABS.includes(activeSec)&&isMF);
+  const isHidden=(MINT_ONLY_TABS.includes(activeSec)&&ticker!=='MINT')||(HOLDINGS_TABS.includes(activeSec)&&isMF)||(activeSec==='overview'&&isMF);
   if(isHidden){
     document.querySelector('.nav-tab[data-section="analytics"]').click();
     return; // click will trigger rebuild via lazy init
@@ -795,6 +813,72 @@ function buildOverview(){
   mc('chart-coupon',{type:'doughnut',data:{labels:COUPON_LABELS,datasets:[{data:COUPON_VALUES,backgroundColor:['#00d4aa','#3b82f6','#6b7a90','#ffa502'].slice(0,COUPON_LABELS.length),borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:TC,font:CF,padding:12,boxWidth:12}},tooltip:{...tt(),callbacks:{label:c=>c.parsed+'%'}}}}});
   mc('chart-maturity',{type:'bar',data:{labels:MAT_LABELS,datasets:[{data:MAT_VALUES,backgroundColor:['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'].slice(0,MAT_LABELS.length),borderWidth:0,borderRadius:2,barThickness:36}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.y+'%'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
   mc('chart-yield-comp',{type:'bar',data:{labels:YIELD_LABELS,datasets:[{data:YIELD_VALUES,backgroundColor:YIELD_COLORS,borderWidth:0,borderRadius:2,barThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.x.toFixed(2)+'%'}}},scales:{x:{...sc(),max:5.5,ticks:{...sc().ticks,callback:v=>v+'%'}},y:{...sc(),grid:{display:false}}}}});
+}
+
+function buildOverviewForFund(){
+  const isMINT=currentFund==='MINT';
+  const isMF=FUND_REGISTRY[currentFund]&&FUND_REGISTRY[currentFund].is_mutual_fund;
+  document.getElementById('mint-overview-panels').style.display=isMINT?'':'none';
+  document.getElementById('etf-overview-panels').style.display=(!isMINT&&!isMF)?'':'none';
+  if(isMINT||isMF)return;
+
+  // Summary cards from FUND_STATS and latest factor data
+  const st=FUND_STATS||{};
+  const reg=FUND_REGISTRY[currentFund]||{};
+  let durStr='N/A',ytmStr='N/A',navStr='N/A',spreadStr='N/A';
+  if(typeof FACTOR_DATES!=='undefined'&&FACTOR_DATES&&FACTOR_DATES.length){
+    const li=FACTOR_DATES.length-1;
+    if(FACTOR_DUR&&FACTOR_DUR[li]!=null)durStr=FACTOR_DUR[li].toFixed(3)+'yr';
+    if(FACTOR_YTM&&FACTOR_YTM[li]!=null)ytmStr=FACTOR_YTM[li].toFixed(2)+'%';
+    if(FACTOR_NAV&&FACTOR_NAV[li]!=null)navStr='$'+FACTOR_NAV[li].toFixed(2);
+    if(FACTOR_TSPREAD&&FACTOR_TSPREAD[li]!=null)spreadStr=FACTOR_TSPREAD[li].toFixed(3)+'pp';
+  }
+  const holdN=st.count_now||'N/A';
+  const lSec=st.largest_sector||'N/A';
+  const lSecW=st.largest_sector_w||0;
+  const wam=st.wam_now!=null?st.wam_now+'yr':'N/A';
+  const wac=st.wac_now!=null?st.wac_now+'%':'N/A';
+  document.getElementById('etf-overview-cards').innerHTML=
+    '<div class="stat-card green"><div class="stat-label">Holdings</div><div class="stat-value">'+holdN+'</div><div class="stat-sub">'+reg.category+'</div></div>'+
+    '<div class="stat-card blue"><div class="stat-label">NAV</div><div class="stat-value">'+navStr+'</div><div class="stat-sub">Duration: '+durStr+'</div></div>'+
+    '<div class="stat-card amber"><div class="stat-label">YTM</div><div class="stat-value">'+ytmStr+'</div><div class="stat-sub">Total Spread: '+spreadStr+'</div></div>'+
+    '<div class="stat-card purple"><div class="stat-label">WAM / WAC</div><div class="stat-value">'+wam+'</div><div class="stat-sub">WAC: '+wac+'</div></div>'+
+    '<div class="stat-card cyan"><div class="stat-label">Largest Sector</div><div class="stat-value">'+esc(lSec)+'</div><div class="stat-sub">'+lSecW+'% of portfolio</div></div>'+
+    '<div class="stat-card green"><div class="stat-label">Concentration</div><div class="stat-value">HHI '+(st.hhi_now||'N/A')+'</div><div class="stat-sub">Eff N: '+(st.eff_n_now||'N/A')+'</div></div>';
+
+  // Sector allocation doughnut from latest TS_SECTORS
+  if(typeof TS_SECTORS!=='undefined'&&TS_SECTORS&&typeof TS_DATES!=='undefined'&&TS_DATES&&TS_DATES.length){
+    const li=TS_DATES.length-1;
+    const sLabels=[];const sVals=[];
+    DISPLAY_SECTORS.forEach(s=>{
+      const v=TS_SECTORS[s]?TS_SECTORS[s][li]:0;
+      if(v>0.1){sLabels.push(s);sVals.push(Math.round(v*10)/10);}
+    });
+    mc('chart-etf-sector',{type:'doughnut',data:{labels:sLabels,datasets:[{data:sVals,backgroundColor:COLORS.slice(0,sLabels.length),borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:TC,font:CF,padding:12,boxWidth:12}},tooltip:{...tt(),callbacks:{label:c=>c.label+': '+c.parsed.toFixed(1)+'%'}}}}});
+    // Show/hide corp breakdown button based on whether corporates are significant
+    const corpW=TS_SECTORS['Corporate']?TS_SECTORS['Corporate'][li]:0;
+    document.getElementById('etf-corp-btn').style.display=corpW>10?'':'none';
+  }
+
+  // Maturity profile from latest MAT_BUCKETS
+  if(typeof MAT_BUCKETS!=='undefined'&&MAT_BUCKETS&&typeof MAT_DATES!=='undefined'&&MAT_DATES&&MAT_DATES.length){
+    const li=MAT_DATES.length-1;
+    const mLabels=[];const mVals=[];
+    MAT_BUCKET_NAMES.forEach(b=>{
+      const v=MAT_BUCKETS[b]?MAT_BUCKETS[b][li]:0;
+      if(v>0.1){mLabels.push(b);mVals.push(Math.round(v*10)/10);}
+    });
+    const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'];
+    mc('chart-etf-maturity',{type:'bar',data:{labels:mLabels,datasets:[{data:mVals,backgroundColor:matColors.slice(0,mLabels.length),borderWidth:0,borderRadius:2,barThickness:36}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.y.toFixed(1)+'%'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
+  }
+
+  // Top holdings table from POS_INDEX
+  if(typeof POS_INDEX!=='undefined'&&POS_INDEX&&POS_INDEX.length){
+    const sorted=[...POS_INDEX].filter(p=>p.cur&&p.cur>0).sort((a,b)=>b.cur-a.cur).slice(0,30);
+    document.getElementById('etf-top-holdings-body').innerHTML=sorted.map(p=>
+      '<tr><td class="company-cell" title="'+esc(p.d)+'">'+esc(p.d)+'</td><td class="ctr">'+esc(p.s)+'</td><td class="num">'+p.cur.toFixed(2)+'</td></tr>'
+    ).join('');
+  }
 }
 
 function buildPerformance(){
@@ -902,12 +986,12 @@ pos_age:{title:'Position Age Distribution',sections:[
 {label:'Caveat',text:'First appearance in our dataset (2023-01-02) is used as \'first seen\'. Positions held before that date will show a maximum age capped at the dataset start.'},
 {label:'Source',text:'CUSIP first-seen dates from 825 daily PIMCO holdings snapshots.'}]},
 sector_alloc:{title:'Sector Allocation Over Time',sections:[
-{label:'Consolidation',formula:'13 raw PIMCO sectors \u2192 6 display sectors:\nCorporate \u2190 Corporate\nStructured Credit \u2190 ABS + CLO\nAgency MBS \u2190 CMO + Mortgage Pass Thru\nShort-Term \u2190 Comm Paper + CD + Repo\nGovernment \u2190 Government + Agency Debenture\nSupranational \u2190 Supranational + Muni'},
-{label:'Normalization',text:'Weights are normalized to sum to 100% of the long portfolio. Futures (typically negative weight) and \'Other net assets\' are excluded. This means the chart shows relative allocation among investable sectors, not absolute NAV weight.'},
+{label:'Consolidation',formula:'Raw PIMCO sectors \u2192 7 display sectors:\nCorporate \u2190 Corporate + Bank Loan + Financials + Industrials + Energy + Comm Svcs + Right\nStructured Credit \u2190 ABS + CLO + CDO + Whole Loan\nAgency MBS \u2190 CMO + Mortgage Pass Thru\nShort-Term \u2190 Comm Paper + CD + Repo + Reverse Repo + Bankers Acceptance\nGovernment \u2190 Government + Agency Debenture\nSupranational \u2190 Supranational + Local Authority + Municipal Bond\nOther \u2190 Exchange Traded Fund + Adj + unmapped'},
+{label:'Weights',text:'Raw pctMarketValue (% of NAV). The stacked total can exceed 100% because derivatives provide short exposure that allows long positions beyond 100% of NAV. Futures and \'Other net assets\' (cash) are excluded from these sectors but tracked separately.'},
 {label:'Source',text:'level1SectorGroupName and pctMarketValue from PIMCO daily holdings API.'}]},
 sector_hist:{title:'Sector Weight History Table',sections:[
-{label:'Method',text:'Shows each consolidated sector\'s normalized weight at the current date vs approximately 3, 6, and 12 months ago (63, 126, 252 business days).'},
-{label:'Deltas',text:'Delta columns show the change in normalized sector weight. Green = increased allocation, red = decreased. These are in percentage points of the normalized long portfolio.'},
+{label:'Method',text:'Shows each consolidated sector\'s raw weight (% of NAV) at the current date vs approximately 3, 6, and 12 months ago (63, 126, 252 business days).'},
+{label:'Deltas',text:'Delta columns show the change in sector weight (percentage points of NAV). Green = increased allocation, red = decreased.'},
 {label:'Source',text:'Computed from PIMCO daily holdings. Uses first available day at each lookback point.'}]},
 movers:{title:'Biggest Movers (90 Days)',sections:[
 {label:'Method',text:'For the top 500 positions by peak weight, compute: delta = current_weight - weight_90_business_days_ago. Show the 10 largest increases and 10 largest decreases.'},
@@ -924,8 +1008,12 @@ risk_factors:{title:'Risk Factor Time Series',sections:[
 {label:'Spread Metrics',formula:'Portfolio-level spread contributions by sector (pct points):\nMortgage, Corporate, EM, Sovereign-Related\nTotal Spread = sum of all components'},
 {label:'DTS (Duration Times Spread)',formula:'DTS = Duration \u00d7 Total Spread \u00d7 100\nUnits: duration-basis-points\nMeasures total spread risk accounting for duration'},
 {label:'Source',text:'All values directly from PIMCO fund-stats API. No LLM-derived numbers.'}]},
+port_weight_info:{title:'Portfolio Weight \u2260 100%',sections:[
+{label:'Why',text:'Weights are raw pctMarketValue from PIMCO \u2014 each holding\'s percentage of total NAV. The sum of long securities can exceed 100% because derivatives (futures, swaps) provide short exposure that frees up capital for additional long positions. This is normal leverage in a bond fund.'},
+{label:'What\'s excluded',text:'Derivatives (futures, swaps, options) are tracked separately and typically carry negative weight. \'Other net assets\' (cash, receivables) represented by the -- cusip is also excluded. Together: securities + derivatives + cash = 100% of NAV.'},
+{label:'Other sector',text:'Holdings mapped to \'Other\': Exchange Traded Funds, adjustment entries (Adj), and any PIMCO sector names not in the consolidation map. Currently MINT holds none of these.'}]},
 sector_detail:{title:'Sector Analytics & Sharpe Ratios',sections:[
-{label:'Sector Breakdown',text:'Holdings grouped into 6 consolidated sectors. WAM, WAC, count, weight, avg price computed from latest daily holdings snapshot.'},
+{label:'Sector Breakdown',text:'Holdings grouped into 7 consolidated sectors. WAM, WAC, count, weight, avg price computed from latest daily holdings snapshot. Weights are raw % of NAV (not normalized).'},
 {label:'Daily Total Returns',formula:'r_sector_t = \u03a3(w_i \u00d7 (p_i_t/p_i_{t-1} - 1 + cpn_i/360 \u00d7 \u0394t/p_i_{t-1})) / \u03a3(w_i)\nwhere w_i = previous day weight, p = price, cpn = annual coupon,\n\u0394t = calendar days between observations (handles weekends)'},
 {label:'Sharpe Ratio',formula:'Sharpe = (Annualized Return - SOFR) / Annualized Volatility\nAnn. Return = mean(daily returns) \u00d7 252 \u00d7 100\nAnn. Vol = stdev(daily returns) \u00d7 \u221a252 \u00d7 100\nRisk-free rate: SOFR 4.30% annual'},
 {label:'Max Drawdown',text:'Maximum peak-to-trough decline in cumulative total return over the full observation period (823 daily snapshots, Jan 2023 to Mar 2026).'},
@@ -1136,7 +1224,8 @@ function renderSectorAnalytics(){
     h+='<tr style="'+rs+'">';
     h+='<td style="color:'+nc+';font-weight:500">'+esc(r.s)+'</td>';
     h+='<td class="num">'+r.count+'</td>';
-    h+='<td class="num">'+r.weight.toFixed(1)+'</td>';
+    const wtCell=r.weight.toFixed(1)+(isTot&&Math.abs(r.weight-100)>0.5?' <span class="info-btn" data-info="port_weight_info" style="font-size:9px;vertical-align:super">i</span>':'');
+    h+='<td class="num">'+wtCell+'</td>';
     h+='<td class="num">'+(r.wam?r.wam.toFixed(3):'\u2014')+'</td>';
     h+='<td class="num">'+(r.wac?r.wac.toFixed(3):'\u2014')+'</td>';
     h+='<td class="num">'+(r.avg_price?r.avg_price.toFixed(2):'\u2014')+'</td>';
@@ -1203,7 +1292,7 @@ function buildActiveManagement(){
   if(typeof TS_DATES==='undefined')return;
   // Sector allocation stacked area
   const secDS=Object.keys(SECTOR_COLORS).map(s=>({label:s,data:TS_SECTORS[s],backgroundColor:SECTOR_COLORS[s]+'66',borderColor:SECTOR_COLORS[s],borderWidth:1,fill:true,pointRadius:0}));
-  mc('chart-sector-evo',{type:'line',data:{labels:TS_DATES,datasets:secDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:CF,boxWidth:12,padding:10}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),stacked:true,max:100,ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
+  mc('chart-sector-evo',{type:'line',data:{labels:TS_DATES,datasets:secDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:CF,boxWidth:12,padding:10}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),stacked:true,ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
 
   // Entries table
   let ehtml='';
@@ -1451,7 +1540,7 @@ function buildCompSectors(){
     label:s,data:tickers.map(t=>sc2[t][s]||0),
     backgroundColor:sColors[i]+'aa',borderColor:sColors[i],borderWidth:1
   }));
-  mc('chart-comp-sectors',{type:'bar',data:{labels:tickers,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}}},scales:{x:{...sc(),stacked:true,grid:{display:false}},y:{...sc(),stacked:true,max:100,ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
+  mc('chart-comp-sectors',{type:'bar',data:{labels:tickers,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}}},scales:{x:{...sc(),stacked:true,grid:{display:false}},y:{...sc(),stacked:true,ticks:{...sc().ticks,callback:v=>v+'%'}}}}});
 }
 
 function buildCompMaturity(){
@@ -1803,6 +1892,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   document.querySelector('#holdings-table thead th[data-key="w"]').classList.add('sorted-desc');
   document.querySelectorAll('.nav-tab').forEach(btn=>{
     btn.addEventListener('click',()=>{
+      if(btn.dataset.section==='overview'&&currentFund!=='MINT'){buildOverviewForFund();}
       if(btn.dataset.section==='analytics'&&!analyticsBuilt){analyticsBuilt=true;buildAnalytics();initAnalyticsRange();}
       if(btn.dataset.section==='active'&&!activeBuilt){activeBuilt=true;buildActiveManagement();}
       if(btn.dataset.section==='commentary'&&!commentaryBuilt){commentaryBuilt=true;buildCommentary();}
