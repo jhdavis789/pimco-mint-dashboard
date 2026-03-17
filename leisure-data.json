@@ -1,0 +1,61 @@
+{
+  "summary": {
+    "thesis": "More Productivity = More Leisure",
+    "thesis_sub": "As human economic activity has grown, working hours have fallen and leisure time has risen",
+    "hours_1870": "~3,000",
+    "hours_1870_sub": "Annual hours per worker (US)",
+    "hours_2017": "~1,757",
+    "hours_2017_sub": "Annual hours per worker (US)",
+    "leisure_gain": "+6 hrs/wk",
+    "leisure_gain_sub": "Additional weekly leisure since 1965 (US avg)"
+  },
+  "working_hours": {
+    "years": ["1870","1880","1890","1900","1913","1929","1938","1950","1960","1970","1980","1990","2000","2010","2017"],
+    "countries": {
+      "United States": [2964,2734,2789,2766,2632,2342,2062,1867,1795,1711,1610,1562,1536,1500,1757],
+      "United Kingdom": [2755,2624,2494,2372,2328,2208,2167,1958,1913,1737,1617,1635,1489,1477,1681],
+      "Germany": [2941,2782,2623,2584,2392,2228,2316,2316,2081,1907,1666,1557,1452,1390,1354],
+      "France": [2945,2781,2616,2531,2441,2209,1848,1926,1919,1806,1604,1539,1454,1390,1514],
+      "Japan": [2588,2588,2588,2588,2588,2364,2391,2166,2095,2064,2020,1889,1821,1733,1710]
+    }
+  },
+  "recreation_spending": {
+    "years": ["1959","1962","1965","1968","1971","1974","1977","1980","1983","1986","1989","1992","1995","1998","2001","2004","2007","2010","2013","2016","2019","2021","2023"],
+    "pct": [5.6,5.8,6.0,6.2,6.4,6.1,6.3,6.2,6.0,6.6,7.0,6.8,7.2,7.8,7.5,7.6,7.8,7.4,7.5,7.8,8.1,7.6,8.4]
+  },
+  "time_use": {
+    "categories": ["Market Work","Home Production","Child Care","Leisure","Sleep & Personal Care","Education & Civic"],
+    "1965": [33.6,25.4,3.2,34.5,62.3,9.0],
+    "2003": [27.9,21.8,4.5,39.0,62.9,11.9]
+  },
+  "gdp_vs_hours": [
+    {"name":"Mexico","gdp":10948,"hrs":2128},
+    {"name":"Costa Rica","gdp":13432,"hrs":2073},
+    {"name":"Colombia","gdp":6630,"hrs":1964},
+    {"name":"Chile","gdp":16800,"hrs":1916},
+    {"name":"South Korea","gdp":32255,"hrs":1901},
+    {"name":"Greece","gdp":20867,"hrs":1886},
+    {"name":"Israel","gdp":54688,"hrs":1847},
+    {"name":"Poland","gdp":18321,"hrs":1830},
+    {"name":"United States","gdp":76330,"hrs":1811},
+    {"name":"New Zealand","gdp":44046,"hrs":1752},
+    {"name":"Czech Republic","gdp":27650,"hrs":1753},
+    {"name":"Japan","gdp":33815,"hrs":1607},
+    {"name":"Italy","gdp":34085,"hrs":1694},
+    {"name":"Canada","gdp":54966,"hrs":1685},
+    {"name":"Australia","gdp":64674,"hrs":1707},
+    {"name":"Spain","gdp":30116,"hrs":1644},
+    {"name":"Portugal","gdp":24530,"hrs":1649},
+    {"name":"Ireland","gdp":103685,"hrs":1657},
+    {"name":"United Kingdom","gdp":45850,"hrs":1532},
+    {"name":"France","gdp":43659,"hrs":1511},
+    {"name":"Finland","gdp":50550,"hrs":1518},
+    {"name":"Sweden","gdp":55215,"hrs":1444},
+    {"name":"Austria","gdp":52131,"hrs":1442},
+    {"name":"Switzerland","gdp":93260,"hrs":1533},
+    {"name":"Netherlands","gdp":57025,"hrs":1427},
+    {"name":"Norway","gdp":87925,"hrs":1425},
+    {"name":"Denmark","gdp":67790,"hrs":1372},
+    {"name":"Germany","gdp":48636,"hrs":1341}
+  ]
+}
