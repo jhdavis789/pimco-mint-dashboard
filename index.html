@@ -172,8 +172,6 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 .tab-insights-label{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--amber);letter-spacing:1px}
 .tab-insights-badge{font-family:var(--mono);font-size:8px;color:var(--text-2);letter-spacing:.5px;border:1px solid var(--border);padding:1px 6px;border-radius:3px}
 .nav-tab[data-section="compare"]:hover,.nav-tab[data-section="compare"].active{color:#e879f9;border-color:#e879f9;background:color-mix(in srgb,#e879f9 12%,transparent)}
-.nav-tab[data-section="leisure"]{color:#22c55e;border-color:color-mix(in srgb,#22c55e 40%,transparent)}
-.nav-tab[data-section="leisure"]:hover,.nav-tab[data-section="leisure"].active{color:#22c55e;border-color:#22c55e;background:color-mix(in srgb,#22c55e 12%,transparent)}
 .comp-summary-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
 .comp-summary-table thead th{background:var(--bg-2);border-bottom:1px solid var(--border-bright);padding:8px 10px;text-align:right;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-2);font-weight:600;white-space:nowrap;position:sticky;top:0;z-index:5}
 .comp-summary-table thead th:first-child,.comp-summary-table thead th:nth-child(2){text-align:left}
@@ -229,7 +227,6 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
     <button class="nav-tab" data-section="active">Active Mgmt</button>
     <button class="nav-tab" data-section="commentary">Commentary</button>
     <button class="nav-tab" data-section="compare" style="color:#e879f9;border-color:color-mix(in srgb,#e879f9 40%,transparent)">Compare</button>
-    <button class="nav-tab" data-section="leisure" style="color:#22c55e;border-color:color-mix(in srgb,#22c55e 40%,transparent)">Leisure</button>
     <div class="range-selector" id="global-range" style="display:flex;gap:4px;align-items:center;margin-left:12px;border-left:1px solid var(--border);padding-left:12px">
       <button class="range-btn" data-range="63">3M</button>
       <button class="range-btn" data-range="126">6M</button>
@@ -500,35 +497,6 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
     </div>
   </div>
 
-  <!-- LEISURE TIME -->
-  <div class="section" id="sec-leisure">
-    <div class="summary-row" style="grid-template-columns:repeat(4,1fr)">
-      <div class="stat-card green"><div class="stat-label">Thesis</div><div class="stat-value" style="font-size:14px">More Productivity = More Leisure</div><div class="stat-sub">As human economic activity has grown, working hours have fallen and leisure time has risen</div></div>
-      <div class="stat-card blue"><div class="stat-label">Working Hours 1870</div><div class="stat-value">~3,000</div><div class="stat-sub">Annual hours per worker (US)</div></div>
-      <div class="stat-card cyan"><div class="stat-label">Working Hours 2017</div><div class="stat-value">~1,757</div><div class="stat-sub">Annual hours per worker (US)</div></div>
-      <div class="stat-card purple"><div class="stat-label">Leisure Gain</div><div class="stat-value">+6 hrs/wk</div><div class="stat-sub">Additional weekly leisure since 1965 (US avg)</div></div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-header"><span class="panel-title">Graph 1: Decline in Annual Working Hours per Worker (1870-2017)</span><span class="source-tag">OUR WORLD IN DATA &middot; HUBERMAN &amp; MINNS &middot; PWT 10.0</span></div>
-      <div class="panel-body"><div class="chart-wrap" style="height:380px"><canvas id="chart-leisure-hours"></canvas></div></div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-header"><span class="panel-title">Graph 2: US Recreation Spending as Share of Total Consumer Spending (1959-2023)</span><span class="source-tag">BEA &middot; FRED SERIES DRRLRC1A027NBEA</span></div>
-      <div class="panel-body"><div class="chart-wrap" style="height:340px"><canvas id="chart-leisure-spending"></canvas></div></div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-header"><span class="panel-title">Graph 3: How Americans Spend Their Day &mdash; 1965 vs 2003</span><span class="source-tag">AGUIAR &amp; HURST (2007) &middot; ATUS</span></div>
-      <div class="panel-body"><div class="chart-wrap" style="height:340px"><canvas id="chart-leisure-timeuse"></canvas></div></div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-header"><span class="panel-title">Graph 4: Richer Countries Work Less &mdash; GDP per Capita vs Annual Hours (2022)</span><span class="source-tag">OECD &middot; WORLD BANK</span></div>
-      <div class="panel-body"><div class="chart-wrap" style="height:400px"><canvas id="chart-leisure-gdp"></canvas></div></div>
-    </div>
-  </div>
 
 </div>
 <script>
@@ -864,82 +832,6 @@ rc('chart-comp-spread-decomp','compare',null,buildCompSpreadDecomp);
 rc('chart-comp-dd','compare','w',buildCompDD);
 rc('chart-comp-rolling','compare','w',()=>buildRollingCompChart(compRollingWin,compRollingMet));
 
-// --- Leisure Time (tab: 'leisure') ---
-// Graph 1: Decline in Annual Working Hours per Worker (1870-2017)
-// Source: Our World in Data / Huberman & Minns (2007) / PWT 10.0
-rc('chart-leisure-hours','leisure',null,()=>{
-  const years=['1870','1880','1890','1900','1913','1929','1938','1950','1960','1970','1980','1990','2000','2010','2017'];
-  const us=   [2964,2734,2789,2766,2632,2342,2062,1867,1795,1711,1610,1562,1536,1500,1757];
-  const uk=   [2755,2624,2494,2372,2328,2208,2167,1958,1913,1737,1617,1635,1489,1477,1681];
-  const de=   [2941,2782,2623,2584,2392,2228,2316,2316,2081,1907,1666,1557,1452,1390,1354];
-  const fr=   [2945,2781,2616,2531,2441,2209,1848,1926,1919,1806,1604,1539,1454,1390,1514];
-  const jp=   [2588,2588,2588,2588,2588,2364,2391,2166,2095,2064,2020,1889,1821,1733,1710];
-  CT.multiLine('chart-leisure-hours',years,[
-    {label:'United States',data:us,color:'#3b82f6'},
-    {label:'United Kingdom',data:uk,color:'#00d4aa'},
-    {label:'Germany',data:de,color:'#ffa502'},
-    {label:'France',data:fr,color:'#a855f7'},
-    {label:'Japan',data:jp,color:'#ff4757'}
-  ],{yTitle:'Annual Hours per Worker',xTicks:15,
-    ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toLocaleString()+' hrs/yr'}});
-});
-
-// Graph 2: US Recreation Spending as % of Total PCE (1959-2023)
-// Source: BEA / FRED Series DRRLRC1A027NBEA + PCECA
-rc('chart-leisure-spending','leisure',null,()=>{
-  const years=['1959','1962','1965','1968','1971','1974','1977','1980','1983','1986','1989','1992','1995','1998','2001','2004','2007','2010','2013','2016','2019','2021','2023'];
-  const pct=  [5.6,5.8,6.0,6.2,6.4,6.1,6.3,6.2,6.0,6.6,7.0,6.8,7.2,7.8,7.5,7.6,7.8,7.4,7.5,7.8,8.1,7.6,8.4];
-  CT.singleLine('chart-leisure-spending',years,pct,'#22c55e',{
-    fill:true,yTitle:'Recreation % of Total PCE',
-    ttCb:{label:c=>'Recreation share: '+c.parsed.y.toFixed(1)+'%'}});
-});
-
-// Graph 3: How Americans Spend Their Day - 1965 vs 2003
-// Source: Aguiar & Hurst (2007) "Measuring Trends in Leisure" / ATUS
-rc('chart-leisure-timeuse','leisure',null,()=>{
-  const cats=['Market Work','Home Production','Child Care','Leisure','Sleep & Personal Care','Education & Civic'];
-  const hrs1965=[33.6,25.4,3.2,34.5,62.3,9.0];
-  const hrs2003=[27.9,21.8,4.5,39.0,62.9,11.9];
-  mc('chart-leisure-timeuse',{type:'bar',data:{labels:cats,datasets:[
-    {label:'1965',data:hrs1965,backgroundColor:'#3b82f688',borderColor:'#3b82f6',borderWidth:1,borderRadius:2},
-    {label:'2003',data:hrs2003,backgroundColor:'#00d4aa88',borderColor:'#00d4aa',borderWidth:1,borderRadius:2}
-  ]},options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{labels:{color:TC,font:CF,boxWidth:10,padding:8}},
-      tooltip:{...tt(),callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+' hrs/wk'}}},
-    scales:{x:{...sc(),grid:{display:false}},
-      y:{...sc(),title:{display:true,text:'Hours per Week',color:TC,font:CF},
-        ticks:{...sc().ticks,callback:v=>v+'h'}}}}});
-});
-
-// Graph 4: GDP per Capita vs Annual Working Hours - Cross-Country (2022)
-// Source: OECD / World Bank
-rc('chart-leisure-gdp','leisure',null,()=>{
-  const countries=[
-    {name:'Mexico',gdp:10948,hrs:2128},{name:'Costa Rica',gdp:13432,hrs:2073},
-    {name:'Colombia',gdp:6630,hrs:1964},{name:'Chile',gdp:16800,hrs:1916},
-    {name:'South Korea',gdp:32255,hrs:1901},{name:'Greece',gdp:20867,hrs:1886},
-    {name:'Israel',gdp:54688,hrs:1847},{name:'Poland',gdp:18321,hrs:1830},
-    {name:'United States',gdp:76330,hrs:1811},{name:'New Zealand',gdp:44046,hrs:1752},
-    {name:'Czech Republic',gdp:27650,hrs:1753},{name:'Japan',gdp:33815,hrs:1607},
-    {name:'Italy',gdp:34085,hrs:1694},{name:'Canada',gdp:54966,hrs:1685},
-    {name:'Australia',gdp:64674,hrs:1707},{name:'Spain',gdp:30116,hrs:1644},
-    {name:'Portugal',gdp:24530,hrs:1649},{name:'Ireland',gdp:103685,hrs:1657},
-    {name:'United Kingdom',gdp:45850,hrs:1532},{name:'France',gdp:43659,hrs:1511},
-    {name:'Finland',gdp:50550,hrs:1518},{name:'Sweden',gdp:55215,hrs:1444},
-    {name:'Austria',gdp:52131,hrs:1442},{name:'Switzerland',gdp:93260,hrs:1533},
-    {name:'Netherlands',gdp:57025,hrs:1427},{name:'Norway',gdp:87925,hrs:1425},
-    {name:'Denmark',gdp:67790,hrs:1372},{name:'Germany',gdp:48636,hrs:1341}
-  ];
-  const ds=[{
-    label:'Countries',data:countries.map(c=>({x:c.gdp,y:c.hrs,name:c.name})),
-    backgroundColor:'#00d4aa',borderColor:'#00d4aa',pointRadius:6,pointHoverRadius:9
-  }];
-  CT.scatter('chart-leisure-gdp',ds,{
-    xTitle:'GDP per Capita (USD, 2022)',yTitle:'Annual Hours Worked per Worker',
-    xFmt:v=>'$'+Math.round(v/1000)+'k',yFmt:v=>v.toLocaleString(),
-    ttCb:{label:c=>c.raw.name+': $'+Math.round(c.raw.x/1000)+'k GDP, '+c.raw.y+' hrs/yr'}
-  });
-});
 
 // ─── FUND SWITCHING ──────────────────────────────────
 let currentFund='MINT';
