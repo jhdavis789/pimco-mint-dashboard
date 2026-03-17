@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leisure Time Graphs</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-0:#0a0c10;--bg-1:#0f1218;--bg-2:#151a23;--bg-3:#1c2230;
+  --border:#252d3d;--border-bright:#344054;
+  --text-0:#e8ecf4;--text-1:#a0aec0;--text-2:#6b7a90;
+  --accent:#00d4aa;--accent-dim:#00d4aa33;
+  --red:#ff4757;--blue:#3b82f6;--purple:#a855f7;--amber:#ffa502;--cyan:#06b6d4;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'DM Sans',-apple-system,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-size:13px;line-height:1.5}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg-1)}
+::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:3px}
+
+.header{background:var(--bg-1);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+.header h1{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.header .subtitle{font-size:12px;color:var(--text-2)}
+
+.main{padding:20px 24px 40px;max-width:1600px;margin:0 auto}
+
+.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--bg-1);border:1px solid var(--border);padding:14px 16px;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card:hover{border-color:var(--border-bright)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.green::before{background:var(--accent)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.cyan::before{background:var(--cyan)}
+.stat-card.purple::before{background:var(--purple)}
+.stat-label{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-2);margin-bottom:6px}
+.stat-value{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text-0);margin-bottom:2px}
+.stat-sub{font-size:11px;color:var(--text-2)}
+
+.panel{background:var(--bg-1);border:1px solid var(--border);margin-bottom:16px}
+.panel-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border);gap:12px}
+.panel-title{font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--text-0);font-weight:600}
+.source-tag{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text-2);white-space:nowrap}
+.panel-body{padding:16px}
+.chart-wrap{position:relative}
+.chart-wrap canvas{width:100%!important}
+
+@media(max-width:900px){
+  .summary-row{grid-template-columns:repeat(2,1fr)}
+  .header{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:600px){
+  .summary-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>LEISURE TIME</h1>
+  <span class="subtitle">More Productivity = More Leisure &mdash; How economic growth has reshaped time use</span>
+</div>
+
+<div class="main">
+  <div class="summary-row">
+    <div class="stat-card green"><div class="stat-label">Thesis</div><div class="stat-value" style="font-size:14px">More Productivity = More Leisure</div><div class="stat-sub">As human economic activity has grown, working hours have fallen and leisure time has risen</div></div>
+    <div class="stat-card blue"><div class="stat-label">Working Hours 1870</div><div class="stat-value">~3,000</div><div class="stat-sub">Annual hours per worker (US)</div></div>
+    <div class="stat-card cyan"><div class="stat-label">Working Hours 2017</div><div class="stat-value">~1,757</div><div class="stat-sub">Annual hours per worker (US)</div></div>
+    <div class="stat-card purple"><div class="stat-label">Leisure Gain</div><div class="stat-value">+6 hrs/wk</div><div class="stat-sub">Additional weekly leisure since 1965 (US avg)</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Graph 1: Decline in Annual Working Hours per Worker (1870-2017)</span><span class="source-tag">OUR WORLD IN DATA &middot; HUBERMAN &amp; MINNS &middot; PWT 10.0</span></div>
+    <div class="panel-body"><div class="chart-wrap" style="height:380px"><canvas id="chart-hours"></canvas></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Graph 2: US Recreation Spending as Share of Total Consumer Spending (1959-2023)</span><span class="source-tag">BEA &middot; FRED SERIES DRRLRC1A027NBEA</span></div>
+    <div class="panel-body"><div class="chart-wrap" style="height:340px"><canvas id="chart-spending"></canvas></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Graph 3: How Americans Spend Their Day &mdash; 1965 vs 2003</span><span class="source-tag">AGUIAR &amp; HURST (2007) &middot; ATUS</span></div>
+    <div class="panel-body"><div class="chart-wrap" style="height:340px"><canvas id="chart-timeuse"></canvas></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Graph 4: Richer Countries Work Less &mdash; GDP per Capita vs Annual Hours (2022)</span><span class="source-tag">OECD &middot; WORLD BANK</span></div>
+    <div class="panel-body"><div class="chart-wrap" style="height:400px"><canvas id="chart-gdp"></canvas></div></div>
+  </div>
+</div>
+
+<script>
+const CF={family:"'JetBrains Mono',monospace",size:10};
+const GC='#252d3d',TC='#6b7a90';
+const charts={};
+
+function mc(id,cfg){if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id).getContext('2d'),cfg);}
+function tt(){return{backgroundColor:'#1c2230',borderColor:'#344054',borderWidth:1,titleFont:{family:CF.family,size:11,weight:'600'},bodyFont:{family:CF.family,size:10},titleColor:'#00d4aa',bodyColor:'#e8ecf4',padding:10,cornerRadius:2,displayColors:true,boxPadding:4,itemSort:(a,b)=>{const av=a.parsed&&a.parsed.y!=null?a.parsed.y:a.parsed;const bv=b.parsed&&b.parsed.y!=null?b.parsed.y:b.parsed;return(bv||0)-(av||0);}};}
+function sc(){return{grid:{color:GC,drawBorder:false},ticks:{color:TC,font:CF}};}
+
+// --- Graph 1: Decline in Annual Working Hours (1870-2017) ---
+(function(){
+  const years=['1870','1880','1890','1900','1913','1929','1938','1950','1960','1970','1980','1990','2000','2010','2017'];
+  const series=[
+    {label:'United States',data:[2964,2734,2789,2766,2632,2342,2062,1867,1795,1711,1610,1562,1536,1500,1757],color:'#3b82f6'},
+    {label:'United Kingdom',data:[2755,2624,2494,2372,2328,2208,2167,1958,1913,1737,1617,1635,1489,1477,1681],color:'#00d4aa'},
+    {label:'Germany',data:[2941,2782,2623,2584,2392,2228,2316,2316,2081,1907,1666,1557,1452,1390,1354],color:'#ffa502'},
+    {label:'France',data:[2945,2781,2616,2531,2441,2209,1848,1926,1919,1806,1604,1539,1454,1390,1514],color:'#a855f7'},
+    {label:'Japan',data:[2588,2588,2588,2588,2588,2364,2391,2166,2095,2064,2020,1889,1821,1733,1710],color:'#ff4757'}
+  ];
+  const datasets=series.map(s=>({label:s.label,data:s.data,borderColor:s.color,borderWidth:1.5,pointRadius:0,tension:.3,fill:false,spanGaps:true}));
+  mc('chart-hours',{type:'line',data:{labels:years,datasets},options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},
+      tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toLocaleString()+' hrs/yr'}}},
+    scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:15,maxRotation:0}},
+      y:{...sc(),title:{display:true,text:'Annual Hours per Worker',color:TC,font:CF}}}}});
+})();
+
+// --- Graph 2: Recreation Spending (1959-2023) ---
+(function(){
+  const years=['1959','1962','1965','1968','1971','1974','1977','1980','1983','1986','1989','1992','1995','1998','2001','2004','2007','2010','2013','2016','2019','2021','2023'];
+  const pct=[5.6,5.8,6.0,6.2,6.4,6.1,6.3,6.2,6.0,6.6,7.0,6.8,7.2,7.8,7.5,7.6,7.8,7.4,7.5,7.8,8.1,7.6,8.4];
+  mc('chart-spending',{type:'line',data:{labels:years,datasets:[{label:'',data:pct,borderColor:'#22c55e',backgroundColor:'#22c55e22',fill:true,borderWidth:1.5,pointRadius:0,tension:.3}]},options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},
+      tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>'Recreation share: '+c.parsed.y.toFixed(1)+'%'}}},
+    scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:10,maxRotation:0}},
+      y:{...sc(),title:{display:true,text:'Recreation % of Total PCE',color:TC,font:CF}}}}});
+})();
+
+// --- Graph 3: Time Use 1965 vs 2003 ---
+(function(){
+  const cats=['Market Work','Home Production','Child Care','Leisure','Sleep & Personal Care','Education & Civic'];
+  const hrs1965=[33.6,25.4,3.2,34.5,62.3,9.0];
+  const hrs2003=[27.9,21.8,4.5,39.0,62.9,11.9];
+  mc('chart-timeuse',{type:'bar',data:{labels:cats,datasets:[
+    {label:'1965',data:hrs1965,backgroundColor:'#3b82f688',borderColor:'#3b82f6',borderWidth:1,borderRadius:2},
+    {label:'2003',data:hrs2003,backgroundColor:'#00d4aa88',borderColor:'#00d4aa',borderWidth:1,borderRadius:2}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:TC,font:CF,boxWidth:10,padding:8}},
+      tooltip:{...tt(),callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+' hrs/wk'}}},
+    scales:{x:{...sc(),grid:{display:false}},
+      y:{...sc(),title:{display:true,text:'Hours per Week',color:TC,font:CF},
+        ticks:{...sc().ticks,callback:v=>v+'h'}}}}});
+})();
+
+// --- Graph 4: GDP vs Working Hours Scatter ---
+(function(){
+  const countries=[
+    {name:'Mexico',gdp:10948,hrs:2128},{name:'Costa Rica',gdp:13432,hrs:2073},
+    {name:'Colombia',gdp:6630,hrs:1964},{name:'Chile',gdp:16800,hrs:1916},
+    {name:'South Korea',gdp:32255,hrs:1901},{name:'Greece',gdp:20867,hrs:1886},
+    {name:'Israel',gdp:54688,hrs:1847},{name:'Poland',gdp:18321,hrs:1830},
+    {name:'United States',gdp:76330,hrs:1811},{name:'New Zealand',gdp:44046,hrs:1752},
+    {name:'Czech Republic',gdp:27650,hrs:1753},{name:'Japan',gdp:33815,hrs:1607},
+    {name:'Italy',gdp:34085,hrs:1694},{name:'Canada',gdp:54966,hrs:1685},
+    {name:'Australia',gdp:64674,hrs:1707},{name:'Spain',gdp:30116,hrs:1644},
+    {name:'Portugal',gdp:24530,hrs:1649},{name:'Ireland',gdp:103685,hrs:1657},
+    {name:'United Kingdom',gdp:45850,hrs:1532},{name:'France',gdp:43659,hrs:1511},
+    {name:'Finland',gdp:50550,hrs:1518},{name:'Sweden',gdp:55215,hrs:1444},
+    {name:'Austria',gdp:52131,hrs:1442},{name:'Switzerland',gdp:93260,hrs:1533},
+    {name:'Netherlands',gdp:57025,hrs:1427},{name:'Norway',gdp:87925,hrs:1425},
+    {name:'Denmark',gdp:67790,hrs:1372},{name:'Germany',gdp:48636,hrs:1341}
+  ];
+  mc('chart-gdp',{type:'scatter',data:{datasets:[{
+    label:'Countries',data:countries.map(c=>({x:c.gdp,y:c.hrs,name:c.name})),
+    backgroundColor:'#00d4aa',borderColor:'#00d4aa',pointRadius:6,pointHoverRadius:9
+  }]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'top',labels:{color:TC,font:CF,boxWidth:10,padding:8,usePointStyle:true}},
+      tooltip:{...tt(),callbacks:{label:c=>c.raw.name+': $'+Math.round(c.raw.x/1000)+'k GDP, '+c.raw.y+' hrs/yr'}}},
+    scales:{x:{...sc(),title:{display:true,text:'GDP per Capita (USD, 2022)',color:TC,font:CF},
+      ticks:{...sc().ticks,callback:v=>'$'+Math.round(v/1000)+'k'}},
+      y:{...sc(),title:{display:true,text:'Annual Hours Worked per Worker',color:TC,font:CF},
+      ticks:{...sc().ticks,callback:v=>v.toLocaleString()}}}}});
+})();
+</script>
+</body>
+</html>
