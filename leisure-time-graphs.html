@@ -6,46 +6,42 @@
 <title>Leisure Time Graphs</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-0:#0a0c10;--bg-1:#0f1218;--bg-2:#151a23;--bg-3:#1c2230;
-  --border:#252d3d;--border-bright:#344054;
-  --text-0:#e8ecf4;--text-1:#a0aec0;--text-2:#6b7a90;
-  --accent:#00d4aa;--accent-dim:#00d4aa33;
-  --red:#ff4757;--blue:#3b82f6;--purple:#a855f7;--amber:#ffa502;--cyan:#06b6d4;
-  --mono:'JetBrains Mono',monospace;
-  --sans:'DM Sans',-apple-system,sans-serif;
+  --cg-blue:#018AC0;--cg-navy:#004B87;--cg-light:#99B9C2;--cg-red:#C8102E;
+  --cg-red-light:#E03E52;--cg-blue-pale:#E8F4F8;--cg-navy-dark:#002B4E;
+  --bg:#ffffff;--bg-card:#f7f9fb;--bg-header:#002B4E;
+  --border:#dde3ea;--border-light:#e8edf2;
+  --text-0:#1a2332;--text-1:#4a5568;--text-2:#718096;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-size:13px;line-height:1.5}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--bg-1)}
-::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:3px}
+body{background:var(--bg);color:var(--text-0);font-family:var(--sans);font-size:13px;line-height:1.5}
 
-.header{background:var(--bg-1);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
-.header h1{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--accent);letter-spacing:2px}
-.header .subtitle{font-size:12px;color:var(--text-2)}
+.header{background:var(--bg-header);padding:20px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+.header h1{font-size:18px;font-weight:700;color:#fff;letter-spacing:1.5px}
+.header .subtitle{font-size:12px;color:var(--cg-light)}
 
-.main{padding:20px 24px 40px;max-width:1600px;margin:0 auto}
+.main{padding:24px 24px 48px;max-width:1600px;margin:0 auto}
 
-.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.stat-card{background:var(--bg-1);border:1px solid var(--border);padding:14px 16px;position:relative;overflow:hidden;transition:border-color .2s}
-.stat-card:hover{border-color:var(--border-bright)}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.stat-card.green::before{background:var(--accent)}
-.stat-card.blue::before{background:var(--blue)}
-.stat-card.cyan::before{background:var(--cyan)}
-.stat-card.purple::before{background:var(--purple)}
-.stat-label{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-2);margin-bottom:6px}
-.stat-value{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text-0);margin-bottom:2px}
+.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:6px;padding:16px 18px;position:relative;overflow:hidden;transition:box-shadow .2s}
+.stat-card:hover{box-shadow:0 2px 12px rgba(0,43,78,.08)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:6px 6px 0 0}
+.stat-card.blue::before{background:var(--cg-blue)}
+.stat-card.navy::before{background:var(--cg-navy)}
+.stat-card.light::before{background:var(--cg-light)}
+.stat-card.red::before{background:var(--cg-red)}
+.stat-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-2);margin-bottom:6px;font-weight:600}
+.stat-value{font-size:22px;font-weight:700;color:var(--cg-navy);margin-bottom:2px}
 .stat-sub{font-size:11px;color:var(--text-2)}
 
-.panel{background:var(--bg-1);border:1px solid var(--border);margin-bottom:16px}
-.panel-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border);gap:12px}
-.panel-title{font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--text-0);font-weight:600}
-.source-tag{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text-2);white-space:nowrap}
-.panel-body{padding:16px}
+.panel{background:var(--bg);border:1px solid var(--border);border-radius:6px;margin-bottom:20px;overflow:hidden}
+.panel-header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border-light);background:var(--bg-card);gap:12px}
+.panel-title{font-size:12px;letter-spacing:.3px;color:var(--cg-navy);font-weight:600}
+.source-tag{font-size:9px;letter-spacing:.8px;color:var(--text-2);white-space:nowrap;font-weight:500}
+.panel-body{padding:18px}
 .chart-wrap{position:relative}
 .chart-wrap canvas{width:100%!important}
 
@@ -67,10 +63,10 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 
 <div class="main">
   <div class="summary-row">
-    <div class="stat-card green"><div class="stat-label">Thesis</div><div class="stat-value" style="font-size:14px">More Productivity = More Leisure</div><div class="stat-sub">As human economic activity has grown, working hours have fallen and leisure time has risen</div></div>
-    <div class="stat-card blue"><div class="stat-label">Working Hours 1870</div><div class="stat-value">~3,000</div><div class="stat-sub">Annual hours per worker (US)</div></div>
-    <div class="stat-card cyan"><div class="stat-label">Working Hours 2017</div><div class="stat-value">~1,757</div><div class="stat-sub">Annual hours per worker (US)</div></div>
-    <div class="stat-card purple"><div class="stat-label">Leisure Gain</div><div class="stat-value">+6 hrs/wk</div><div class="stat-sub">Additional weekly leisure since 1965 (US avg)</div></div>
+    <div class="stat-card blue"><div class="stat-label">Thesis</div><div class="stat-value" style="font-size:14px">More Productivity = More Leisure</div><div class="stat-sub">As human economic activity has grown, working hours have fallen and leisure time has risen</div></div>
+    <div class="stat-card navy"><div class="stat-label">Working Hours 1870</div><div class="stat-value">~3,000</div><div class="stat-sub">Annual hours per worker (US)</div></div>
+    <div class="stat-card red"><div class="stat-label">Working Hours 2017</div><div class="stat-value">~1,757</div><div class="stat-sub">Annual hours per worker (US)</div></div>
+    <div class="stat-card light"><div class="stat-label">Leisure Gain</div><div class="stat-value">+6 hrs/wk</div><div class="stat-sub">Additional weekly leisure since 1965 (US avg)</div></div>
   </div>
 
   <div class="panel">
@@ -95,29 +91,33 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 </div>
 
 <script>
-const CF={family:"'JetBrains Mono',monospace",size:10};
-const GC='#252d3d',TC='#6b7a90';
+// Capital Group palette
+const CG_BLUE='#018AC0',CG_NAVY='#004B87',CG_LIGHT='#99B9C2',CG_RED='#C8102E',CG_RED_LT='#E03E52',CG_NAVY_DK='#002B4E';
+const COLORS=[CG_BLUE,CG_NAVY,CG_RED,CG_LIGHT,CG_RED_LT,'#5BA4CF','#7ECBC0','#E8927C'];
+
+const CF={family:"'Inter',sans-serif",size:10};
+const GC='#e8edf2',TC='#718096';
 const charts={};
 
 function mc(id,cfg){if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id).getContext('2d'),cfg);}
-function tt(){return{backgroundColor:'#1c2230',borderColor:'#344054',borderWidth:1,titleFont:{family:CF.family,size:11,weight:'600'},bodyFont:{family:CF.family,size:10},titleColor:'#00d4aa',bodyColor:'#e8ecf4',padding:10,cornerRadius:2,displayColors:true,boxPadding:4,itemSort:(a,b)=>{const av=a.parsed&&a.parsed.y!=null?a.parsed.y:a.parsed;const bv=b.parsed&&b.parsed.y!=null?b.parsed.y:b.parsed;return(bv||0)-(av||0);}};}
+function tt(){return{backgroundColor:'#002B4E',borderColor:'#004B87',borderWidth:1,titleFont:{family:CF.family,size:11,weight:'600'},bodyFont:{family:CF.family,size:10},titleColor:'#ffffff',bodyColor:'#e8f4f8',padding:10,cornerRadius:4,displayColors:true,boxPadding:4,itemSort:(a,b)=>{const av=a.parsed&&a.parsed.y!=null?a.parsed.y:a.parsed;const bv=b.parsed&&b.parsed.y!=null?b.parsed.y:b.parsed;return(bv||0)-(av||0);}};}
 function sc(){return{grid:{color:GC,drawBorder:false},ticks:{color:TC,font:CF}};}
 
 // --- Graph 1: Decline in Annual Working Hours (1870-2017) ---
 (function(){
   const years=['1870','1880','1890','1900','1913','1929','1938','1950','1960','1970','1980','1990','2000','2010','2017'];
   const series=[
-    {label:'United States',data:[2964,2734,2789,2766,2632,2342,2062,1867,1795,1711,1610,1562,1536,1500,1757],color:'#3b82f6'},
-    {label:'United Kingdom',data:[2755,2624,2494,2372,2328,2208,2167,1958,1913,1737,1617,1635,1489,1477,1681],color:'#00d4aa'},
-    {label:'Germany',data:[2941,2782,2623,2584,2392,2228,2316,2316,2081,1907,1666,1557,1452,1390,1354],color:'#ffa502'},
-    {label:'France',data:[2945,2781,2616,2531,2441,2209,1848,1926,1919,1806,1604,1539,1454,1390,1514],color:'#a855f7'},
-    {label:'Japan',data:[2588,2588,2588,2588,2588,2364,2391,2166,2095,2064,2020,1889,1821,1733,1710],color:'#ff4757'}
+    {label:'United States',data:[2964,2734,2789,2766,2632,2342,2062,1867,1795,1711,1610,1562,1536,1500,1757],color:CG_BLUE},
+    {label:'United Kingdom',data:[2755,2624,2494,2372,2328,2208,2167,1958,1913,1737,1617,1635,1489,1477,1681],color:CG_NAVY},
+    {label:'Germany',data:[2941,2782,2623,2584,2392,2228,2316,2316,2081,1907,1666,1557,1452,1390,1354],color:CG_RED},
+    {label:'France',data:[2945,2781,2616,2531,2441,2209,1848,1926,1919,1806,1604,1539,1454,1390,1514],color:CG_LIGHT},
+    {label:'Japan',data:[2588,2588,2588,2588,2588,2364,2391,2166,2095,2064,2020,1889,1821,1733,1710],color:CG_RED_LT}
   ];
-  const datasets=series.map(s=>({label:s.label,data:s.data,borderColor:s.color,borderWidth:1.5,pointRadius:0,tension:.3,fill:false,spanGaps:true}));
+  const datasets=series.map(s=>({label:s.label,data:s.data,borderColor:s.color,borderWidth:2,pointRadius:0,tension:.3,fill:false,spanGaps:true}));
   mc('chart-hours',{type:'line',data:{labels:years,datasets},options:{
     responsive:true,maintainAspectRatio:false,
     interaction:{mode:'index',intersect:false},
-    plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},
+    plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:10},boxWidth:10,padding:8,usePointStyle:true}},
       tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toLocaleString()+' hrs/yr'}}},
     scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:15,maxRotation:0}},
       y:{...sc(),title:{display:true,text:'Annual Hours per Worker',color:TC,font:CF}}}}});
@@ -127,7 +127,7 @@ function sc(){return{grid:{color:GC,drawBorder:false},ticks:{color:TC,font:CF}};
 (function(){
   const years=['1959','1962','1965','1968','1971','1974','1977','1980','1983','1986','1989','1992','1995','1998','2001','2004','2007','2010','2013','2016','2019','2021','2023'];
   const pct=[5.6,5.8,6.0,6.2,6.4,6.1,6.3,6.2,6.0,6.6,7.0,6.8,7.2,7.8,7.5,7.6,7.8,7.4,7.5,7.8,8.1,7.6,8.4];
-  mc('chart-spending',{type:'line',data:{labels:years,datasets:[{label:'',data:pct,borderColor:'#22c55e',backgroundColor:'#22c55e22',fill:true,borderWidth:1.5,pointRadius:0,tension:.3}]},options:{
+  mc('chart-spending',{type:'line',data:{labels:years,datasets:[{label:'',data:pct,borderColor:CG_BLUE,backgroundColor:CG_BLUE+'18',fill:true,borderWidth:2,pointRadius:0,tension:.3}]},options:{
     responsive:true,maintainAspectRatio:false,
     interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:false},
@@ -142,8 +142,8 @@ function sc(){return{grid:{color:GC,drawBorder:false},ticks:{color:TC,font:CF}};
   const hrs1965=[33.6,25.4,3.2,34.5,62.3,9.0];
   const hrs2003=[27.9,21.8,4.5,39.0,62.9,11.9];
   mc('chart-timeuse',{type:'bar',data:{labels:cats,datasets:[
-    {label:'1965',data:hrs1965,backgroundColor:'#3b82f688',borderColor:'#3b82f6',borderWidth:1,borderRadius:2},
-    {label:'2003',data:hrs2003,backgroundColor:'#00d4aa88',borderColor:'#00d4aa',borderWidth:1,borderRadius:2}
+    {label:'1965',data:hrs1965,backgroundColor:CG_NAVY+'88',borderColor:CG_NAVY,borderWidth:1,borderRadius:3},
+    {label:'2003',data:hrs2003,backgroundColor:CG_RED+'88',borderColor:CG_RED,borderWidth:1,borderRadius:3}
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{labels:{color:TC,font:CF,boxWidth:10,padding:8}},
       tooltip:{...tt(),callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+' hrs/wk'}}},
@@ -172,7 +172,7 @@ function sc(){return{grid:{color:GC,drawBorder:false},ticks:{color:TC,font:CF}};
   ];
   mc('chart-gdp',{type:'scatter',data:{datasets:[{
     label:'Countries',data:countries.map(c=>({x:c.gdp,y:c.hrs,name:c.name})),
-    backgroundColor:'#00d4aa',borderColor:'#00d4aa',pointRadius:6,pointHoverRadius:9
+    backgroundColor:CG_BLUE,borderColor:CG_NAVY,pointRadius:6,pointHoverRadius:9,borderWidth:1
   }]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{position:'top',labels:{color:TC,font:CF,boxWidth:10,padding:8,usePointStyle:true}},
       tooltip:{...tt(),callbacks:{label:c=>c.raw.name+': $'+Math.round(c.raw.x/1000)+'k GDP, '+c.raw.y+' hrs/yr'}}},
