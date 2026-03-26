@@ -497,6 +497,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
     </div>
   </div>
 
+
 </div>
 <script>
 // All data globals — populated by loadData()
@@ -830,6 +831,7 @@ rc('chart-comp-factors','compare','w',()=>buildFactorCompChart(compFactorMetric)
 rc('chart-comp-spread-decomp','compare',null,buildCompSpreadDecomp);
 rc('chart-comp-dd','compare','w',buildCompDD);
 rc('chart-comp-rolling','compare','w',()=>buildRollingCompChart(compRollingWin,compRollingMet));
+
 
 // ─── FUND SWITCHING ──────────────────────────────────
 let currentFund='MINT';
@@ -1466,7 +1468,7 @@ function initPositionTracker(){
   });
 }
 
-let analyticsBuilt=false,activeBuilt=false,commentaryBuilt=false,compareBuilt=false;
+let analyticsBuilt=false,activeBuilt=false,commentaryBuilt=false,compareBuilt=false,leisureBuilt=false;
 
 // ─── COMPARE TAB ──────────────────────────────────
 let compScatterPeriod='SI', compFactorMetric='duration', compRollingWin='3M', compRollingMet='ret';
@@ -2005,6 +2007,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
       if(btn.dataset.section==='active'&&!activeBuilt){activeBuilt=true;buildActiveManagement();}
       if(btn.dataset.section==='commentary'&&!commentaryBuilt){commentaryBuilt=true;buildCommentary();}
       if(btn.dataset.section==='compare'&&!compareBuilt){compareBuilt=true;buildCompare();}
+      if(btn.dataset.section==='leisure'&&!leisureBuilt){leisureBuilt=true;buildTabCharts('leisure');}
     });
   });
   // Corp industry modal handlers
