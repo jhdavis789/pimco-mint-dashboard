@@ -9,12 +9,13 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-0:#0a0c10;--bg-1:#0f1218;--bg-2:#151a23;--bg-3:#1c2230;
-  --border:#252d3d;--border-bright:#344054;
-  --text-0:#e8ecf4;--text-1:#a0aec0;--text-2:#6b7a90;
+  --bg-0:#0a0a0f;--bg-1:#12121a;--bg-2:#1a1a26;--bg-3:#22222e;
+  --border:#2a2a3a;--border-bright:#3a3a4e;
+  --text-0:#e0e0e8;--text-1:#a0a0b0;--text-2:#888898;
   --accent:#00d4aa;--accent-dim:#00d4aa33;
-  --red:#ff4757;--red-dim:#ff475722;
-  --amber:#ffa502;--amber-dim:#ffa50222;
+  --accent2:#6366f1;--accent3:#f59e0b;
+  --red:#ef4444;--red-dim:#ef444422;
+  --amber:#f59e0b;--amber-dim:#f59e0b22;
   --blue:#3b82f6;--blue-dim:#3b82f622;
   --purple:#a855f7;--cyan:#06b6d4;
   --mono:'JetBrains Mono',monospace;
@@ -32,13 +33,13 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 .header-meta .name{font-size:13px;color:var(--text-1);font-weight:500}
 .header-meta .filing{font-family:var(--mono);font-size:10px;color:var(--text-2);letter-spacing:1px}
 .header-right{display:flex;gap:10px;align-items:center}
-.nav-tab{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:all .2s;border-radius:2px}
+.nav-tab{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:all .2s;border-radius:4px}
 .nav-tab:hover,.nav-tab.active{color:var(--accent);border-color:var(--accent);background:var(--accent-dim)}
 .main{padding:16px 24px 40px;max-width:1800px;margin:0 auto}
 .section{display:none}.section.active{display:block;animation:fadeUp .3s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .summary-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
-.stat-card{background:var(--bg-1);border:1px solid var(--border);padding:14px 16px;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card{background:var(--bg-1);border:1px solid var(--border);border-radius:6px;padding:14px 16px;position:relative;overflow:hidden;transition:border-color .2s}
 .stat-card:hover{border-color:var(--border-bright)}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
 .stat-card.green::before{background:var(--accent)}
@@ -51,7 +52,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 .stat-value{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--text-0)}
 .stat-sub{font-family:var(--mono);font-size:10px;color:var(--text-2);margin-top:4px}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-.panel{background:var(--bg-1);border:1px solid var(--border);overflow:hidden}
+.panel{background:var(--bg-1);border:1px solid var(--border);border-radius:6px;overflow:hidden}
 .panel-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg-2);flex-wrap:wrap;gap:6px}
 .panel-title{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-1);font-weight:600}
 .panel-body{padding:14px}
@@ -90,7 +91,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 @media(max-width:1200px){.summary-row{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:800px){.summary-row{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
 .range-selector{display:flex;gap:6px;margin-bottom:14px}
-.range-btn{font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:4px 12px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:all .2s;border-radius:2px}
+.range-btn{font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:4px 12px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:all .2s;border-radius:4px}
 .range-btn:hover,.range-btn.active{color:var(--accent);border-color:var(--accent);background:var(--accent-dim)}
 .pos-search{display:flex;gap:8px;margin-bottom:10px}
 .pos-search input{flex:1;background:var(--bg-2);border:1px solid var(--border);color:var(--text-0);font-family:var(--mono);font-size:12px;padding:8px 14px;outline:none;transition:border-color .2s}
@@ -113,7 +114,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 .info-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
 .info-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center}
 .info-modal-bg.show{display:flex}
-.info-modal{background:var(--bg-1);border:1px solid var(--border-bright);max-width:560px;width:90%;max-height:80vh;overflow-y:auto;padding:0;font-family:var(--mono);font-size:11px}
+.info-modal{background:var(--bg-1);border:1px solid var(--border-bright);border-radius:8px;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;padding:0;font-family:var(--mono);font-size:11px}
 .info-modal-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--bg-2)}
 .info-modal-head h3{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0}
 .info-modal-close{background:none;border:none;color:var(--text-2);font-size:18px;cursor:pointer;padding:0 4px}
@@ -126,7 +127,7 @@ body{background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-siz
 .info-modal-body .info-source{color:var(--text-2);font-size:10px;border-top:1px solid var(--border);padding-top:8px;margin-top:8px}
 .corp-ind-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9500;align-items:center;justify-content:center}
 .corp-ind-modal-bg.show{display:flex}
-.corp-ind-modal{background:var(--bg-1);border:1px solid var(--border-bright);max-width:900px;width:94%;max-height:85vh;overflow-y:auto;padding:0}
+.corp-ind-modal{background:var(--bg-1);border:1px solid var(--border-bright);border-radius:8px;max-width:900px;width:94%;max-height:85vh;overflow-y:auto;padding:0}
 .corp-ind-modal-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--bg-2)}
 .corp-ind-modal-head h3{font-family:var(--mono);font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0}
 .corp-ind-modal-head .sub{font-family:var(--mono);font-size:10px;color:var(--text-2);margin-left:12px;letter-spacing:.5px}
@@ -595,11 +596,11 @@ async function loadData(){
 }
 
 const CF={family:"'JetBrains Mono',monospace",size:10};
-const GC='#252d3d',TC='#6b7a90';
-const COLORS=['#3b82f6','#00d4aa','#a855f7','#ffa502','#06b6d4','#ec4899','#84cc16','#f97316','#8b5cf6','#14b8a6','#6b7a90'];
+const GC='#2a2a3a',TC='#888898';
+const COLORS=['#3b82f6','#00d4aa','#a855f7','#f59e0b','#06b6d4','#ec4899','#84cc16','#f97316','#8b5cf6','#14b8a6','#888898'];
 const charts={};
 function mc(id,cfg){if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id).getContext('2d'),cfg);}
-function tt(){return{backgroundColor:'#1c2230',borderColor:'#344054',borderWidth:1,titleFont:{family:CF.family,size:11,weight:'600'},bodyFont:{family:CF.family,size:10},titleColor:'#00d4aa',bodyColor:'#e8ecf4',padding:10,cornerRadius:2,displayColors:true,boxPadding:4,itemSort:(a,b)=>{const av=a.parsed&&a.parsed.y!=null?a.parsed.y:a.parsed;const bv=b.parsed&&b.parsed.y!=null?b.parsed.y:b.parsed;return(bv||0)-(av||0);}};}
+function tt(){return{backgroundColor:'#1a1a26',borderColor:'#3a3a4e',borderWidth:1,titleFont:{family:CF.family,size:11,weight:'600'},bodyFont:{family:CF.family,size:10},titleColor:'#00d4aa',bodyColor:'#e0e0e8',padding:10,cornerRadius:4,displayColors:true,boxPadding:4,itemSort:(a,b)=>{const av=a.parsed&&a.parsed.y!=null?a.parsed.y:a.parsed;const bv=b.parsed&&b.parsed.y!=null?b.parsed.y:b.parsed;return(bv||0)-(av||0);}};}
 
 function sc(){return{grid:{color:GC,drawBorder:false},ticks:{color:TC,font:CF}};}
 
@@ -637,8 +638,8 @@ const CT={
     CT.line(id,labels,ds,opts);
   },
   stackedArea(id,labels,series,opts={}){
-    const ds=series.map(s=>({label:s.label,data:s.data,backgroundColor:(s.color||'#6b7a90')+'66',
-      borderColor:s.color||'#6b7a90',borderWidth:1,fill:true,pointRadius:0}));
+    const ds=series.map(s=>({label:s.label,data:s.data,backgroundColor:(s.color||'#888898')+'66',
+      borderColor:s.color||'#888898',borderWidth:1,fill:true,pointRadius:0}));
     CT.line(id,labels,ds,{stacked:true,...opts});
   },
   bar(id,labels,datasets,opts={}){
@@ -683,8 +684,8 @@ function buildTabCharts(tab){for(const c of Object.values(CR))if(c.tab===tab)c.b
 rc('chart-issuer','overview-mint',null,()=>{CT.doughnut('chart-issuer',ISSUER_LABELS,ISSUER_VALUES,COLORS.slice(0,ISSUER_LABELS.length));});
 rc('chart-asset','overview-mint',null,()=>{CT.doughnut('chart-asset',ASSET_LABELS,ASSET_VALUES,COLORS.slice(0,ASSET_LABELS.length));});
 rc('chart-country','overview-mint',null,()=>{CT.doughnut('chart-country',COUNTRY_LABELS,COUNTRY_VALUES,COLORS.slice(0,COUNTRY_LABELS.length),{type:'pie',cutout:'0%'});});
-rc('chart-coupon','overview-mint',null,()=>{CT.doughnut('chart-coupon',COUPON_LABELS,COUPON_VALUES,['#00d4aa','#3b82f6','#6b7a90','#ffa502'].slice(0,COUPON_LABELS.length));});
-rc('chart-maturity','overview-mint',null,()=>{CT.bar('chart-maturity',MAT_LABELS,[{data:MAT_VALUES,backgroundColor:['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'].slice(0,MAT_LABELS.length),borderWidth:0,borderRadius:2,barThickness:36}],{yFmt:v=>v+'%',ttCb:{label:c=>c.parsed.y+'%'}});});
+rc('chart-coupon','overview-mint',null,()=>{CT.doughnut('chart-coupon',COUPON_LABELS,COUPON_VALUES,['#00d4aa','#3b82f6','#888898','#f59e0b'].slice(0,COUPON_LABELS.length));});
+rc('chart-maturity','overview-mint',null,()=>{CT.bar('chart-maturity',MAT_LABELS,[{data:MAT_VALUES,backgroundColor:['#00d4aa','#22c55e','#84cc16','#eab308','#f59e0b','#f97316','#ef4444'].slice(0,MAT_LABELS.length),borderWidth:0,borderRadius:2,barThickness:36}],{yFmt:v=>v+'%',ttCb:{label:c=>c.parsed.y+'%'}});});
 rc('chart-yield-comp','overview-mint',null,()=>{mc('chart-yield-comp',{type:'bar',data:{labels:YIELD_LABELS,datasets:[{data:YIELD_VALUES,backgroundColor:YIELD_COLORS,borderWidth:0,borderRadius:2,barThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.x.toFixed(2)+'%'}}},scales:{x:{...sc(),max:5.5,ticks:{...sc().ticks,callback:v=>v+'%'}},y:{...sc(),grid:{display:false}}}}});});
 
 // --- Overview ETF (tab: 'overview-etf') ---
@@ -701,21 +702,21 @@ rc('chart-etf-maturity','overview-etf',null,()=>{
   if(!FD.MAT_BUCKETS||!FD.MAT_DATES||!FD.MAT_DATES.length)return;
   const li=FD.MAT_DATES.length-1;const mLabels=[],mVals=[];
   MAT_BUCKET_NAMES.forEach(b=>{const v=FD.MAT_BUCKETS[b]?FD.MAT_BUCKETS[b][li]:0;if(v>0.1){mLabels.push(b);mVals.push(Math.round(v*10)/10);}});
-  const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'];
+  const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#f59e0b','#f97316','#ef4444'];
   CT.bar('chart-etf-maturity',mLabels,[{data:mVals,backgroundColor:matColors.slice(0,mLabels.length),borderWidth:0,borderRadius:2,barThickness:36}],{yFmt:v=>v+'%',ttCb:{label:c=>c.parsed.y.toFixed(1)+'%'}});
 });
 
 // --- Performance (tab: 'performance') ---
 rc('chart-monthly-returns','performance','m',()=>{CT.bar('chart-monthly-returns',MR_LABELS,[{label:'Monthly Return',data:MR_VALUES,backgroundColor:'#00d4aa',borderWidth:0,borderRadius:2,barThickness:48}],{ttCb:{label:c=>'+'+c.parsed.y.toFixed(3)+'%'},yFmt:v=>v.toFixed(1)+'%'});});
-rc('chart-annual-returns','performance',null,()=>{CT.bar('chart-annual-returns',AR_LABELS,[{label:'Annual Return',data:AR_VALUES,backgroundColor:AR_VALUES.map(d=>d>=0?'#00d4aa':'#ff4757'),borderWidth:0,borderRadius:2,barThickness:40}],{ttCb:{label:c=>(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(1)+'%'},yFmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%'});});
+rc('chart-annual-returns','performance',null,()=>{CT.bar('chart-annual-returns',AR_LABELS,[{label:'Annual Return',data:AR_VALUES,backgroundColor:AR_VALUES.map(d=>d>=0?'#00d4aa':'#ef4444'),borderWidth:0,borderRadius:2,barThickness:40}],{ttCb:{label:c=>(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(1)+'%'},yFmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%'});});
 
 // --- Income (tab: 'income') ---
 rc('chart-dist-history','income','m',()=>{
   const dr=[...DIST_DATA].reverse();
-  mc('chart-dist-history',{type:'bar',data:{labels:dr.map(d=>d.d),datasets:[{label:'Distribution',data:dr.map(d=>d.a),backgroundColor:dr.map(d=>d.a>=0.44?'#00d4aa':d.a>=0.35?'#3b82f6':d.a>=0.25?'#ffa502':'#ff4757'),borderWidth:0,borderRadius:1,barPercentage:0.85}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'$'+c.parsed.y.toFixed(3)}}},scales:{x:{...sc(),grid:{display:false},ticks:{...sc().ticks,maxRotation:45,autoSkip:true,maxTicksLimit:16}},y:{...sc(),ticks:{...sc().ticks,callback:v=>'$'+v.toFixed(2)}}}}});
+  mc('chart-dist-history',{type:'bar',data:{labels:dr.map(d=>d.d),datasets:[{label:'Distribution',data:dr.map(d=>d.a),backgroundColor:dr.map(d=>d.a>=0.44?'#00d4aa':d.a>=0.35?'#3b82f6':d.a>=0.25?'#f59e0b':'#ef4444'),borderWidth:0,borderRadius:1,barPercentage:0.85}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'$'+c.parsed.y.toFixed(3)}}},scales:{x:{...sc(),grid:{display:false},ticks:{...sc().ticks,maxRotation:45,autoSkip:true,maxTicksLimit:16}},y:{...sc(),ticks:{...sc().ticks,callback:v=>'$'+v.toFixed(2)}}}}});
 });
 rc('chart-annual-income','income',null,()=>{
-  mc('chart-annual-income',{type:'bar',data:{labels:AI_LABELS,datasets:[{label:'Annual Income/Share',data:AI_VALUES,backgroundColor:AI_VALUES.map((v,i,a)=>i===a.length-1?'#6b7a90':v>=a[Math.max(0,i-1)]?'#00d4aa':'#ffa502'),borderWidth:0,borderRadius:2,barThickness:48}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'$'+c.parsed.y.toFixed(2)+' / share'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>'$'+v.toFixed(2)}}}}});
+  mc('chart-annual-income',{type:'bar',data:{labels:AI_LABELS,datasets:[{label:'Annual Income/Share',data:AI_VALUES,backgroundColor:AI_VALUES.map((v,i,a)=>i===a.length-1?'#888898':v>=a[Math.max(0,i-1)]?'#00d4aa':'#f59e0b'),borderWidth:0,borderRadius:2,barThickness:48}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>'$'+c.parsed.y.toFixed(2)+' / share'}}},scales:{x:{...sc(),grid:{display:false}},y:{...sc(),ticks:{...sc().ticks,callback:v=>'$'+v.toFixed(2)}}}}});
 });
 
 // --- Analytics (tab: 'analytics') ---
@@ -732,7 +733,7 @@ rc('chart-eff-n','analytics','d',()=>{
 rc('chart-wam','analytics','d',()=>{
   if(!FD.TS_DATES||!FD.TS_DATES.length)return;
   const n=gRange>0?Math.min(gRange,FD.TS_DATES.length):0;
-  CT.singleLine('chart-wam',sliceTail(FD.TS_DATES,n),sliceTail(FD.TS_WAM,n),'#ffa502',{yTitle:'Years',ttCb:{label:c=>c.parsed.y.toFixed(3)+' years'}});
+  CT.singleLine('chart-wam',sliceTail(FD.TS_DATES,n),sliceTail(FD.TS_WAM,n),'#f59e0b',{yTitle:'Years',ttCb:{label:c=>c.parsed.y.toFixed(3)+' years'}});
 });
 rc('chart-wac','analytics','d',()=>{
   if(!FD.TS_DATES||!FD.TS_DATES.length)return;
@@ -744,7 +745,7 @@ rc('chart-mat-evo','analytics','m',()=>{
   const n=gRange>0?Math.min(gRange,FD.TS_DATES?FD.TS_DATES.length:0):0;
   const mn=gRange>0?Math.ceil(n/21):0;
   const mDates=sliceTail(FD.MAT_DATES,mn);
-  const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'];
+  const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#f59e0b','#f97316','#ef4444'];
   const matDS=MAT_BUCKET_NAMES.map((b,i)=>({label:b,data:sliceTail(FD.MAT_BUCKETS[b],mn),backgroundColor:matColors[i]+'99',borderColor:matColors[i],borderWidth:1,fill:true,pointRadius:0}));
   CT.line('chart-mat-evo',mDates,matDS,{stacked:true,yMax:100,yFmt:v=>v+'%',xTicks:12});
 });
@@ -752,8 +753,8 @@ rc('chart-concentration','analytics','d',()=>{
   if(!FD.TS_DATES||!FD.TS_DATES.length)return;
   const n=gRange>0?Math.min(gRange,FD.TS_DATES.length):0;
   CT.multiLine('chart-concentration',sliceTail(FD.TS_DATES,n),[
-    {label:'Top 5',data:sliceTail(FD.TS_TOP5,n),color:'#ff4757',backgroundColor:'#ff475722'},
-    {label:'Top 10',data:sliceTail(FD.TS_TOP10,n),color:'#ffa502',backgroundColor:'#ffa50222'},
+    {label:'Top 5',data:sliceTail(FD.TS_TOP5,n),color:'#ef4444',backgroundColor:'#ef444422'},
+    {label:'Top 10',data:sliceTail(FD.TS_TOP10,n),color:'#f59e0b',backgroundColor:'#f59e0b22'},
     {label:'Top 20',data:sliceTail(FD.TS_TOP20,n),color:'#00d4aa',backgroundColor:'#00d4aa22'}
   ],{yFmt:v=>v+'%'});
 });
@@ -768,7 +769,7 @@ rc('chart-deriv','analytics','d',()=>{
   const dates=sliceTail(FD.TS_DATES,n);
   CT.multiLine('chart-deriv',dates,[
     {label:'Other Net Assets %',data:sliceTail(FD.TS_OTHER,n),color:'#3b82f6',backgroundColor:'#3b82f622',yAxisID:'y'},
-    {label:'Future Position %',data:sliceTail(FD.TS_FUTURE,n),color:'#ff4757',backgroundColor:'#ff475722',yAxisID:'y1'}
+    {label:'Future Position %',data:sliceTail(FD.TS_FUTURE,n),color:'#ef4444',backgroundColor:'#ef444422',yAxisID:'y1'}
   ],{yTitle:'Other Net Assets %',yFmt:v=>v+'%',y1:{title:{display:true,text:'Future Position %',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v+'%'}}});
 });
 rc('chart-churn','analytics','w',()=>{
@@ -778,8 +779,8 @@ rc('chart-churn','analytics','w',()=>{
   const cDates=sliceTail(FD.CHURN_DATES,cn);
   mc('chart-churn',{type:'bar',data:{labels:cDates,datasets:[
     {label:'New Positions',data:sliceTail(FD.CHURN_NEW,cn),backgroundColor:'#00d4aa88',borderWidth:0,order:2},
-    {label:'Exited Positions',data:sliceTail(FD.CHURN_EXIT,cn).map(v=>-v),backgroundColor:'#ff475788',borderWidth:0,order:2},
-    {label:'Turnover Rate %',data:sliceTail(FD.CHURN_RATE,cn),type:'line',borderColor:'#ffa502',borderWidth:2,pointRadius:0,tension:.3,yAxisID:'y1',order:1}
+    {label:'Exited Positions',data:sliceTail(FD.CHURN_EXIT,cn).map(v=>-v),backgroundColor:'#ef444488',borderWidth:0,order:2},
+    {label:'Turnover Rate %',data:sliceTail(FD.CHURN_RATE,cn),type:'line',borderColor:'#f59e0b',borderWidth:2,pointRadius:0,tension:.3,yAxisID:'y1',order:1}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:TC,font:CF,boxWidth:10}},tooltip:{...tt(),mode:'index',intersect:false}},scales:{x:{...sc(),stacked:true,ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),stacked:true,title:{display:true,text:'Positions',color:TC,font:CF}},y1:{...sc(),position:'right',title:{display:true,text:'Turnover %',color:TC,font:CF},grid:{drawOnChartArea:false}}}}});
 });
 rc('chart-jaccard','analytics','m',()=>{
@@ -788,13 +789,13 @@ rc('chart-jaccard','analytics','m',()=>{
   const jn=gRange>0?Math.ceil(n/21):0;
   CT.multiLine('chart-jaccard',sliceTail(FD.JACC_DATES,jn),[
     {label:'vs 1 Month Ago',data:sliceTail(FD.JACC_1M,jn),color:'#00d4aa'},
-    {label:'vs 3 Months Ago',data:sliceTail(FD.JACC_3M,jn),color:'#ffa502'},
-    {label:'vs 6 Months Ago',data:sliceTail(FD.JACC_6M,jn),color:'#ff4757'}
+    {label:'vs 3 Months Ago',data:sliceTail(FD.JACC_3M,jn),color:'#f59e0b'},
+    {label:'vs 6 Months Ago',data:sliceTail(FD.JACC_6M,jn),color:'#ef4444'}
   ],{yMax:100,yFmt:v=>v+'%',yTitle:'CUSIP Overlap %',xTicks:12,ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'% overlap'}});
 });
 rc('chart-age','analytics',null,()=>{
   if(!FD.AGE_LABELS||!FD.AGE_LABELS.length)return;
-  CT.bar('chart-age',FD.AGE_LABELS,[{data:FD.AGE_VALUES,backgroundColor:['#ff4757','#ffa502','#eab308','#84cc16','#22c55e','#00d4aa'],borderWidth:0,borderRadius:2}],{yTitle:'# Positions',ttCb:{label:c=>c.parsed.y+' positions'}});
+  CT.bar('chart-age',FD.AGE_LABELS,[{data:FD.AGE_VALUES,backgroundColor:['#ef4444','#f59e0b','#eab308','#84cc16','#22c55e','#00d4aa'],borderWidth:0,borderRadius:2}],{yTitle:'# Positions',ttCb:{label:c=>c.parsed.y+' positions'}});
 });
 rc('chart-factors','analytics','d',buildFactorChart);
 rc('chart-cum-ret','analytics','d',buildCumRetChart);
@@ -812,7 +813,7 @@ rc('chart-sector-evo','active','d',()=>{
 rc('chart-movers','active',null,()=>{
   if(!FD.BIGGEST_MOVERS||!FD.BIGGEST_MOVERS.length)return;
   const bm=FD.BIGGEST_MOVERS.sort((a,b)=>b.delta-a.delta);
-  mc('chart-movers',{type:'bar',data:{labels:bm.map(m=>{const d=m.d;return d.length>30?d.slice(0,28)+'..':d}),datasets:[{label:'Weight Change (90d)',data:bm.map(m=>m.delta),backgroundColor:bm.map(m=>m.delta>=0?'#00d4aa88':'#ff475788'),borderWidth:0,borderRadius:2}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>(c.parsed.x>=0?'+':'')+c.parsed.x.toFixed(3)+'% | Current: '+bm[c.dataIndex].cur.toFixed(3)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'}},y:{...sc(),grid:{display:false},ticks:{...sc().ticks,font:{...CF,size:9}}}}}});
+  mc('chart-movers',{type:'bar',data:{labels:bm.map(m=>{const d=m.d;return d.length>30?d.slice(0,28)+'..':d}),datasets:[{label:'Weight Change (90d)',data:bm.map(m=>m.delta),backgroundColor:bm.map(m=>m.delta>=0?'#00d4aa88':'#ef444488'),borderWidth:0,borderRadius:2}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>(c.parsed.x>=0?'+':'')+c.parsed.x.toFixed(3)+'% | Current: '+bm[c.dataIndex].cur.toFixed(3)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+'%'}},y:{...sc(),grid:{display:false},ticks:{...sc().ticks,font:{...CF,size:9}}}}}});
 });
 rc('chart-sec-vol','active','d',()=>{
   if(!FD.SEC_VOL_DATES)return;
@@ -1029,7 +1030,7 @@ function buildOverviewForFund(){
     const geoData=hasState?fd.state_breakdown:fd.country_breakdown;
     if(geoData){
       const gLabels=geoData.labels.slice(0,20);const gVals=geoData.values.slice(0,20);
-      const gColors=['#00d4aa','#22c55e','#3b82f6','#a855f7','#f97316','#06b6d4','#ffa502','#ff4757','#e879f9','#84cc16','#eab308','#6366f1','#14b8a6','#f59e0b','#ef4444','#8b5cf6','#0ea5e9','#d946ef','#f43f5e','#10b981'];
+      const gColors=['#00d4aa','#22c55e','#3b82f6','#a855f7','#f97316','#06b6d4','#f59e0b','#ef4444','#e879f9','#84cc16','#eab308','#6366f1','#14b8a6','#f59e0b','#ef4444','#8b5cf6','#0ea5e9','#d946ef','#f43f5e','#10b981'];
       mc('chart-etf-country',{type:'bar',data:{labels:gLabels,datasets:[{data:gVals,backgroundColor:gColors.slice(0,gLabels.length),borderWidth:0,borderRadius:2}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt(),callbacks:{label:c=>c.parsed.x.toFixed(2)+'%'}}},scales:{x:{...sc(),ticks:{...sc().ticks,callback:v=>v+'%'}},y:{...sc(),grid:{display:false}}}}});
     }
     if(fd.cpn_breakdown&&fd.cpn_breakdown.labels.length>0){
@@ -1281,7 +1282,7 @@ function updateActiveCards(){
 }
 
 // ─── PORTFOLIO ANALYTICS TAB ──────────────────────────
-const SECTOR_COLORS={Corporate:'#3b82f6','Structured Credit':'#a855f7','Agency MBS':'#00d4aa','Short-Term':'#ffa502',Government:'#06b6d4',Supranational:'#ec4899',Other:'#6b7280'};
+const SECTOR_COLORS={Corporate:'#3b82f6','Structured Credit':'#a855f7','Agency MBS':'#00d4aa','Short-Term':'#f59e0b',Government:'#06b6d4',Supranational:'#ec4899',Other:'#6b7280'};
 let analyticsRange=0; // 0=all
 function sliceTail(arr,n){return n>0&&arr.length>n?arr.slice(-n):arr;}
 
@@ -1307,12 +1308,12 @@ function buildCorpDuration(){
       const avgB=durInds[b].filter(v=>v!=null).reduce((s,v)=>s+v,0)/Math.max(1,durInds[b].filter(v=>v!=null).length);
       return avgB-avgA;
     });
-    const durColors=['#3b82f6','#00d4aa','#a855f7','#ffa502','#ff4757','#06b6d4','#ec4899','#84cc16','#f97316','#8b5cf6','#14b8a6','#6366f1','#22c55e','#eab308','#f43f5e','#0ea5e9','#d946ef','#10b981'];
+    const durColors=['#3b82f6','#00d4aa','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316','#8b5cf6','#14b8a6','#6366f1','#22c55e','#eab308','#f43f5e','#0ea5e9','#d946ef','#10b981'];
     const durDS=indKeys.map((ind,i)=>({
       label:ind,data:durInds[ind],borderColor:durColors[i%durColors.length],borderWidth:1.5,pointRadius:0,tension:.3,spanGaps:true
     }));
     // Add portfolio aggregate line
-    durDS.push({label:'All Corp (wt-avg)',data:durPort,borderColor:'#e8ecf4',borderWidth:2.5,borderDash:[6,3],pointRadius:0,tension:.3,spanGaps:true});
+    durDS.push({label:'All Corp (wt-avg)',data:durPort,borderColor:'#e0e0e8',borderWidth:2.5,borderDash:[6,3],pointRadius:0,tension:.3,spanGaps:true});
     mc('chart-corp-dur',{type:'line',data:{labels:durDates,datasets:durDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed.y;return v!=null?c.dataset.label+': '+v.toFixed(3)+'yr':null;}}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),title:{display:true,text:'Modified Duration (years)',color:TC,font:CF},ticks:{...sc().ticks,callback:v=>v.toFixed(2)}}}}});
   }else{
     durPanel.style.display='none';
@@ -1334,8 +1335,8 @@ function buildFactorChart(){
     {label:'Corp Spread (pp)',data:FD.FACTOR_CORP,borderColor:'#ec4899',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
     {label:'EM Spread (pp)',data:FD.FACTOR_EM,borderColor:'#14b8a6',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
     {label:'Sovg Spread (pp)',data:FD.FACTOR_SOVG,borderColor:'#a3a3a3',yAxisID:'y1',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
-    {label:'Total Spread (pp)',data:FD.FACTOR_TSPREAD,borderColor:'#ffa502',yAxisID:'y1',borderWidth:2,pointRadius:2,tension:.3,fill:false},
-    {label:'DTS (dur-bps)',data:FD.FACTOR_DTS,borderColor:'#ff4757',yAxisID:'y',borderWidth:2,pointRadius:2,tension:.3,fill:false},
+    {label:'Total Spread (pp)',data:FD.FACTOR_TSPREAD,borderColor:'#f59e0b',yAxisID:'y1',borderWidth:2,pointRadius:2,tension:.3,fill:false},
+    {label:'DTS (dur-bps)',data:FD.FACTOR_DTS,borderColor:'#ef4444',yAxisID:'y',borderWidth:2,pointRadius:2,tension:.3,fill:false},
     {label:'NAV ($)',data:FD.FACTOR_NAV,borderColor:'#a78bfa',yAxisID:'y2',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,hidden:true},
   ];
   mc('chart-factors',{type:'line',data:{labels:FD.FACTOR_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6,usePointStyle:true}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed.y;return c.dataset.label+': '+(v!=null?v.toFixed(4):'N/A');}}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),position:'left',title:{display:true,text:'Duration / DTS',color:TC,font:CF}},y1:{...sc(),position:'right',title:{display:true,text:'Yield / Spread (%)',color:TC,font:CF},grid:{drawOnChartArea:false}},y2:{display:false}}}});
@@ -1371,7 +1372,7 @@ function buildCumRetChart(){
   if(typeof FD.CUM_DATES==='undefined'||!FD.CUM_CONTRIBUTIONS)return;
   const src=FD.CUM_CONTRIBUTIONS;
   const allKeys=[...Object.keys(SECTOR_COLORS),'Portfolio'];
-  const ds=allKeys.map(s=>({label:s,data:src[s]||[],borderColor:s==='Portfolio'?'#e8ecf4':(SECTOR_COLORS[s]||'#6b7a90'),borderWidth:s==='Portfolio'?2.5:1.5,pointRadius:0,tension:.3,fill:false,borderDash:s==='Portfolio'?[5,3]:[]}));
+  const ds=allKeys.map(s=>({label:s,data:src[s]||[],borderColor:s==='Portfolio'?'#e0e0e8':(SECTOR_COLORS[s]||'#888898'),borderWidth:s==='Portfolio'?2.5:1.5,pointRadius:0,tension:.3,fill:false,borderDash:s==='Portfolio'?[5,3]:[]}));
   mc('chart-cum-ret',{type:'line',data:{labels:FD.CUM_DATES,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:TC,font:{...CF,size:9},boxWidth:10,padding:6}},tooltip:{...tt(),mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(2)+' ppts'}}},scales:{x:{...sc(),ticks:{...sc().ticks,maxTicksLimit:12,maxRotation:0}},y:{...sc(),ticks:{...sc().ticks,callback:v=>(v>=0?'+':'')+v.toFixed(1)+' ppts'},title:{display:true,text:'Portfolio Contribution (ppts)',color:TC,font:CF}}}}});
 }
 
@@ -1383,7 +1384,7 @@ function buildRollSharpeChart(){
 function buildRollVolChart(){
   if(typeof FD.ROLL_VOL_DATES==='undefined')return;
   const allKeys=[...Object.keys(SECTOR_COLORS),'Portfolio'];
-  const series=allKeys.map(s=>({label:s,data:FD.ROLL_VOL[s],color:s==='Portfolio'?'#e8ecf4':(SECTOR_COLORS[s]||'#6b7a90'),width:s==='Portfolio'?2:1.5,hidden:s!=='Portfolio'&&s!=='Agency MBS'&&s!=='Government'}));
+  const series=allKeys.map(s=>({label:s,data:FD.ROLL_VOL[s],color:s==='Portfolio'?'#e0e0e8':(SECTOR_COLORS[s]||'#888898'),width:s==='Portfolio'?2:1.5,hidden:s!=='Portfolio'&&s!=='Agency MBS'&&s!=='Government'}));
   CT.multiLine('chart-roll-vol', FD.ROLL_VOL_DATES, series, {yTitle:'Ann. Vol %',yFmt:v=>v.toFixed(1)+'%',ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}});
 }
 
@@ -1392,14 +1393,14 @@ function buildSpreadDecomp(){
   CT.stackedArea('chart-spread-decomp', FD.FACTOR_DATES, [
     {label:'Mortgage',data:FD.FACTOR_MTG,color:'#3b82f6'},
     {label:'Corporate',data:FD.FACTOR_CORP,color:'#00d4aa'},
-    {label:'EM',data:FD.FACTOR_EM,color:'#ffa502'},
+    {label:'EM',data:FD.FACTOR_EM,color:'#f59e0b'},
     {label:'Sovereign',data:FD.FACTOR_SOVG,color:'#a855f7'}
   ], {yTitle:'Spread Contribution (pp)',xTicks:12,ttCb:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(4)+' pp'}});
 }
 
 function buildDrawdown(){
   if(typeof FD.DD_DATES==='undefined')return;
-  CT.singleLine('chart-drawdown', FD.DD_DATES, FD.DD_VALS.map(v=>-v), '#ff4757', {yTitle:'Drawdown %', yFmt:v=>v.toFixed(2)+'%', ttCb:{label:c=>'Drawdown: -'+Math.abs(c.parsed.y).toFixed(3)+'%'}});
+  CT.singleLine('chart-drawdown', FD.DD_DATES, FD.DD_VALS.map(v=>-v), '#ef4444', {yTitle:'Drawdown %', yFmt:v=>v.toFixed(2)+'%', ttCb:{label:c=>'Drawdown: -'+Math.abs(c.parsed.y).toFixed(3)+'%'}});
 }
 
 function initGlobalRange(){
@@ -1630,7 +1631,7 @@ function buildCompSectors(){
   const sc2=COMP_DATA.sector_comp;
   const tickers=Object.keys(sc2);
   const sectors=DISPLAY_SECTORS;
-  const sColors=['#3b82f6','#a855f7','#00d4aa','#ffa502','#06b6d4','#ec4899'];
+  const sColors=['#3b82f6','#a855f7','#00d4aa','#f59e0b','#06b6d4','#ec4899'];
   const ds=sectors.map((s,i)=>({
     label:s,data:tickers.map(t=>sc2[t][s]||0),
     backgroundColor:sColors[i]+'aa',borderColor:sColors[i],borderWidth:1
@@ -1646,7 +1647,7 @@ function buildCompMaturity(){
   const mc2=COMP_DATA.mat_comp;
   const tickers=Object.keys(mc2);
   const buckets=MAT_BUCKET_NAMES;
-  const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#ffa502','#f97316','#ff4757'];
+  const matColors=['#00d4aa','#22c55e','#84cc16','#eab308','#f59e0b','#f97316','#ef4444'];
   const ds=buckets.map((b,i)=>({
     label:b,data:tickers.map(t=>mc2[t][i]||0),
     backgroundColor:matColors[i]+'aa',borderColor:matColors[i],borderWidth:1
@@ -1706,7 +1707,7 @@ function buildCompSpreadDecomp(){
   const ds=[
     {label:'Mortgage',data:s.map(f=>f.mtg_spread||0),backgroundColor:'#3b82f6aa',borderColor:'#3b82f6',borderWidth:1},
     {label:'Corporate',data:s.map(f=>f.corp_spread||0),backgroundColor:'#00d4aaaa',borderColor:'#00d4aa',borderWidth:1},
-    {label:'EM',data:s.map(f=>f.em_spread||0),backgroundColor:'#ffa502aa',borderColor:'#ffa502',borderWidth:1},
+    {label:'EM',data:s.map(f=>f.em_spread||0),backgroundColor:'#f59e0baa',borderColor:'#f59e0b',borderWidth:1},
     {label:'Sovereign',data:s.map(f=>f.sovg_spread||0),backgroundColor:'#a855f7aa',borderColor:'#a855f7',borderWidth:1},
   ];
   CT.bar('chart-comp-spread-decomp',tickers,ds,{
@@ -1946,7 +1947,7 @@ function restoreFromHash(){
 }
 
 // ─── CORPORATE INDUSTRY BREAKDOWN MODAL ──────────────
-const CORP_IND_COLORS=['#00d4aa','#3b82f6','#a855f7','#ffa502','#ff4757','#06b6d4','#e879f9','#22c55e','#f97316','#ec4899','#84cc16','#eab308','#6366f1','#14b8a6','#f43f5e','#8b5cf6','#0ea5e9','#d946ef'];
+const CORP_IND_COLORS=['#00d4aa','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#e879f9','#22c55e','#f97316','#ec4899','#84cc16','#eab308','#6366f1','#14b8a6','#f43f5e','#8b5cf6','#0ea5e9','#d946ef'];
 let corpIndChart=null;
 function openCorpIndustryModal(){
   if(!CORP_INDUSTRY||!CORP_INDUSTRY.length)return;
@@ -1967,7 +1968,7 @@ function openCorpIndustryModal(){
   const labels=CORP_INDUSTRY.map(r=>r.industry);
   const vals=CORP_INDUSTRY.map(r=>r.weight);
   const colors=CORP_INDUSTRY.map((_,i)=>CORP_IND_COLORS[i%CORP_IND_COLORS.length]);
-  corpIndChart=new Chart(document.getElementById('chart-corp-ind'),{type:'doughnut',data:{labels:labels,datasets:[{data:vals,backgroundColor:colors,borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1c2230',titleColor:'#e8ecf4',bodyColor:'#a0aec0',borderColor:'#344054',borderWidth:1,titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:c=>{const v=c.parsed;const pct=totalW>0?(v/totalW*100).toFixed(1):'0';return c.label+': '+v.toFixed(2)+'% ('+pct+'% of corp)';}}}}}});
+  corpIndChart=new Chart(document.getElementById('chart-corp-ind'),{type:'doughnut',data:{labels:labels,datasets:[{data:vals,backgroundColor:colors,borderColor:'#0f1218',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1c2230',titleColor:'#e0e0e8',bodyColor:'#a0aec0',borderColor:'#344054',borderWidth:1,titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:c=>{const v=c.parsed;const pct=totalW>0?(v/totalW*100).toFixed(1):'0';return c.label+': '+v.toFixed(2)+'% ('+pct+'% of corp)';}}}}}});
 }
 function closeCorpIndustryModal(){
   document.getElementById('corp-ind-modal-bg').classList.remove('show');
