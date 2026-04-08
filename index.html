@@ -878,15 +878,34 @@ let currentFund='MINT';
 const MINT_ONLY_TABS=['performance','income','commentary'];
 const HOLDINGS_TABS=['holdings','active'];  // tabs needing position/holdings data
 
+function _clearFD(){
+  FD.TS_DATES=[];FD.TS_SECTORS={};FD.TS_COUNT=[];FD.TS_TOP5=[];FD.TS_TOP10=[];FD.TS_TOP20=[];
+  FD.TS_FUTURE=[];FD.TS_OTHER=[];FD.TS_HHI=[];FD.TS_EFF_N=[];FD.TS_WAM=[];FD.TS_WAC=[];
+  FD.CHURN_DATES=[];FD.CHURN_NEW=[];FD.CHURN_EXIT=[];FD.CHURN_RATE=[];
+  FD.MAT_DATES=[];FD.MAT_BUCKETS={};FD.JACC_DATES=[];FD.JACC_1M=[];FD.JACC_3M=[];FD.JACC_6M=[];
+  FD.SEC_VOL_DATES=[];FD.SEC_VOL={};
+  FD.POS_INDEX=[];FD.POS_TRACK=[];FD.RECENT_ENTRIES=[];FD.RECENT_EXITS=[];
+  FD.BIGGEST_MOVERS=[];FD.SECTOR_TABLE=[];FD.AGE_LABELS=[];FD.AGE_VALUES=[];
+  FD.FUND_STATS=null;
+  FD.SECTOR_ANALYTICS=null;FD.CUM_DATES=[];FD.CUM_RETURNS={};FD.CUM_CONTRIBUTIONS={};
+  FD.ROLL_SHARPE_DATES=[];FD.ROLL_SHARPE=[];FD.ROLL_VOL_DATES=[];FD.ROLL_VOL={};
+  FD.DD_DATES=[];FD.DD_VALS=[];
+  FD.FACTOR_DATES=[];FD.FACTOR_DUR=[];FD.FACTOR_YTM=[];FD.FACTOR_TSPREAD=[];FD.FACTOR_DTS=[];
+  FD.FACTOR_BULL=[];FD.FACTOR_BEAR=[];FD.FACTOR_CURVE=[];FD.FACTOR_AVGMAT=[];
+  FD.FACTOR_CY=[];FD.FACTOR_SEC30=[];FD.FACTOR_NAV=[];
+  FD.FACTOR_MTG=[];FD.FACTOR_CORP=[];FD.FACTOR_EM=[];FD.FACTOR_SOVG=[];
+  FD.CORP_DUR_DATA=null;
+}
 function loadFundData(ticker){
   if(ticker==='MINT'&&MINT_ORIG){
     Object.assign(FD,MINT_ORIG);
     return true;
   }
+  // Always clear first so stale data from previous fund never leaks through
+  _clearFD();
   const fd=typeof FUND_DATA!=='undefined'?FUND_DATA[ticker]:null;
-  if(!fd)return false;
-  const isMF=fd.is_mutual_fund||false;
-  // Load time series (null for mutual funds)
+  if(!fd)return true; // Still allow switch — charts will show empty gracefully
+  // Load time series
   if(fd.ts_dates){
     FD.TS_DATES=fd.ts_dates;FD.TS_SECTORS=fd.ts_sectors;FD.TS_COUNT=fd.ts_count;
     FD.TS_TOP5=fd.ts_top5;FD.TS_TOP10=fd.ts_top10;FD.TS_TOP20=fd.ts_top20;
@@ -896,24 +915,14 @@ function loadFundData(ticker){
     FD.MAT_DATES=fd.mat_dates;FD.MAT_BUCKETS=fd.mat_buckets;
     FD.JACC_DATES=fd.jacc_dates;FD.JACC_1M=fd.jacc_1m;FD.JACC_3M=fd.jacc_3m;FD.JACC_6M=fd.jacc_6m;
     FD.SEC_VOL_DATES=fd.sec_vol_dates;FD.SEC_VOL=fd.sec_vol;
-  }else if(isMF){
-    FD.TS_DATES=[];FD.TS_SECTORS={};FD.TS_COUNT=[];FD.TS_TOP5=[];FD.TS_TOP10=[];FD.TS_TOP20=[];
-    FD.TS_FUTURE=[];FD.TS_OTHER=[];FD.TS_HHI=[];FD.TS_EFF_N=[];FD.TS_WAM=[];FD.TS_WAC=[];
-    FD.CHURN_DATES=[];FD.CHURN_NEW=[];FD.CHURN_EXIT=[];FD.CHURN_RATE=[];
-    FD.MAT_DATES=[];FD.MAT_BUCKETS={};FD.JACC_DATES=[];FD.JACC_1M=[];FD.JACC_3M=[];FD.JACC_6M=[];
-    FD.SEC_VOL_DATES=[];FD.SEC_VOL={};
   }
-  // Load position data (null for mutual funds)
+  // Load position data
   if(fd.pos_index){
     FD.POS_INDEX=fd.pos_index;FD.POS_TRACK=fd.pos_track;
     FD.RECENT_ENTRIES=fd.recent_entries;FD.RECENT_EXITS=fd.recent_exits;
     FD.BIGGEST_MOVERS=fd.biggest_movers;FD.SECTOR_TABLE=fd.sector_table;
     FD.AGE_LABELS=fd.age_labels;FD.AGE_VALUES=fd.age_values;
     FD.FUND_STATS=fd.stats||null;
-  }else if(isMF){
-    FD.POS_INDEX=[];FD.POS_TRACK=[];FD.RECENT_ENTRIES=[];FD.RECENT_EXITS=[];
-    FD.BIGGEST_MOVERS=[];FD.SECTOR_TABLE=[];FD.AGE_LABELS=[];FD.AGE_VALUES=[];
-    FD.FUND_STATS=null;
   }
   // Load sector analytics
   if(fd.sector_analytics){
@@ -948,9 +957,9 @@ function rebuildActiveSection(){
 
 function switchFund(ticker){
   if(ticker===currentFund)return;
-  currentFund=ticker;
   const reg=FUND_REGISTRY[ticker];
-  if(!reg)return;
+  if(!reg){console.warn('No registry entry for',ticker);return;}
+  currentFund=ticker;
 
   // Update header
   document.getElementById('fund-name').textContent=reg.name;
@@ -1001,7 +1010,7 @@ function switchFund(ticker){
   // Defer heavy data loading + chart rebuilding to keep UI responsive
   requestAnimationFrame(()=>{
     if(currentFund!==ticker)return; // Superseded by newer switch
-    if(!loadFundData(ticker))return;
+    loadFundData(ticker);
     analyticsBuilt=false;activeBuilt=false;
     const activeTab=document.querySelector('.nav-tab.active');
     const activeSec=activeTab?activeTab.dataset.section:'';
