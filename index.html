@@ -198,9 +198,16 @@ body{background:var(--bg-1);color:var(--text-0);font-family:var(--sans);font-siz
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
 @media(max-width:1200px){.grid-3{grid-template-columns:1fr 1fr}}
 @media(max-width:800px){.grid-3{grid-template-columns:1fr}}
-.fund-select{font-family:var(--mono);font-size:16px;font-weight:700;background:#003a66;border:1px solid #1a4a70;color:#7bd0e2;padding:6px 12px;cursor:pointer;letter-spacing:2px}
-.fund-select:hover{border-color:var(--accent)}
-.fund-select:focus{outline:none;border-color:var(--accent)}
+.fund-dd{position:relative;z-index:200}
+.fund-dd-btn{font-family:var(--mono);font-size:16px;font-weight:700;background:#003a66;border:1px solid #1a4a70;color:#7bd0e2;padding:6px 14px;cursor:pointer;letter-spacing:2px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.fund-dd-btn:hover{border-color:#7bd0e2}
+.fund-dd-btn::after{content:'';border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #6b7a90;margin-left:4px}
+.fund-dd-menu{display:none;position:absolute;top:calc(100% + 2px);left:0;background:#00294b;border:1px solid #1a4a70;min-width:220px;max-height:420px;overflow-y:auto;z-index:300;box-shadow:0 8px 32px rgba(0,20,40,.6)}
+.fund-dd-menu.open{display:block}
+.fund-dd-item{display:block;width:100%;padding:8px 14px;font-family:var(--mono);font-size:12px;color:#b6c4d4;background:none;border:none;border-bottom:1px solid #1a4a7033;text-align:left;cursor:pointer;letter-spacing:1px;white-space:nowrap;transition:background .1s}
+.fund-dd-item:hover{background:#1a4a70;color:#def5ff}
+.fund-dd-item.active{color:#7bd0e2;font-weight:600}
+.deploy-ts{position:fixed;bottom:8px;left:12px;font-family:var(--mono);font-size:9px;color:#596577;letter-spacing:.5px;z-index:50;pointer-events:none}
 .share-fab{position:fixed;bottom:24px;right:24px;z-index:8000;cursor:pointer;user-select:none}
 .share-fab-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;background:var(--navy);border:1px solid #1a4a70;color:#7b8fa6;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;transition:all .25s;box-shadow:0 4px 16px rgba(0,41,75,.3);white-space:nowrap}
 .share-fab-btn:hover{border-color:#7bd0e2;color:#7bd0e2;background:#003a66}
@@ -217,8 +224,10 @@ body{background:var(--bg-1);color:var(--text-0);font-family:var(--sans);font-siz
 <div class="loading-overlay" id="loading"><div class="loading-text">LOADING MINT</div></div>
 <div class="header">
   <div class="header-left">
-    <select id="fund-selector" class="fund-select" onchange="switchFund(this.value)">
-    </select>
+    <div class="fund-dd" id="fund-dd">
+      <button class="fund-dd-btn" id="fund-dd-btn" type="button">MINT</button>
+      <div class="fund-dd-menu" id="fund-dd-menu"></div>
+    </div>
     <div class="header-meta">
       <div class="name" id="fund-name">PIMCO Enhanced Short Maturity Active ETF</div>
       <div class="filing" id="fund-meta"></div>
@@ -589,7 +598,7 @@ async function loadData(){
   document.getElementById('income-cards').innerHTML=D.html.income_cards;
   document.getElementById('analytics-cards').innerHTML=D.html.analytics_cards;
   document.getElementById('active-cards').innerHTML=D.html.active_cards;
-  document.getElementById('fund-selector').innerHTML=D.html.fund_options;
+  _buildFundMenu(D.html.fund_options);
   document.getElementById('fund-meta').textContent='SEC N-PORT \u00B7 AS OF '+D.html.filing_date+' \u00B7 '+D.html.num_holdings+' HOLDINGS';
   document.getElementById('holdings-panel-title').textContent='All '+D.html.num_holdings+' Holdings (SEC N-PORT '+D.html.filing_date+')';
   document.getElementById('holdings-count').textContent=D.html.num_holdings+' positions';
@@ -946,8 +955,8 @@ function switchFund(ticker){
   // Update header
   document.getElementById('fund-name').textContent=reg.name;
   document.title=ticker+' | '+reg.name;
-  const sel=document.getElementById('fund-selector');
-  sel.style.color=reg.color;
+  const ddbtn=document.getElementById('fund-dd-btn');
+  ddbtn.textContent=ticker;ddbtn.style.color=reg.color;
 
   // Update meta line
   const metaEl=document.getElementById('fund-meta');
@@ -1917,8 +1926,9 @@ function restoreFromHash(){
   if(!s)return;
   // 1. Fund
   if(s.f&&s.f!=='MINT'){
-    const sel=document.getElementById('fund-selector');
-    if(sel){sel.value=s.f;switchFund(s.f);}
+    switchFund(s.f);
+    const ddb=document.getElementById('fund-dd-btn');
+    if(ddb)ddb.textContent=s.f;
   }
   // 2. Tab — click the correct nav-tab (triggers lazy init)
   if(s.t){
@@ -2022,10 +2032,39 @@ function buildTabInsights(){
   }
 }
 
+// ─── CUSTOM FUND DROPDOWN ──────────────────────────
+function _buildFundMenu(optHtml){
+  const tmp=document.createElement('select');tmp.innerHTML=optHtml;
+  const menu=document.getElementById('fund-dd-menu');menu.innerHTML='';
+  for(const opt of tmp.options){
+    const btn=document.createElement('button');
+    btn.className='fund-dd-item'+(opt.value===currentFund?' active':'');
+    btn.textContent=opt.textContent;btn.dataset.val=opt.value;
+    if(opt.style.color)btn.style.color=opt.style.color;
+    btn.addEventListener('click',()=>{
+      menu.classList.remove('open');
+      const ddb=document.getElementById('fund-dd-btn');
+      ddb.textContent=opt.value;
+      if(opt.style.color)ddb.style.color=opt.style.color;
+      menu.querySelectorAll('.fund-dd-item').forEach(i=>i.classList.remove('active'));
+      btn.classList.add('active');
+      switchFund(opt.value);
+    });
+    menu.appendChild(btn);
+  }
+}
+function _initFundDD(){
+  const btn=document.getElementById('fund-dd-btn');
+  const menu=document.getElementById('fund-dd-menu');
+  btn.addEventListener('click',e=>{e.stopPropagation();menu.classList.toggle('open');});
+  document.addEventListener('click',()=>menu.classList.remove('open'));
+}
+
 document.addEventListener('DOMContentLoaded',async()=>{
   // Nav + range work before data loads — tabs always switch even if fetch fails
-  initNav();initGlobalRange();
+  initNav();initGlobalRange();_initFundDD();
   document.addEventListener('mouseover',e=>{const s=e.target.closest('.chart-snap');if(s&&s.dataset.cid)_revC(s.dataset.cid);});
+  document.getElementById('deploy-ts').textContent='Updated: 2026-04-08 10:02 ET';
   try{
     await loadData();
     buildOverview();buildPerformance();buildIncome();
@@ -2069,5 +2108,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
 </div>
 <div class="share-fab" onclick="shareView()" title="Copy share link"><div class="share-fab-btn"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>Share View</div></div>
 <div class="share-toast" id="share-toast">Link copied</div>
+<div class="deploy-ts" id="deploy-ts"></div>
 </body>
 </html>
