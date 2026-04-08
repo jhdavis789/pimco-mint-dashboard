@@ -28,12 +28,12 @@ body{background:var(--bg-1);color:var(--text-0);font-family:var(--sans);font-siz
 ::-webkit-scrollbar-track{background:var(--bg-2)}
 ::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:3px}
 .header{background:var(--navy);border-bottom:3px solid var(--raspberry);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.header-left{display:flex;align-items:center;gap:16px}
+.header-left{display:flex;align-items:center;gap:16px;flex-shrink:0;position:relative;z-index:10}
 .ticker{font-family:var(--mono);font-size:18px;font-weight:700;color:#7bd0e2;letter-spacing:2px}
 .header-meta{display:flex;flex-direction:column;gap:1px}
 .header-meta .name{font-size:13px;color:#aebece;font-weight:500}
 .header-meta .filing{font-family:var(--mono);font-size:10px;color:#7b8fa6;letter-spacing:1px}
-.header-right{display:flex;gap:10px;align-items:center}
+.header-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;min-width:0}
 .nav-tab{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border:1px solid #1a4a70;background:transparent;color:#7b8fa6;cursor:pointer;transition:all .2s;border-radius:4px}
 .nav-tab:hover,.nav-tab.active{color:#def5ff;border-color:#7bd0e2;background:#7bd0e215}
 .main{padding:16px 24px 40px;max-width:1800px;margin:0 auto}
@@ -218,7 +218,7 @@ body{background:var(--bg-1);color:var(--text-0);font-family:var(--sans);font-siz
 <div class="loading-overlay" id="loading"><div class="loading-text">LOADING MINT</div></div>
 <div class="header">
   <div class="header-left">
-    <select id="fund-selector" class="fund-select" onchange="requestAnimationFrame(()=>switchFund(this.value))">
+    <select id="fund-selector" class="fund-select" onchange="switchFund(this.value)">
     </select>
     <div class="header-meta">
       <div class="name" id="fund-name">PIMCO Enhanced Short Maturity Active ETF</div>
